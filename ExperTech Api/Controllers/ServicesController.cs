@@ -187,10 +187,7 @@ namespace ExperTech_Api.Controllers
                         db.ServicePhotoes.Add(AddPhoto);
                         db.SaveChanges();
                     }
-
-
                 }
-
                 return "success";
             }
             catch (Exception err)
@@ -279,10 +276,7 @@ namespace ExperTech_Api.Controllers
                 }
                 myList.Add(newObject);
             }
-
             return myList;
-
-
         }
 
         [Route("api/Services/UpdateService")]
@@ -339,8 +333,6 @@ namespace ExperTech_Api.Controllers
 
         }
 
-        
-
         [Route("api/Services/GetServiceOption")]
         [HttpGet]
         public List<ServiceOption> GetServiceOption()
@@ -362,8 +354,6 @@ namespace ExperTech_Api.Controllers
                 findOption.Duration = Modell.Duration;
                 db.SaveChanges();
                 return "success";
-
-                
             }
             catch(Exception err)
             {
@@ -435,7 +425,7 @@ namespace ExperTech_Api.Controllers
             }
         }
 
-        //*********************************Refiloe's stuff****************************
+        //*********************************Refiloe's availability stuff****************************
 
         [Route("api/Services/DisplaySchedule")]
         [HttpGet]
