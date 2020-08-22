@@ -78,6 +78,7 @@ namespace ExperTech_Api.Controllers
             db.Products.Remove(findProduct);
             db.SaveChanges();
             return "success";
+            
 
         }
 

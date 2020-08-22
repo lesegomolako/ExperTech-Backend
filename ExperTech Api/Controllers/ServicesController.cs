@@ -150,29 +150,40 @@ namespace ExperTech_Api.Controllers
                 int ServiceID = db.Services.Where(zz => zz.Name == Modell.Name).Select(zz => zz.ServiceID).FirstOrDefault();
 
                 foreach (ServicePrice Items in Modell.ServicePrices)
-                {
-                    //checks if service Object has a service option
-                    if (Items.OptionID != null)
-                    {
-                        //saves the OptionID and ServiceID into bride entity
-                        ServiceTypeOption newObject = new ServiceTypeOption();
-                        newObject.ServiceID = ServiceID;
-                        int OptionID = (int)Items.OptionID;
-                        newObject.OptionID = OptionID;
-                        db.ServiceTypeOptions.Add(newObject);
-                        db.SaveChanges();
-
-                    }
-
+                {                 
                     //Save the Service price object
                     ServicePrice PriceObject = new ServicePrice();
                     PriceObject.ServiceID = ServiceID;
-                    PriceObject.OptionID = Items.OptionID;
+                    //PriceObject.OptionID = Items.OptionID;
                     PriceObject.Price = Items.Price;
                     PriceObject.Date = DateTime.Now;
                     db.ServicePrices.Add(PriceObject);
 
                     db.SaveChanges();
+                }
+
+                foreach(ServiceTypeOption Items in Modell.ServiceTypeOptions)
+                {                                   
+                        //saves the OptionID and ServiceID into bride entity
+                     ServiceTypeOption newObject = new ServiceTypeOption();
+                     newObject.ServiceID = ServiceID;
+                     int OptionID = (int)Items.OptionID;
+                     newObject.OptionID = OptionID;
+                     db.ServiceTypeOptions.Add(newObject);
+                     db.SaveChanges();
+
+                    foreach(ServicePrice PriceItem in Items.ServicePrices)
+                    {
+                        ServicePrice PriceObject = new ServicePrice();
+                        PriceObject.ServiceID = ServiceID;
+                        PriceObject.OptionID = PriceItem.OptionID;
+                        PriceObject.Price = PriceItem.Price;
+                        PriceObject.Date = DateTime.Now;
+                        db.ServicePrices.Add(PriceObject);
+
+                        db.SaveChanges();
+                    }
+
                 }
 
                 //check if service object has photos
@@ -256,13 +267,47 @@ namespace ExperTech_Api.Controllers
             foreach (Service Items in Modell)
             {
                 dynamic newObject = new ExpandoObject();
+                newObject.ServiceID = Items.ServiceID;
                 newObject.Name = Items.Name;
+                newObject.ServiceType = Items.ServiceType.Name;
+                newObject.TypeID = Items.TypeID;
                 newObject.Description = Items.Description;
                 newObject.Duration = Items.Duration;
-                newObject.Price = getSPrice(Items);
+                if(Items.ServiceTypeOptions.Count > 0)
+                newObject.ServiceTypeOptions = getOptions(Items);
+                else
+                newObject.ServicePrices = getSPrice(Items);
+
                 ServiceList.Add(newObject);
             }
             return ServiceList;
+        }
+
+
+        private dynamic getOptions(Service Modell)
+        {
+            List<dynamic> myList = new List<dynamic>();
+            foreach (ServiceTypeOption Items in Modell.ServiceTypeOptions)
+            {
+                dynamic newObject = new ExpandoObject();
+                ServiceOption findOption = db.ServiceOptions.Where(zz => zz.OptionID == Items.OptionID).FirstOrDefault();
+                newObject.Option = findOption.Name;
+                newObject.OptionID = Items.OptionID;
+                List<dynamic>ServicePrices = new List<dynamic>();
+                foreach(ServicePrice PriceItem in Items.ServicePrices)
+                {
+                    dynamic PriceObject = new ExpandoObject();
+                    PriceObject.Price = PriceItem.Price;
+
+                    ServicePrices.Add(PriceObject);
+                }
+                newObject.ServicePrices = ServicePrices;
+                myList.Add(newObject);
+            }
+
+            return myList;
+
+
         }
 
         private dynamic getSPrice(Service Modell)
@@ -271,7 +316,6 @@ namespace ExperTech_Api.Controllers
             foreach (ServicePrice Items in Modell.ServicePrices)
             {
                 dynamic newObject = new ExpandoObject();
-                newObject.ServiceID = Items.ServiceID;
                 newObject.Price = Items.Price;
                 if(Items.OptionID != null)
                 {
@@ -346,7 +390,7 @@ namespace ExperTech_Api.Controllers
         public List<ServiceOption> GetServiceOption()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            List<ServiceOption> mylist = db.ServiceOptions.ToList();
+            List<ServiceOption> mylist = db.ServiceOptions.Include(zz => zz.ServiceTypeOptions).ToList();
             return mylist;
         }
 
@@ -389,7 +433,7 @@ namespace ExperTech_Api.Controllers
         {
             try
             {
-                ServicePackage findPackage = db.ServicePackages.Where(zz => zz.Description == Modell.Description).FirstOrDefault();
+                ServicePackage findPackage = db.ServicePackages.Where(zz => zz.Name == Modell.Name).FirstOrDefault();
 
                 if (findPackage == null)
                 {
@@ -414,8 +458,25 @@ namespace ExperTech_Api.Controllers
         public dynamic RetrieveServicePackage()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            List<ServicePackage> mylist = db.ServicePackages.ToList();
-            return mylist;
+            List<ServicePackage> mylist = db.ServicePackages.Include(zz => zz.Service).ToList();
+            return getPackage(mylist);
+        }
+
+        private dynamic getPackage(List<ServicePackage> Modell)
+        {
+            List<dynamic> thisList = new List<dynamic>();
+            foreach(ServicePackage items in Modell)
+            {
+                dynamic myObject = new ExpandoObject();
+                myObject.Service = items.Service.Name;
+                myObject.Description = items.Name;
+                myObject.Price = items.Price;
+                myObject.Quantity = items.Quantity;
+
+                thisList.Add(myObject);
+            }
+
+            return thisList;
         }
 
         [Route("api/Services/RemoveServicePackage")]
