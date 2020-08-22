@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Description;
 using ExperTech_Api.Models;
-using System.Text;
-using System.Net.Mail;
+using System.Web.Http.Cors;
 using System.Dynamic;
 
 namespace ExperTech_Api.Controllers
@@ -25,10 +28,10 @@ namespace ExperTech_Api.Controllers
             db.Configuration.ProxyCreationEnabled = false;
             return getEmployeeID(db.Employees.ToList());
         }
-        private List<dynamic> getEmployeeID(List<Employee> forEmployee)
+        private List<dynamic> getEmployeeID(List<Admin> forEmployee)
         {
             List<dynamic> dynamicEmployees = new List<dynamic>();
-            foreach (Employee employeename in forEmployee)
+            foreach (Admin employeename in forEmployee)
             {
                 dynamic dynamicEmployee = new ExpandoObject();
                 dynamicEmployee.EmployeeID = employeename.EmployeeID;
@@ -41,7 +44,7 @@ namespace ExperTech_Api.Controllers
             }
             return dynamicEmployees;
         }
-        //read client
+        //*********************************Read client****************************
         [Route("api/Client/getClient")]
         [HttpGet]
         public List<dynamic> getClient()
@@ -66,7 +69,7 @@ namespace ExperTech_Api.Controllers
             return dynamicClients;
         }
 
-        //update employee
+        //*********************************update employee****************************
         [Route("api/Employee/updateEmployee")]
         [HttpPost]
         public IHttpActionResult PutUserMaster([FromBody] dynamic forEmployee)
@@ -78,7 +81,7 @@ namespace ExperTech_Api.Controllers
             }
             try
             {
-                Employee emplo = db.Employees.Find(forEmployee.Employee.EmployeeID);
+                Client emplo = db.Employees.Find(forEmployee.Employee.EmployeeID);
 
                 if (emplo != null)
                 {
@@ -95,17 +98,17 @@ namespace ExperTech_Api.Controllers
             }
             return Ok(forEmployee);
         }
-        //delete employee
+        //*********************************Delete employee****************************
         [Route("api/Employee/deleteEmployee")]
         [HttpDelete]
-        public List<dynamic> deleteEmployee([FromBody] Employee forEmployee)
+        public List<dynamic> deleteEmployee([FromBody] Admin forEmployee)
         {
             if (forEmployee != null)
             {
                 ExperTechEntities db = new ExperTechEntities();
                 db.Configuration.ProxyCreationEnabled = false;
 
-                Employee employeeThings = db.Employees.Where(rr => rr.EmployeeID == forEmployee.EmployeeID).FirstOrDefault();
+                Admin employeeThings = db.Employees.Where(rr => rr.EmployeeID == forEmployee.EmployeeID).FirstOrDefault();
                 User userThings = db.Users.Where(rr => rr.UserID == forEmployee.UserID).FirstOrDefault();
 
                 db.Employees.Remove(employeeThings);
@@ -118,6 +121,59 @@ namespace ExperTech_Api.Controllers
             {
                 return null;
             }
+        }
+
+        //*********************************employee availability****************************
+        [Route("api/Employee/getSchedule")]
+        [System.Web.Mvc.HttpGet]
+        public dynamic getSchedule()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            List<Schedule> findSchedule = db.Schedules.Include(zz => zz.Timeslot).Include(zz => zz.Date).ToList();
+            return DisplayList(findSchedule);
+        }
+        private List<dynamic> DisplayList(List<Schedule> Modell)
+        {
+            List<dynamic> TimesList = new List<dynamic>();
+            foreach (Schedule Items in Modell)
+            {
+                dynamic newObject = new ExpandoObject();
+                newObject.Dates = Items.Date.Date1;
+                newObject.StartTimes = Items.Timeslot.StartTime;
+                newObject.EndTimes = Items.Timeslot.EndTime;
+                TimesList.Add(newObject);
+            }
+            return TimesList;
+        }
+        //*********************************employee availability****************************
+        [Route("api/Employee/getTime")]
+        [HttpGet]
+        public dynamic getTime()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            List<Timeslot> findTime = db.Timeslots.ToList();
+            return DisplayTime(findTime);
+        }
+
+        [Route("api/Employee/getDate")]
+        public List<Date> getDate()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            List<Date> findDate = db.Dates.ToList();
+            return findDate;
+        }
+        private List<dynamic> DisplayTime(List<Timeslot> models)
+        {
+            List<dynamic> time = new List<dynamic>();
+            foreach(Timeslot items in models)
+            {
+                dynamic newobject = new ExpandoObject();
+                newobject.TimeID = items.TimeID;
+                newobject.StartTime = items.StartTime;
+                newobject.EndTime = items.EndTime;
+                time.Add(newobject);
+            }
+            return time;
         }
 
 

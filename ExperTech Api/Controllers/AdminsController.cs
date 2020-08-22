@@ -287,43 +287,6 @@ namespace ExperTech_Api.Controllers
                 throw;
             }
         }
-        [Route("api/Admins/generateUser")]
-        [HttpPost]
-        public static string generateUser([FromBody] User forUser)
-        {
-            string uname = "";
-
-            char[] lower = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
-            char[] upper = new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
-
-            int low = lower.Length;
-            int up = upper.Length;
-
-            Random random = new Random();
-
-            uname += lower[random.Next(0, low)].ToString();
-            uname += lower[random.Next(0, up)].ToString();
-
-            uname += upper[random.Next(0, low)].ToString();
-            uname += upper[random.Next(0, up)].ToString();
-
-            User usr = new User();
-            usr.Username = forUser.Username;
-
-            return uname;
-        }
-        [Route("api/Admins/generatePassword")]
-        [HttpPost]
-        public string generatePassword(int Length)
-        {
-            const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            StringBuilder res = new StringBuilder();
-            Random rndm = new Random();
-            while(0 < Length--)
-            {
-                res.Append(valid[rndm.Next(valid.Length)]);
-            }
-            return res.ToString();
-        }
+        
     }
 }
