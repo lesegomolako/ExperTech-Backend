@@ -379,7 +379,7 @@ namespace ExperTech_Api.Controllers
         {
             try
             {
-                ServicePackage findPackage = db.ServicePackages.Where(zz => zz.Description == Modell.Description).FirstOrDefault();
+                ServicePackage findPackage = db.ServicePackages.Where(zz => zz.Name == Modell.Name).FirstOrDefault();
 
                 if (findPackage == null)
                 {

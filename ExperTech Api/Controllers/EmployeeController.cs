@@ -18,15 +18,13 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Employee/getEmployee")]
         [System.Web.Mvc.HttpGet]
-
-        //read emplo
+        //read employee
         public List<dynamic> getEmployee()
         {
             ExperTechEntities db = new ExperTechEntities();
             db.Configuration.ProxyCreationEnabled = false;
             return getEmployeeID(db.Employees.ToList());
         }
-
         private List<dynamic> getEmployeeID(List<Employee> forEmployee)
         {
             List<dynamic> dynamicEmployees = new List<dynamic>();
@@ -100,7 +98,6 @@ namespace ExperTech_Api.Controllers
         //delete employee
         [Route("api/Employee/deleteEmployee")]
         [HttpDelete]
-
         public List<dynamic> deleteEmployee([FromBody] Employee forEmployee)
         {
             if (forEmployee != null)
@@ -122,6 +119,7 @@ namespace ExperTech_Api.Controllers
                 return null;
             }
         }
+
 
     }
 }

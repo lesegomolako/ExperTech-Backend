@@ -22,7 +22,7 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Admins/getAdmin")]
         [System.Web.Mvc.HttpGet]
-
+        //read admin
         public List<dynamic> getAdmin()
         {
             ExperTechEntities db = new ExperTechEntities();
@@ -31,7 +31,6 @@ namespace ExperTech_Api.Controllers
 
             return getAdminID(db.Admins.ToList());
         }
-        //read admin
         private List<dynamic> getAdminID(List<Admin> forAdmin)
         {
             List<dynamic> dynamicAdmins = new List<dynamic>();
@@ -42,6 +41,7 @@ namespace ExperTech_Api.Controllers
                 dynamicAdmin.Name = adminname.Name;
                 dynamicAdmin.Surname = adminname.Surname;
                 dynamicAdmin.ContactNo = adminname.ContactNo;
+                dynamicAdmin.Email = adminname.Email;
 
                 dynamicAdmins.Add(dynamicAdmin);
             }
@@ -80,12 +80,11 @@ namespace ExperTech_Api.Controllers
 
             return one;
         }
-
         //update admin
         [Route("api/Admins/updateAdmin")]
         [System.Web.Mvc.HttpPost]
 
-        public IHttpActionResult PutUserMaster([FromBody] dynamic forAdmin)
+        public IHttpActionResult updateAdmin([FromBody] dynamic forAdmin)
         {
             db.Configuration.ProxyCreationEnabled = false;
             if (ModelState.IsValid)
@@ -137,7 +136,7 @@ namespace ExperTech_Api.Controllers
             }
         }
         //read client
-        [Route("api/Admins//getClient")]
+        [Route("api/Admins/getClient")]
         [HttpGet]
         public List<dynamic> getClient()
         {
@@ -161,11 +160,30 @@ namespace ExperTech_Api.Controllers
             return dynamicClients;
 
         }
+        //walk in client to db
+        [Route("api/Admins/walkInClient")]
+        [System.Web.Mvc.HttpPost]
 
+        public object walkInClient([FromBody] dynamic walkClient)
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+
+            Client clnt = new Client();
+            clnt.Name = walkClient.Name;
+            clnt.Surname = walkClient.Surname;
+            clnt.ContactNo = walkClient.ContactNo;
+            clnt.Email = walkClient.Email;
+            clnt.ClientID = walkClient.ClientID;
+
+            db.Clients.Add(clnt);
+            db.SaveChanges();
+
+            return clnt;
+        }
         //delete admin
         [Route("api/Admins/deleteClient")]
         [HttpDelete]
-        public List<dynamic> deleteClient([FromBody] Client forClient)
+        public dynamic deleteClient([FromBody] Client forClient)
         {
             if (forClient != null)
             {
@@ -185,6 +203,33 @@ namespace ExperTech_Api.Controllers
                 return null;
             }
         }
+        [Route("api/Admins/updateUser")]
+        [HttpPost]
+        public IHttpActionResult updateUser([FromBody] dynamic forUser)
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            if (ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                User user = db.Users.Find(forUser.User.UserID);
+                var hash = GenerateHash(ApplySomeSalt(forUser.Password));
+
+                if(user != null)
+                {
+                    user.Username = forUser.Username;
+                    user.Password = hash;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return Ok(forUser);
+        }
+
         public static string ApplySomeSalt(string input)
         {
             return input + "plokijuhygwaesrdtfyguhmnzxnvhfjdkslaowksjdienfhvbg";
@@ -266,7 +311,6 @@ namespace ExperTech_Api.Controllers
             usr.Username = forUser.Username;
 
             return uname;
-
         }
         [Route("api/Admins/generatePassword")]
         [HttpPost]
