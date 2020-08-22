@@ -17,7 +17,8 @@ namespace ExperTech_Api.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Employee()
         {
-            this.EmployeeServiceTypes = new HashSet<EmployeeServiceType>();
+            this.EmployeeSchedules = new HashSet<EmployeeSchedule>();
+            this.ServiceTypes = new HashSet<ServiceType>();
         }
     
         public int EmployeeID { get; set; }
@@ -29,6 +30,8 @@ namespace ExperTech_Api.Models
     
         public virtual User User { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<EmployeeServiceType> EmployeeServiceTypes { get; set; }
+        public virtual ICollection<EmployeeSchedule> EmployeeSchedules { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ServiceType> ServiceTypes { get; set; }
     }
 }
