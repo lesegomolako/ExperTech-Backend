@@ -22,7 +22,7 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Admins/getAdmin")]
         [System.Web.Mvc.HttpGet]
-        //read admin
+        //**********************************************************read admin**********************************************************
         public List<dynamic> getAdmin()
         {
             ExperTechEntities db = new ExperTechEntities();
@@ -80,7 +80,7 @@ namespace ExperTech_Api.Controllers
 
             return one;
         }
-        //update admin
+        //**********************************************************update admin**********************************************************
         [Route("api/Admins/updateAdmin")]
         [System.Web.Mvc.HttpPost]
 
@@ -135,7 +135,7 @@ namespace ExperTech_Api.Controllers
                 return null;
             }
         }
-        //read client
+        //**********************************************************read client**********************************************************
         [Route("api/Admins/getClient")]
         [HttpGet]
         public List<dynamic> getClient()
@@ -180,7 +180,7 @@ namespace ExperTech_Api.Controllers
 
             return clnt;
         }
-        //delete admin
+        //**********************************************************delete admin**********************************************************
         [Route("api/Admins/deleteClient")]
         [HttpDelete]
         public dynamic deleteClient([FromBody] Client forClient)
@@ -258,7 +258,7 @@ namespace ExperTech_Api.Controllers
             return new string(Enumerable.Repeat(chars, length).Select(rr => rr[random.Next(rr.Length)]).ToArray());
         }
 
-        //registration email
+        //**********************************************************registration email**********************************************************
         [Route("api/Admins/sendEmail")]
         [System.Web.Mvc.HttpGet]
         public void sendEmail()

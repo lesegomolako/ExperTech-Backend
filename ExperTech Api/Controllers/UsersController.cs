@@ -18,7 +18,9 @@ namespace ExperTech_Api.Controllers
 {
     public class UsersController : ApiController
     {
-        [EnableCors(origins: "*", headers: "*", methods: "*")]
+     
+      [EnableCors(origins: "*", headers: "*", methods: "*")]
+      //***************************************************************************Login
         [Route("api/User/Login")]
         [HttpPost]
         public object Login(User usr)
@@ -40,8 +42,7 @@ namespace ExperTech_Api.Controllers
             toReturn.Error = "Incorrect username and password combination";
             return toReturn;
         }
-
-        //check user role
+        //************************************************************************check user role
         [Route("api/User/checkRole")]
         [HttpPost]
         public dynamic checkRole(dynamic seshin)
@@ -54,15 +55,15 @@ namespace ExperTech_Api.Controllers
             {
                 if (user.RoleID == 1) // client
                 {
-                    return true;
+                    return "client";
                 }
                 else if (user.RoleID == 2) // admin
                 {
-                    return true;
+                    return "admin";
                 }
                 else if (user.RoleID == 3) //employee
                 {
-                    return true;
+                    return "employee";
                 }
                 else
                 {
@@ -71,36 +72,47 @@ namespace ExperTech_Api.Controllers
             }
             else
             {
-                dynamic toReturn = new ExpandoObject();
-                toReturn.Error = "Guid is no longer valid";
-                return toReturn;
+                //dynamic toReturn = new ExpandoObject();
+                //toReturn.Error = "Guid is not valid";
+                return "error";
             }
         }
-
+        //**********************************************************************register employee admin
         [Route("api/User/Register")]
         [HttpPost]
-        public dynamic Register([FromBody]User Modell)
+        private dynamic RegisterEmployee(User Modell)
         {
-            db.Configuration.ProxyCreationEnabled = false;
-            try
-            {
-                int Verify = db.Users.Where(zz => zz.Username == Modell.Username).Select(zz => zz.UserID).FirstOrDefault();
-                if(Verify > 0)
-                {
-                    return RegisterEmployee(Modell);
-                }
-                else
-                {
-                    return "duplicate";
-                }
-            }
-            catch(Exception err)
-            {
-                return err.Message;
-            }
+            User UserObject = new User();
+            UserObject.Username = generateUser();
+            UserObject.Password = generatePassword(15);
+            UserObject.RoleID = Modell.RoleID;
+            Guid g = new Guid();
+            UserObject.SessionID = g.ToString();
+            db.SaveChanges();
 
+            int UserID = db.Users.Where(zz => zz.Username == Modell.Username).Select(zz => zz.UserID).FirstOrDefault();
+
+            if (Modell.RoleID == 3) //employee
+            {
+                foreach (Employee EmployeeData in Modell.Employees)
+                {
+                    db.Employees.Add(EmployeeData);
+                    db.SaveChanges();
+
+                }
+            }
+            else if (Modell.RoleID == 2) // admin
+            {
+                foreach (Admin AdminData in Modell.Admins)
+                {
+                    db.Admins.Add(AdminData);
+                    db.SaveChanges();
+
+                }
+            }
+            return "success";
         }
-       
+        //************************************************************generate username for registration
         private static string generateUser()
         {
             string uname = "";
@@ -151,7 +163,7 @@ namespace ExperTech_Api.Controllers
             {
                 foreach (Employee EmployeeData in Modell.Employees)
                 {
-                    db.Employees
+                    db.Employees.Add(EmployeeData);
                     db.SaveChanges();
 
                 }
@@ -167,7 +179,7 @@ namespace ExperTech_Api.Controllers
             }
             return "success";
         }
-        //forgot password code
+        //************************************************************************forgot password code
         [Route("api/User/ForgotPassword")]
         [System.Web.Mvc.HttpPost]
         public IHttpActionResult PutUserMaster(User usr)
@@ -195,30 +207,46 @@ namespace ExperTech_Api.Controllers
             }
             return Ok(usr);
         }
-        //Paymentsssssssssssssssssssssssssssssss
-        //make sale payment
+        //****************************************************************************Payments
+        //****************************************************************************make sale payment
         [Route("api/User/salePayment")]
         [HttpPut]
-        public object salePayment()
+        public object salePayment([FromBody]Sale sayle)
         {
-            Sale sales = new Sale();
-            sales.StatusID = 1;
-            db.SaveChanges();
-
-            return sales;
+            try
+            {
+                Sale findSale = db.Sales.Where(zz => zz.SaleID == sayle.SaleID).FirstOrDefault();
+                findSale.StatusID = 1;
+                findSale.Payment = sayle.Payment;
+                findSale.PaymentTypeID = sayle.PaymentTypeID;
+                db.SaveChanges();
+                return findSale;
+            }
+            catch
+            {
+                return "error";
+            }
         }
-        //make booking paynent
+        //*********************************************************************make booking paynent
         [Route("api/User/bookingPayment")]
         [HttpPut]
-        public object bookingPayment()
+        public object bookingPayment([FromBody] Booking bkings)
         {
-            Booking bookings = new Booking();
-            bookings.BookingID = 4;
-            db.SaveChanges();
-
-            return bookings;
+            try
+            {
+                Booking findBookings = db.Bookings.Where(zz => zz.BookingID == bkings.BookingID).FirstOrDefault();
+                findBookings.BookingID = 4;
+                Sale sayle = new Sale();
+                //booking, client array, sale
+                db.SaveChanges();
+                return findBookings;
+            }
+            catch
+            {
+                return "error";
+            }
         }
-        //Service Packaaaaaeegggggeeeeeeeee
+        //*********************************************************************SP payment
         [Route("api/ServicePackage/getservicePackage")]
         [HttpGet]
         public dynamic getservicePackage()
@@ -244,7 +272,7 @@ namespace ExperTech_Api.Controllers
             return dynamicSPs;
         }
 
-        //adding client package
+        //**********************************************************************adding client package
         [Route("api/ClientPackage/activeSP")]
         [HttpPut]
 
@@ -255,7 +283,7 @@ namespace ExperTech_Api.Controllers
             string sp = "Activate Service Package";
             DateTime Now = DateTime.Now;
 
-            //refiloeknowsbest   CAP!!!!!
+            //*****************************************************************refiloeknowsbest   CAP!!!!!
             Sale sales = new Sale();
             sales.ClientID = forSP.Sale.ClientID;
             //sales.Decription = activeSP;      this is where the sale type is specific            
@@ -269,7 +297,7 @@ namespace ExperTech_Api.Controllers
 
             int SaleID = db.Sales.Where(zz => zz.ClientID == forSP.Sale.ClientID && zz.Description == sp).Select(zz => zz.SaleID).LastOrDefault();
 
-            //adding to client sdjfnjvn thingy
+            //*****************************************************************adding to client sdjfnjvn thingy
             ClientPackage CP = new ClientPackage();
             CP.SaleID = SaleID;
             CP.PackageID = forSP.ServicePackage.PackageID;
@@ -289,6 +317,30 @@ namespace ExperTech_Api.Controllers
                 db.SaveChanges();
             }
         }
+        //*******************************************************read payment type**********************************************************************
+        [Route("api/User/getPaymentType")]
+        [HttpGet]
+
+        public List<dynamic> getPaymentType()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            return getPaymentTypeID(db.PaymentTypes.ToList());
+        }
+        private List<dynamic> getPaymentTypeID(List<PaymentType> forPT)
+        {
+            List<dynamic> dynamicPTs = new List<dynamic>();
+            foreach (PaymentType pt in forPT)
+            {
+                dynamic dynamicPT = new ExpandoObject();
+                dynamicPT.PaymentTypeID = pt.PaymentTypeID;
+                dynamicPT.Sales = pt.Sales;
+                dynamicPT.Type = pt.Type;
+
+                dynamicPTs.Add(dynamicPT);
+            }
+            return dynamicPTs;
+        }
+
 
         public static string ApplySomeSalt(string input)
         {

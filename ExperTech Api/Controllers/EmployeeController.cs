@@ -21,7 +21,7 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Employee/getEmployee")]
         [System.Web.Mvc.HttpGet]
-        //read employee
+        //**********************************************************read employee**********************************************************
         public List<dynamic> getEmployee()
         {
             ExperTechEntities db = new ExperTechEntities();
@@ -44,7 +44,7 @@ namespace ExperTech_Api.Controllers
             }
             return dynamicEmployees;
         }
-        //*********************************Read client****************************
+        //****************************************************************Read client***********************************************
         [Route("api/Client/getClient")]
         [HttpGet]
         public List<dynamic> getClient()
@@ -69,7 +69,7 @@ namespace ExperTech_Api.Controllers
             return dynamicClients;
         }
 
-        //*********************************update employee****************************
+        //**************************************************update employee**************************************
         [Route("api/Employee/updateEmployee")]
         [HttpPost]
         public IHttpActionResult PutUserMaster([FromBody] dynamic forEmployee)

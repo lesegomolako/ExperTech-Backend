@@ -196,6 +196,7 @@ namespace ExperTech_Api.Controllers
             }
         }
 
+        //**********************************************************delete service**********************************************************
         [Route("api/Services/DeleteService")]
         [HttpDelete]
         public dynamic DeleteService(int ServiceID)
@@ -236,7 +237,7 @@ namespace ExperTech_Api.Controllers
             }
         }
 
-
+        //**********************************************************get service**********************************************************
         [Route("api/Services/GetService")]
         [HttpGet]
         public List<dynamic> GetService()
@@ -278,7 +279,7 @@ namespace ExperTech_Api.Controllers
             }
             return myList;
         }
-
+        //**********************************************************update service**********************************************************
         [Route("api/Services/UpdateService")]
         [HttpDelete]
         public dynamic UpdateService([FromBody] Service Modell)
