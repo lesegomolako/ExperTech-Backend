@@ -14,6 +14,7 @@ namespace ExperTech_Api.Models
     
     public partial class StockTakeLine
     {
+        public int LineID { get; set; }
         public int ItemID { get; set; }
         public int StockTakeID { get; set; }
         public int Quantity { get; set; }

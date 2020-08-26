@@ -10,12 +10,13 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Diagnostics;
 
 namespace ExperTech_Api.Controllers
 {
     public class ClientController : ApiController
     {
-        ExperTechEntities db = new ExperTechEntities();
+        ExperTechEntities1 db = new ExperTechEntities1();
         [System.Web.Mvc.HttpPost]
         [System.Web.Http.Route("api/Clients/registerUser")]
         public object registerUser([FromBody] User client)
@@ -113,7 +114,7 @@ namespace ExperTech_Api.Controllers
         [System.Web.Mvc.HttpGet]
         public List<dynamic> getALLClientsWithUser(dynamic sess)
         {
-            ExperTechEntities db = new ExperTechEntities();
+            ExperTechEntities1 db = new ExperTechEntities1();
             string sessionId = sess.token;
             var user = db.Users.Where(zz => zz.SessionID == sessionId).FirstOrDefault();
             db.Configuration.ProxyCreationEnabled = false;
@@ -248,7 +249,7 @@ namespace ExperTech_Api.Controllers
         [System.Web.Mvc.HttpGet]
         public List<dynamic> getClientPackage()
         {
-            ExperTechEntities db = new ExperTechEntities();
+            ExperTechEntities1 db = new ExperTechEntities1();
             db.Configuration.ProxyCreationEnabled = false;
             List<ClientPackage> CLINETPAKCAGE = db.ClientPackages.Include(zz => zz.ServicePackage).Include(ii => ii.PackageInstances).ToList();
             return getClientPackagewithWervicePackage(CLINETPAKCAGE);
@@ -277,7 +278,7 @@ namespace ExperTech_Api.Controllers
 
 
             dynamic dynamicServicePackage = new ExpandoObject();
-            dynamicServicePackage.Description = service.Description;
+            dynamicServicePackage.Name = service.Name;
             dynamicServicePackage.PackageID = service.PackageID;
             dynamicServicePackage.Quantity = service.Quantity;
             return dynamicServicePackage;
@@ -285,6 +286,7 @@ namespace ExperTech_Api.Controllers
         private dynamic getInstancePackage(ClientPackage service)
         {
             List<dynamic> dymanicinstances = new List<dynamic>();
+            int Total = 0;
             foreach (PackageInstance pack in service.PackageInstances)
             {
                 dynamic dynamicInstancePackage = new ExpandoObject();
@@ -294,6 +296,9 @@ namespace ExperTech_Api.Controllers
                 dynamicInstancePackage.StatusID = pack.StatusID;
                 InstanceStatu stat = db.InstanceStatus.Where(zz => zz.StatusID == pack.StatusID).FirstOrDefault();
                 dynamicInstancePackage.Status = stat.Status;
+                if (stat.Status == "Active")
+                    Total++;
+                dynamicInstancePackage.TotalAvailable = Total;
 
                 dymanicinstances.Add(dynamicInstancePackage);
 
@@ -308,76 +313,160 @@ namespace ExperTech_Api.Controllers
             return Stat.Status;
         }
 
+        [System.Web.Http.Route("api/Client/getALLProductsWithPhoto")]
+        [System.Web.Mvc.HttpGet]
+        public List<dynamic> getALLProductsWithPhoto()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            List<Product> product = db.Products.Include(zz => zz.ProductPhotoes).Include(ii => ii.ProductCategory).ToList();
+            return getALLProductssWithPhoto(product);
+
+        }
+        private List<dynamic> getALLProductssWithPhoto(List<Product> forProduct)
+        {
+            List<dynamic> dymanicProducts = new List<dynamic>();
+            foreach (Product PRODUCT in forProduct)
+            {
+                dynamic obForProduct = new ExpandoObject();
+                obForProduct.ProductID = PRODUCT.ProductID;
+                obForProduct.SupplierID = PRODUCT.SupplierID;
+                obForProduct.CategoryID = PRODUCT.CategoryID;
+                obForProduct.Name = PRODUCT.Name;
+                obForProduct.Description = PRODUCT.Description;
+                obForProduct.Price = PRODUCT.Price;
+                obForProduct.QuantityOnHand = PRODUCT.QuantityOnHand;
+                obForProduct.Category = PRODUCT.ProductCategory.Category;
+                obForProduct.Photo = getProductPhotos(PRODUCT);
+
+                dymanicProducts.Add(obForProduct);
+            }
+            return dymanicProducts;
+        }
+        private dynamic getProductCategorys(ProductCategory productCategory)
+        {
+
+
+            dynamic dynamicProductCategory = new ExpandoObject();
+            dynamicProductCategory.CategoryID = productCategory.CategoryID;
+            dynamicProductCategory.Category = productCategory.Category;
+
+            return dynamicProductCategory;
+        }
+
+        private dynamic getProductPhotos(Product forProduct)
+        {
+            List<dynamic> myphotos = new List<dynamic>();
+            foreach (ProductPhoto item in forProduct.ProductPhotoes)
+            {
+                dynamic photos = new ExpandoObject();
+                photos.Image = item.Photo;
+
+            }
+
+            return myphotos;
+        }
+
+
+
 
         //basket functionality 
         [System.Web.Http.Route("api/Client/addtBasketline")]
         [System.Web.Mvc.HttpPost]
 
-        public void addtBasketline(BasketLine forProduct)
+        public void addtBasketline(int BasketID, [FromBody]BasketLine forProduct)
         {
 
+            BasketLine findBasket = db.BasketLines.Where(zz => zz.BasketID == forProduct.BasketID && zz.ProductID == forProduct.ProductID).FirstOrDefault();
+            Debug.Write("Adding Product", forProduct.Quantity.ToString());
+            if (findBasket == null)
+            {
+                BasketLine newBasket = new BasketLine();
+                newBasket.BasketID = BasketID;
+                newBasket.ProductID = forProduct.ProductID;
+                newBasket.Quantity = forProduct.Quantity;
+                db.BasketLines.Add(newBasket);
+                db.SaveChanges();
+            }
+            else
+            {
+                if (forProduct.Quantity == 0)
+                {
+                    db.BasketLines.Remove(findBasket);
+                }
+                else
+                    findBasket.Quantity = forProduct.Quantity;
 
-            db.BasketLines.Add(forProduct);
-            db.SaveChanges();
+
+                db.SaveChanges();
+            }
+
+
 
         }
-        [System.Web.Mvc.HttpPost]
-        [System.Web.Http.Route("api/Client/AddProductTobasket")]
-        public IHttpActionResult Addbasket(BasketLine forbasket)
+        [System.Web.Mvc.HttpPut]
+        [System.Web.Http.Route("api/Client/Updatebasketline")]
+        public IHttpActionResult PutbasketlineMaster(BasketLine line)
         {
             db.Configuration.ProxyCreationEnabled = false;
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+
             try
             {
-                db.BasketLines.Add(forbasket);
-                db.SaveChanges();
+                BasketLine objEmp = db.BasketLines.Find(line.BasketID);
+
+                if (objEmp != null)
+                {
+                    objEmp.Quantity = line.Quantity;
+                    db.SaveChanges();
+
+
+                }
+
+
             }
             catch (Exception)
             {
                 throw;
             }
-
-
-
-            return Ok(forbasket);
+            return Ok(line);
         }
 
-
-
-        //[System.Web.Http.Route("api/Basket/getClientBasket")]
-        //[System.Web.Mvc.HttpG
-        //public List<dynamic> getClientBasket()
+        //[System.Web.Mvc.HttpPost]
+        //[System.Web.Http.Route("api/Client/AddProductTobasket")]
+        //public IHttpActionResult Addbasket (BasketLine forbasket)
         //{
-        //    ExperTechEntities2 db = new ExperTechEntities2();
         //    db.Configuration.ProxyCreationEnabled = false;
-        //    return getBasketReturnList(db.BasketLines.ToList());
 
-        //}
-        //private List<dynamic> getBasketReturnList(List<BasketLine> ForBasketline)
-        //{
-        //    List<dynamic> dymanicBasketLines = new List<dynamic>();
-        //    foreach (BasketLine basketlinE in ForBasketline)
+        //    if (!ModelState.IsValid)
         //    {
-        //        dynamic dymanicBasketLine = new ExpandoObject();
-        //        dymanicBasketLine.ID = basketlinE.BasketID;
-        //        dymanicBasketLine.ProductID = basketlinE.ProductID;
-        //        dymanicBasketLine.Quantity = basketlinE.Quantity;
-
-        //        dymanicBasketLines.Add(dymanicBasketLine);
+        //        return BadRequest(ModelState);
         //    }
-        //    return dymanicBasketLines;
+        //    try
+        //    {
+        //        db.BasketLines.Add(forbasket);
+        //        db.SaveChanges();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+
+
+
+        //    return Ok(forbasket);
         //}
+
+
 
 
         [System.Web.Http.Route("api/Client/getBasketlinewithProduct")]
         [System.Web.Mvc.HttpGet]
         public List<dynamic> getBasketlinewithProduct()
         {
-            ExperTechEntities db = new ExperTechEntities();
+            ExperTechEntities1 db = new ExperTechEntities1();
             db.Configuration.ProxyCreationEnabled = false;
             List<BasketLine> linebasket = db.BasketLines.Include(zz => zz.Product).Include(dd => dd.Basket).ToList();
             return getBasketlinewithProduct(linebasket);
@@ -407,6 +496,8 @@ namespace ExperTech_Api.Controllers
             product.Name = Modell.Name;
             product.Price = Modell.Price;
             product.Description = Modell.Description;
+
+            product.Category = db.ProductCategories.Where(xx => xx.CategoryID == Modell.CategoryID).Select(zz => zz.Category).FirstOrDefault();
             product.Photo = getPhotos(Modell);
             return product;
 
@@ -464,11 +555,11 @@ namespace ExperTech_Api.Controllers
 
         [System.Web.Mvc.HttpDelete]
         [System.Web.Http.Route("api/Client/DeleteClientBasket")]
-        public dynamic DeleteClientBasket(BasketLine sbasket)
+        public IHttpActionResult DeleteClientBasket(int BasketID, int ProductID)
         {
-            ExperTechEntities db = new ExperTechEntities();
             db.Configuration.ProxyCreationEnabled = false;
-            BasketLine basket = db.BasketLines.Where(zz => zz.ProductID == sbasket.ProductID && zz.BasketID == sbasket.BasketID).FirstOrDefault();
+
+            BasketLine basket = db.BasketLines.Where(zz => zz.ProductID == ProductID && zz.BasketID == BasketID).FirstOrDefault();
             if (basket == null)
             {
                 return NotFound();
@@ -477,14 +568,32 @@ namespace ExperTech_Api.Controllers
             db.BasketLines.Remove(basket);
             db.SaveChanges();
 
-            return "Success";
+            return Ok(basket);
         }
+
+        //[System.Web.Mvc.HttpDelete]
+        //[System.Web.Http.Route("api/Client/DeleteClientBasket")]
+        //public dynamic DeleteClientBasket(BasketLine sbasket)
+        //{
+        //    ExperTechEntities5 db = new ExperTechEntities5();
+        //    db.Configuration.ProxyCreationEnabled = false;
+        //    BasketLine basket = db.BasketLines.Where(zz => zz.ProductID == sbasket.ProductID && zz.BasketID == sbasket.BasketID).FirstOrDefault();
+        //    if (basket == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    db.BasketLines.Remove(basket);
+        //    db.SaveChanges();
+
+        //    return "Success";
+        //}
 
         [System.Web.Mvc.HttpDelete]
         [System.Web.Http.Route("api/Client/DeleteClientBooking")]
         public IHttpActionResult DeleteClientBooking(Booking booking)
         {
-            ExperTechEntities db = new ExperTechEntities();
+            ExperTechEntities1 db = new ExperTechEntities1();
             db.Configuration.ProxyCreationEnabled = false;
             Booking bookings = db.Bookings.Where(zz => zz.BookingID == booking.BookingID && zz.ClientID == booking.ClientID).FirstOrDefault();
 
@@ -493,7 +602,7 @@ namespace ExperTech_Api.Controllers
 
             foreach (EmployeeSchedule emschedule in booking.EmployeeSchedules)
             {
-                EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.TypeID == emschedule.TypeID && zz.EmployeeID == emschedule.EmployeeID
+                EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.EmployeeID == emschedule.EmployeeID
                 && zz.DateID == emschedule.DateID && zz.TimeID == emschedule.TimeID).FirstOrDefault();
                 if (bookinglist != null)
                 {
@@ -512,7 +621,7 @@ namespace ExperTech_Api.Controllers
         [System.Web.Http.Route("api/Client/AcceptClientBooking")]
         public IHttpActionResult AcceptClientBooking(Booking booking)
         {
-            ExperTechEntities db = new ExperTechEntities();
+            ExperTechEntities1 db = new ExperTechEntities1();
             db.Configuration.ProxyCreationEnabled = false;
             Booking bookings = new Booking();
             db.Configuration.ProxyCreationEnabled = false;
@@ -522,7 +631,7 @@ namespace ExperTech_Api.Controllers
             bookings.StatusID = 1;
             foreach (EmployeeSchedule emschedule in booking.EmployeeSchedules)
             {
-                EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.TypeID == emschedule.TypeID && zz.EmployeeID == emschedule.EmployeeID
+                EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.EmployeeID == emschedule.EmployeeID
                 && zz.DateID == emschedule.DateID && zz.TimeID == emschedule.TimeID).FirstOrDefault();
                 if (bookinglist != null)
                 {
@@ -533,7 +642,6 @@ namespace ExperTech_Api.Controllers
             }
             return Ok(bookings);
         }
-
 
 
 

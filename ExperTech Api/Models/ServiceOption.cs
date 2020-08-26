@@ -17,7 +17,6 @@ namespace ExperTech_Api.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public ServiceOption()
         {
-            this.BookingLines = new HashSet<BookingLine>();
             this.ServiceTypeOptions = new HashSet<ServiceTypeOption>();
         }
     
@@ -25,8 +24,6 @@ namespace ExperTech_Api.Models
         public string Name { get; set; }
         public int Duration { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<BookingLine> BookingLines { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ServiceTypeOption> ServiceTypeOptions { get; set; }
     }

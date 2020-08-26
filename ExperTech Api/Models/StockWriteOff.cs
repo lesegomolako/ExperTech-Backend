@@ -21,8 +21,7 @@ namespace ExperTech_Api.Models
         }
     
         public int WriteOffID { get; set; }
-        public string Reason { get; set; }
-        public int Quantity { get; set; }
+        public string Description { get; set; }
         public System.DateTime Date { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

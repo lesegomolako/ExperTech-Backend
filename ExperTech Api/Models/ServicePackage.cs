@@ -22,9 +22,10 @@ namespace ExperTech_Api.Models
     
         public int PackageID { get; set; }
         public int ServiceID { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }
+        public int Duration { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ClientPackage> ClientPackages { get; set; }
