@@ -221,8 +221,8 @@ namespace ExperTech_Api.Controllers
 
             db.Configuration.ProxyCreationEnabled = false;
             List<Booking> booking = db.Bookings.Include(ii => ii.EmployeeSchedules).Include(ll => ll.BookingStatu)
-                .Include(zz => zz.BookingNotes).Include(hh => hh.BookingLines).Where(zz => zz.ClientID == ClientID).ToList();
-            Debug.Write("Bookings", booking.ToString());
+                .Include(zz => zz.BookingNotes).Include(hh => hh.BookingLines).Include(zz => zz.DateRequesteds).Where(zz => zz.ClientID == ClientID).ToList();
+            //Debug.Write("Bookings", booking.ToString());
             return getClientBooking(booking);
 
         }
@@ -235,82 +235,213 @@ namespace ExperTech_Api.Controllers
                 dynamic obForBooking = new ExpandoObject();
                 obForBooking.BookingID = bookings.BookingID;
                 obForBooking.Status = bookings.BookingStatu.Status;
-                obForBooking.Notes = getBoookingNotes(bookings);
-                obForBooking.EmployeeSchedule = getEmployeeSchedules(bookings);
-                obForBooking.BookingStatus = getBookingstatus(bookings.BookingStatu);
-                obForBooking.Bookingline = getBookingline(bookings);
+
+                List<dynamic> notesList = new List<dynamic>();
+                foreach (BookingNote notes in bookings.BookingNotes)
+                {
+                    dynamic notesObject = new ExpandoObject();
+                    notesObject.Notes = notes.Note;
+
+                    notesList.Add(notesObject);
+
+                }
+                if (notesList.Count != 0)
+                    obForBooking.Notes = notesList;
+
+                List<dynamic> EmpSchedule = new List<dynamic>();
+                foreach (EmployeeSchedule schedule in bookings.EmployeeSchedules)
+                {
+                    dynamic SchedgeObject = new ExpandoObject();
+                    SchedgeObject.Date = db.Dates.Where(zz => zz.DateID == schedule.DateID).Select(zz => zz.Date1).FirstOrDefault();
+                    SchedgeObject.StartTime = db.Timeslots.Where(zz => zz.TimeID == schedule.TimeID).Select(zz => zz.StartTime).FirstOrDefault();
+                    SchedgeObject.EndTime = db.Timeslots.Where(zz => zz.TimeID == schedule.TimeID).Select(zz => zz.EndTime).FirstOrDefault();
+                    SchedgeObject.Employee = db.Employees.Where(zz => zz.EmployeeID == schedule.EmployeeID).Select(zz => zz.Name).FirstOrDefault();
+
+                    EmpSchedule.Add(SchedgeObject);
+                }
+                if (EmpSchedule.Count != 0)
+                    obForBooking.EmployeeSchedule = EmpSchedule;
+
+                List<dynamic> DateRequested = new List<dynamic>();
+                foreach (DateRequested requested in bookings.DateRequesteds)
+                {
+                    dynamic requestedDate = new ExpandoObject();
+                    requestedDate.Date = db.DateRequesteds.Where(zz => zz.Date == requested.Date).Select(zz => zz.Date).FirstOrDefault();
+                    requestedDate.StartTime = db.DateRequesteds.Where(zz => zz.StartTime == requested.StartTime).Select(zz => zz.StartTime).FirstOrDefault();
+
+
+                    DateRequested.Add(requestedDate);
+                }
+                if (DateRequested.Count != 0)
+                    obForBooking.DateRequested = DateRequested;
+
+                List<dynamic> BookingLine = new List<dynamic>();
+                foreach (BookingLine line in bookings.BookingLines)
+                {
+                    dynamic LineObject = new ExpandoObject();
+                    LineObject.Service = db.Services.Where(zz => zz.ServiceID == line.ServiceID).Select(zz => zz.Name).FirstOrDefault();
+                    if (line.ServiceTypeOption != null)
+                        LineObject.Option = db.ServiceOptions.Where(zz => zz.OptionID == line.OptionID).Select(zz => zz.Name).FirstOrDefault();
+
+
+                    BookingLine.Add(LineObject);
+
+                }
+                if (BookingLine.Count != 0)
+                    obForBooking.Bookline = BookingLine;
+
 
                 dymanicBookings.Add(obForBooking);
             }
             return dymanicBookings;
         }
 
-        private dynamic getEmployeeSchedules(Booking forBooking)
-        {
-            List<dynamic> dynamicemployeeschedule = new List<dynamic>();
-            foreach (EmployeeSchedule schedue in forBooking.EmployeeSchedules)
-            {
-                dynamic Schedge = new ExpandoObject();
-                Schedge.date = db.Dates.Where(zz => zz.DateID == schedue.DateID).Select(zz => zz.Date1).FirstOrDefault();
+        //private dynamic getEmployeeSchedules(Booking forBooking)
+        //{
+        //    List<dynamic> dynamicemployeeschedule = new List<dynamic>();
+        //    foreach (EmployeeSchedule schedue in forBooking.EmployeeSchedules)
+        //    {
+        //        dynamic Schedge = new ExpandoObject();
+        //        Schedge.Date = db.Dates.Where(zz => zz.DateID == schedue.DateID).Select(zz => zz.Date1).FirstOrDefault();
+        //        Timeslot Times = db.Timeslots.Where(zz => zz.TimeID == schedue.TimeID).FirstOrDefault();
+        //        Schedge.StartTime = Times.StartTime;
+        //        Schedge.EndTime = Times.EndTime;
 
-                //Schedge.EmpType = getEmployee(schedue);
+        //        //Schedge.EmpType = getEmployee(schedue);
 
-            }
+        //    }
 
-            return dynamicemployeeschedule;
-        }
+        //    return dynamicemployeeschedule;
+        //}
 
-        private dynamic getSchedules(Schedule Schedge)
-        {
-            dynamic myObject = new ExpandoObject();
-            myObject.Date = Schedge.Date.Date1;
-            myObject.StartTime = Schedge.Timeslot.StartTime;
-            myObject.EndTime = Schedge.Timeslot.EndTime;
-            return myObject;
-        }
+        //private dynamic getSchedules(Schedule Schedge)
+        //{
+        //    dynamic myObject = new ExpandoObject();
+        //    myObject.Date = Schedge.Date.Date1;
+        //    myObject.StartTime = Schedge.Timeslot.StartTime;
+        //    myObject.EndTime = Schedge.Timeslot.EndTime;
+        //    return myObject;
+        //}
 
-        private dynamic getEmployee(EmployeeServiceType EmpType)
-        {
-            dynamic Emp = new ExpandoObject();
-            Emp.Employee = EmpType.Employee.Name;
-            Emp.ServiceType = EmpType.ServiceType.Name;
-            return Emp;
-        }
+        //private dynamic getEmployee(EmployeeServiceType EmpType)
+        //{
+        //    dynamic Emp = new ExpandoObject();
+        //    Emp.Employee = EmpType.Employee.Name;
+        //    Emp.ServiceType = EmpType.ServiceType.Name;
+        //    return Emp;
+        //}
 
-        private dynamic getBookingstatus(BookingStatu stat)
-        {
-            dynamic status = new ExpandoObject();
-            status.Employee = stat.StatusID;
-            status.Status = stat.Status;
-            return status;
-        }
-        private dynamic getBoookingNotes(Booking note)
-        {
-            List<dynamic> bnote = new List<dynamic>();
-            foreach (BookingNote NOTE in note.BookingNotes)
-            {
-                dynamic notes = new ExpandoObject();
-                notes.Notes = NOTE.Note;
-                bnote.Add(notes);
-            }
 
-            return bnote;
-        }
-        private dynamic getBookingline(Booking line)
-        {
-            List<dynamic> ine = new List<dynamic>();
-            foreach (BookingLine bookinglien in line.BookingLines)
-            {
-                dynamic lines = new ExpandoObject();
-                Debug.Write("<= GETTING SERVICE ID", "#" + bookinglien.ServiceID.ToString() + "#");
-                Debug.Write("<= GETTING LINE ID", bookinglien.LineID.ToString());
-                lines.Service = db.Services.Where(zz => zz.ServiceID == bookinglien.ServiceID).Select(zz => zz.Name).FirstOrDefault();
-                lines.ServiceOption = db.ServiceOptions.Where(zz => zz.OptionID == bookinglien.OptionID).Select(zz => zz.Name).FirstOrDefault();
-                ine.Add(lines);
-            }
-            return ine;
+        //private dynamic getBoookingNotes(Booking note)
+        //{
+        //    List<dynamic> bnote = new List<dynamic>();
+        //    foreach (BookingNote NOTE in note.BookingNotes)
+        //    {
+        //        dynamic notes = new ExpandoObject();
+        //        notes.Notes = NOTE.Note;
+        //        bnote.Add(notes);
+        //    }
 
-        }
+        //    return bnote;
+        //}
+        //private dynamic getBookingline(Booking line)
+        //{
+        //    List<dynamic> ine = new List<dynamic>();
+        //    foreach (BookingLine bookinglien in line.BookingLines)
+        //    {
+        //        dynamic lines = new ExpandoObject();
+        //        Debug.Write("<= GETTING SERVICE ID", "#" + bookinglien.ServiceID.ToString() + "#");
+        //        Debug.Write("<= GETTING LINE ID", bookinglien.LineID.ToString());
+        //        lines.Service = db.Services.Where(zz => zz.ServiceID == bookinglien.ServiceID).Select(zz => zz.Name).FirstOrDefault();
+        //        lines.ServiceOption = db.ServiceOptions.Where(zz => zz.OptionID == bookinglien.OptionID).Select(zz => zz.Name).FirstOrDefault();
+        //        ine.Add(lines);
+        //    }
+        //    return ine;
+
+        //}
+
+
+
+
+        //[System.Web.Http.Route("api/Booking/getClientBookingdetials")]
+        //[System.Web.Mvc.HttpGet]
+        //public List<dynamic> getClientBookingdetials()
+        //{
+        //    ExperTechEntities7 db = new ExperTechEntities7();
+        //    db.Configuration.ProxyCreationEnabled = false;
+        //    List<Booking> clientbooking = db.Bookings.Include(zz => zz.EmployeeSchedules).Include(dd => dd.BookingLines).Include(cc => cc.BookingStatu)
+        //        .Include(ee => ee.BookingNotes).Include(dd => dd.DateRequesteds).ToList();
+        //    return getClientBookingsdetails(clientbooking);
+
+        //}
+        //private List<dynamic> getClientBookingsdetails(List<Booking> forBooking)
+        //{
+        //    List<dynamic> dymanicBookings = new List<dynamic>();
+        //    foreach (Booking booking in forBooking)
+        //    {
+        //        dynamic obForBooking = new ExpandoObject();
+        //        obForBooking.BookingID = booking.BookingID;
+        //        obForBooking.ClientID = booking.ClientID;
+        //        obForBooking.StatusID = booking.StatusID;
+        //        obForBooking.ReminderID = booking.ReminderID;
+        //        obForBooking.BookingLine = getBookingLinezs(booking.BookingLines);
+        //        obForBooking.EmployeeScheduless = getEmployeeScheduless(booking);
+
+
+        //        dymanicBookings.Add(obForBooking);
+        //    }
+        //    return dymanicBookings;
+        //}
+
+        //private dynamic getBookingLinezs(BookingLine Modell)
+        //{
+        //    dynamic line = new ExpandoObject();
+        //    line.BookingID = Modell.BookingID;
+        //    line.ServiceID = Modell.ServiceID;
+        //    line.OptionID = Modell.OptionID;
+
+        //    line.Service = db.Services.Where(xx => xx.ServiceID == Modell.ServiceID).Select(zz => zz.Name).FirstOrDefault();
+        //    line.ServiceOption = db.ServiceOptions.Where(xx => xx.OptionID == Modell.OptionID).Select(zz => zz.Name).FirstOrDefault();
+        //    return line;
+
+        //}
+        //private dynamic getEmployeeScheduless(EmployeeSchedule empsched)
+        //{
+
+
+        //    dynamic dynamicEmployeeschedule = new ExpandoObject();
+        //    dynamicEmployeeschedule.BookingID = empsched.BookingID;
+        //    dynamicEmployeeschedule.EmployeeID = empsched.EmployeeID;
+        //    dynamicEmployeeschedule.TimeID = empsched.TimeID;
+        //    dynamicEmployeeschedule.DateID = empsched.DateID;
+        //    dynamicEmployeeschedule.EmployeeID = empsched.EmployeeID;
+        //    dynamicEmployeeschedule.StatusID = empsched.StatusID;
+        //    dynamicEmployeeschedule.Employee = getEmployee(empsched.Employee);
+        //    dynamicEmployeeschedule.EmployeeSchedule = getEmployeeSchedule(empsched.);
+        //    return dynamicEmployeeschedule;
+        //}
+        //private dynamic getEmployee(Employee forBooking)
+        //{
+
+        //        dynamic dynamicEmployees = new ExpandoObject();
+        //        dynamicEmployees.EmployeeID = forBooking.EmployeeID;
+        //        dynamicEmployees.Name = forBooking.Name;
+
+
+
+        //    return dynamicEmployees;
+        //}
+        //private dynamic getEmployeeSchedule(EmployeeSchedule forBooking)
+        //{
+
+        //    dynamic dynamicEmployees = new ExpandoObject();
+        //    dynamicEmployees.EmployeeID = forBooking.EmployeeID;
+        //    dynamicEmployees.Name = forBooking.Name;
+
+
+
+        //    return dynamicEmployees;
+        //}
 
         //the one the admin does
         [System.Web.Mvc.HttpPut]
@@ -368,13 +499,14 @@ namespace ExperTech_Api.Controllers
         {
             try
             {
-                foreach (EmployeeSchedule items in Modell.EmployeeSchedules)
+                foreach (DateRequested items in Modell.DateRequesteds)
                 {
-                    EmployeeSchedule findSchedule = db.EmployeeSchedules.Where(zz => zz.EmployeeID == items.EmployeeID
-                                                                                && zz.TimeID == items.TimeID && zz.DateID == items.DateID).FirstOrDefault();
+                    items.BookingID = BookingID;
 
-                    findSchedule.BookingID = BookingID;
-                    findSchedule.StatusID = 2;
+                    db.DateRequesteds.Add(items);
+
+                    //findSchedule.BookingID = BookingID;
+                    //findSchedule.StatusID = 2;
                     db.SaveChanges();
                 }
                 //if(Modell.Client.Sales.)
@@ -405,6 +537,7 @@ namespace ExperTech_Api.Controllers
             {
                 return err.Message;
             }
+
         }
 
     }

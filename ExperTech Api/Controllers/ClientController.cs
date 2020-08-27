@@ -114,7 +114,7 @@ namespace ExperTech_Api.Controllers
         [System.Web.Mvc.HttpGet]
         public List<dynamic> getALLClientsWithUser(dynamic sess)
         {
-            ExperTechEntities1 db = new ExperTechEntities1();
+
             string sessionId = sess.token;
             var user = db.Users.Where(zz => zz.SessionID == sessionId).FirstOrDefault();
             db.Configuration.ProxyCreationEnabled = false;
@@ -249,7 +249,7 @@ namespace ExperTech_Api.Controllers
         [System.Web.Mvc.HttpGet]
         public List<dynamic> getClientPackage()
         {
-            ExperTechEntities1 db = new ExperTechEntities1();
+
             db.Configuration.ProxyCreationEnabled = false;
             List<ClientPackage> CLINETPAKCAGE = db.ClientPackages.Include(zz => zz.ServicePackage).Include(ii => ii.PackageInstances).ToList();
             return getClientPackagewithWervicePackage(CLINETPAKCAGE);
@@ -466,7 +466,7 @@ namespace ExperTech_Api.Controllers
         [System.Web.Mvc.HttpGet]
         public List<dynamic> getBasketlinewithProduct()
         {
-            ExperTechEntities1 db = new ExperTechEntities1();
+
             db.Configuration.ProxyCreationEnabled = false;
             List<BasketLine> linebasket = db.BasketLines.Include(zz => zz.Product).Include(dd => dd.Basket).ToList();
             return getBasketlinewithProduct(linebasket);
@@ -593,7 +593,7 @@ namespace ExperTech_Api.Controllers
         [System.Web.Http.Route("api/Client/DeleteClientBooking")]
         public IHttpActionResult DeleteClientBooking(Booking booking)
         {
-            ExperTechEntities1 db = new ExperTechEntities1();
+
             db.Configuration.ProxyCreationEnabled = false;
             Booking bookings = db.Bookings.Where(zz => zz.BookingID == booking.BookingID && zz.ClientID == booking.ClientID).FirstOrDefault();
 
@@ -621,7 +621,8 @@ namespace ExperTech_Api.Controllers
         [System.Web.Http.Route("api/Client/AcceptClientBooking")]
         public IHttpActionResult AcceptClientBooking(Booking booking)
         {
-            ExperTechEntities1 db = new ExperTechEntities1();
+
+
             db.Configuration.ProxyCreationEnabled = false;
             Booking bookings = new Booking();
             db.Configuration.ProxyCreationEnabled = false;
@@ -642,6 +643,7 @@ namespace ExperTech_Api.Controllers
             }
             return Ok(bookings);
         }
+
 
 
 

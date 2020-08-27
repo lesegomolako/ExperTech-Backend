@@ -90,3 +90,6 @@ C:\Users\Default User.DESKTOP-RU7SJN2\Documents\INF 370\Del 5, 6 & 7\API\ExperTe
 C:\Users\Default User.DESKTOP-RU7SJN2\Documents\INF 370\Del 5, 6 & 7\API\ExperTech Api\ExperTech Api\bin\System.Web.Cors.dll
 C:\Users\Default User.DESKTOP-RU7SJN2\Documents\INF 370\Del 5, 6 & 7\API\ExperTech Api\ExperTech Api\bin\System.Web.Http.Cors.dll
 C:\Users\Default User.DESKTOP-RU7SJN2\Documents\INF 370\Del 5, 6 & 7\API\ExperTech Api\ExperTech Api\bin\System.Web.Http.Cors.xml
+C:\Users\mishp\Documents\Third year\370\Del5,6,7\Backend\ExperTech Api\obj\Debug\ExperTech Api.csprojAssemblyReference.cache
+C:\Users\mishp\Documents\Third year\370\Del5,6,7\Backend\ExperTech Api\obj\Debug\ExperTech Api.dll
+C:\Users\mishp\Documents\Third year\370\Del5,6,7\Backend\ExperTech Api\obj\Debug\ExperTech Api.pdb

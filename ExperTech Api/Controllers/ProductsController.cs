@@ -10,7 +10,7 @@ namespace ExperTech_Api.Controllers
 {
     public class ProductsController : ApiController
     {
-        ExperTechEntities db = new ExperTechEntities();
+        ExperTechEntities1 db = new ExperTechEntities1();
 
         [Route("api/Products/AddProduct")]
         [HttpPost]

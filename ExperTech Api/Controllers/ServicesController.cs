@@ -17,7 +17,7 @@ namespace ExperTech_Api.Controllers
 {
     public class ServicesController : ApiController
     {
-        private ExperTechEntities db = new ExperTechEntities();
+        ExperTechEntities1 db = new ExperTechEntities1();
 
 
         //************************************Service Type************************************************
