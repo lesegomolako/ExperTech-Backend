@@ -19,6 +19,7 @@ namespace ExperTech_Api.Models
         {
             this.BookingLines = new HashSet<BookingLine>();
             this.BookingNotes = new HashSet<BookingNote>();
+            this.DateRequesteds = new HashSet<DateRequested>();
             this.EmployeeSchedules = new HashSet<EmployeeSchedule>();
         }
     
@@ -34,6 +35,8 @@ namespace ExperTech_Api.Models
         public virtual ICollection<BookingLine> BookingLines { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<BookingNote> BookingNotes { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<DateRequested> DateRequesteds { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EmployeeSchedule> EmployeeSchedules { get; set; }
     }

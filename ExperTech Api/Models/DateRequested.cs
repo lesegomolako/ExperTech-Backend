@@ -12,14 +12,13 @@ namespace ExperTech_Api.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class SaleLine
+    public partial class DateRequested
     {
-        public int LineID { get; set; }
-        public int ProductID { get; set; }
-        public int SaleID { get; set; }
-        public int Quantity { get; set; }
+        public int RequestedID { get; set; }
+        public Nullable<int> BookingID { get; set; }
+        public Nullable<System.DateTime> Date { get; set; }
+        public Nullable<System.TimeSpan> StartTime { get; set; }
     
-        public virtual Product Product { get; set; }
-        public virtual Sale Sale { get; set; }
+        public virtual Booking Booking { get; set; }
     }
 }

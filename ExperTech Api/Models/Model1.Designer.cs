@@ -1,4 +1,4 @@
-﻿// T4 code generation is enabled for model 'C:\Users\Default User.DESKTOP-RU7SJN2\Documents\INF 370\Del 5, 6 & 7\API\ExperTech Api\ExperTech Api\Models\Model1.edmx'. 
+﻿// T4 code generation is enabled for model 'C:\Users\user\Downloads\INF370\ExperTech-Backend\ExperTech Api\Models\Model1.edmx'. 
 // To enable legacy code generation, change the value of the 'Code Generation Strategy' designer
 // property to 'Legacy ObjectContext'. This property is available in the Properties Window when the model
 // is open in the designer.

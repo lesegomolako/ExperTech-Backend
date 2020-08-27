@@ -37,6 +37,7 @@ namespace ExperTech_Api.Controllers
                 dynobject.Name = loop.Name;
                 dynobject.Description = loop.Description;
                 dynobject.Price = loop.Price;
+                dynobject.QuantityInStock = loop.QuantityInStock;
                 newlist.Add(dynobject);
 
 
@@ -54,6 +55,7 @@ namespace ExperTech_Api.Controllers
                 findStockItem.Name = UpdateObject.Name;
                 findStockItem.Description = UpdateObject.Description;
                 findStockItem.Price = UpdateObject.Price;
+                findStockItem.QuantityInStock = UpdateObject.QuantityInStock;
                 db.SaveChanges();
                 return GetStockItemList();
 
@@ -144,20 +146,20 @@ namespace ExperTech_Api.Controllers
 
                 StockWriteOff Writes = new StockWriteOff();
                 Writes.WriteOffID = AddObject.WriteOffID;
-                Writes.Reason = AddObject.Reason;
+                Writes.Description = AddObject.Description;
                 Writes.Date = DateTime.Now;
                 db.StockWriteOffs.Add(Writes);
 
                 db.SaveChanges();
-                int WriteOffID = db.StockWriteOffs.Where(zz => zz.Reason == AddObject.Reason).Select(zz => zz.WriteOffID).FirstOrDefault();
+                int WriteOffID = db.StockWriteOffs.Where(zz => zz.Description == AddObject.Description).Select(zz => zz.WriteOffID).FirstOrDefault();
 
                 foreach (WriteOffLine lines in AddObject.WriteOffLines)
                 {
                     WriteOffLine newObject = new WriteOffLine();
                     newObject.ItemID = lines.ItemID;
                     newObject.WriteOffID = WriteOffID;
-                    newObject.Reason = Writes.Reason;
-                    //newObject.Quantity = lines.Quantity;
+                    newObject.Reason = lines.Reason;
+                    newObject.Quantity = lines.Quantity;
 
                     db.WriteOffLines.Add(newObject);
                     db.SaveChanges();

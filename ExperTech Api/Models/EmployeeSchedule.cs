@@ -14,7 +14,6 @@ namespace ExperTech_Api.Models
     
     public partial class EmployeeSchedule
     {
-        public int TypeID { get; set; }
         public int EmployeeID { get; set; }
         public int TimeID { get; set; }
         public int DateID { get; set; }
@@ -22,7 +21,7 @@ namespace ExperTech_Api.Models
         public Nullable<int> BookingID { get; set; }
     
         public virtual Booking Booking { get; set; }
-        public virtual EmployeeServiceType EmployeeServiceType { get; set; }
+        public virtual Employee Employee { get; set; }
         public virtual Schedule Schedule { get; set; }
         public virtual ScheduleStatu ScheduleStatu { get; set; }
     }

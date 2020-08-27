@@ -22,10 +22,13 @@ namespace ExperTech_Api.Models
         }
     
         public int ReminderID { get; set; }
+        public int TypeID { get; set; }
         public string Text { get; set; }
+        public int NumHours { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Booking> Bookings { get; set; }
+        public virtual ReminderType ReminderType { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Sale> Sales { get; set; }
     }

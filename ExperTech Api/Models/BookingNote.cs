@@ -15,7 +15,7 @@ namespace ExperTech_Api.Models
     public partial class BookingNote
     {
         public int NotesID { get; set; }
-        public string Notes { get; set; }
+        public string Note { get; set; }
         public int BookingID { get; set; }
     
         public virtual Booking Booking { get; set; }
