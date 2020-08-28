@@ -434,34 +434,6 @@ namespace ExperTech_Api.Controllers
             return Ok(line);
         }
 
-        //[System.Web.Mvc.HttpPost]
-        //[System.Web.Http.Route("api/Client/AddProductTobasket")]
-        //public IHttpActionResult Addbasket (BasketLine forbasket)
-        //{
-        //    db.Configuration.ProxyCreationEnabled = false;
-
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-        //    try
-        //    {
-        //        db.BasketLines.Add(forbasket);
-        //        db.SaveChanges();
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-
-
-
-        //    return Ok(forbasket);
-        //}
-
-
-
-
         [System.Web.Http.Route("api/Client/getBasketlinewithProduct")]
         [System.Web.Mvc.HttpGet]
         public List<dynamic> getBasketlinewithProduct()
@@ -571,76 +543,62 @@ namespace ExperTech_Api.Controllers
             return Ok(basket);
         }
 
-        //[System.Web.Mvc.HttpDelete]
-        //[System.Web.Http.Route("api/Client/DeleteClientBasket")]
-        //public dynamic DeleteClientBasket(BasketLine sbasket)
-        //{
-        //    ExperTechEntities5 db = new ExperTechEntities5();
-        //    db.Configuration.ProxyCreationEnabled = false;
-        //    BasketLine basket = db.BasketLines.Where(zz => zz.ProductID == sbasket.ProductID && zz.BasketID == sbasket.BasketID).FirstOrDefault();
-        //    if (basket == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    db.BasketLines.Remove(basket);
-        //    db.SaveChanges();
-
-        //    return "Success";
-        //}
 
         [System.Web.Mvc.HttpDelete]
-        [System.Web.Http.Route("api/Client/DeleteClientBooking")]
-        public IHttpActionResult DeleteClientBooking(Booking booking)
+        [System.Web.Http.Route("api/Clients/DeleteClientBooking")]
+        public IHttpActionResult DeleteClientBooking(int id)
         {
 
             db.Configuration.ProxyCreationEnabled = false;
-            Booking bookings = db.Bookings.Where(zz => zz.BookingID == booking.BookingID && zz.ClientID == booking.ClientID).FirstOrDefault();
+            Booking bookings = db.Bookings.Where(zz => zz.BookingID == id).FirstOrDefault();
 
             bookings.StatusID = 3;
             db.SaveChanges();
 
-            foreach (EmployeeSchedule emschedule in booking.EmployeeSchedules)
+            foreach (EmployeeSchedule emschedule in bookings.EmployeeSchedules)
             {
                 EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.EmployeeID == emschedule.EmployeeID
                 && zz.DateID == emschedule.DateID && zz.TimeID == emschedule.TimeID).FirstOrDefault();
                 if (bookinglist != null)
                 {
-                    emschedule.StatusID = 1;
+                    bookinglist.StatusID = 1;
+                    bookinglist.BookingID = null;
                     db.SaveChanges();
                 }
 
             }
 
 
-            return Ok(booking);
+            return Ok(id);
         }
 
         //the one the client does
         [System.Web.Mvc.HttpPut]
         [System.Web.Http.Route("api/Client/AcceptClientBooking")]
-        public IHttpActionResult AcceptClientBooking(Booking booking)
+        public IHttpActionResult AcceptClientBooking(int bookingID)
         {
 
-
             db.Configuration.ProxyCreationEnabled = false;
-            Booking bookings = new Booking();
+            Booking bookings = db.Bookings.Where(zz => zz.BookingID == bookingID).FirstOrDefault();
             db.Configuration.ProxyCreationEnabled = false;
 
-            bookings.BookingID = booking.BookingID;
-            bookings.ClientID = booking.ClientID;
-            bookings.StatusID = 1;
-            foreach (EmployeeSchedule emschedule in booking.EmployeeSchedules)
+            //bookings.BookingID = bookingID;
+            //bookings.ClientID = bookingID;
+            bookings.StatusID = 4;
+            db.SaveChanges();
+            foreach (EmployeeSchedule emschedule in bookings.EmployeeSchedules)
             {
                 EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.EmployeeID == emschedule.EmployeeID
                 && zz.DateID == emschedule.DateID && zz.TimeID == emschedule.TimeID).FirstOrDefault();
                 if (bookinglist != null)
                 {
-                    emschedule.StatusID = emschedule.StatusID;
+                    bookinglist.StatusID = 1;
+                    bookinglist.BookingID = null;
                     db.SaveChanges();
                 }
 
             }
+
             return Ok(bookings);
         }
 
