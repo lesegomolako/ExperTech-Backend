@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="3931cdd7decf47c995c0b56e49117690" Name="Diagram1">
+      <Diagram DiagramId="047ed02088f847f98a80465aa68b3f30" Name="Diagram1">
         <EntityTypeShape EntityType="ExperTechModel.Admin" Width="1.5" PointX="5.25" PointY="12.125" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.Basket" Width="1.5" PointX="7.5" PointY="16" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.BasketLine" Width="1.5" PointX="9.75" PointY="15.75" IsExpanded="true" />

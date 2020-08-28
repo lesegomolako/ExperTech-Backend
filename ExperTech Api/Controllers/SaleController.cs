@@ -19,34 +19,30 @@ namespace ExperTech_Api.Controllers
         public List<dynamic> GetSaleList()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            return SaleList(db.SaleLines.ToList());
+            return SaleList(db.Sales.ToList());
 
 
         }
 
-        private List<dynamic> SaleList(List<SaleLine> Model1)
+        private List<dynamic> SaleList(List<Sale> Model1)
         {
             List<dynamic> newlist = new List<dynamic>();
-            foreach (SaleLine loop in Model1)
+            foreach (Sale loop in Model1)
             {
                 dynamic dynobject = new ExpandoObject();
                 dynobject.SaleID = loop.SaleID;
-                dynobject.Date = loop.Sale.Date;
-                dynobject.Client = loop.Sale.Client.Name;
-                dynobject.ContactNo = loop.Sale.Client.ContactNo;
-                dynobject.Product = loop.Product.Name;
-                if (loop.Sale.ReminderID == 2)
+                dynobject.Status = db.SaleStatus.Where(zz => zz.StatusID == loop.StatusID).Select(zz => zz.Status).FirstOrDefault();
+                dynobject.PaymentType = db.PaymentTypes.Where(zz => zz.PaymentTypeID == loop.PaymentTypeID).Select(zz => zz.Type).FirstOrDefault();
+                dynobject.Client = db.Clients.Where(zz => zz.ClientID == loop.ClientID).Select(zz => zz.Name).FirstOrDefault();
+                dynobject.Date = loop.Date;
+                dynobject.SaleType = db.SaleTypes.Where(zz => zz.SaleTypeID == loop.SaleTypeID).Select(zz => zz.Type).FirstOrDefault();
+                dynobject.Payment = loop.Payment;
+                if (loop.ReminderID != null)
                 {
-                    TimeSpan daysLeft = loop.Sale.Date.AddDays(10) - DateTime.Now;
+                    TimeSpan daysLeft = loop.Date.AddDays(10) - DateTime.Now;
                     dynobject.Reminder = daysLeft.Days;
-                    dynobject.PaymentType = loop.Sale.PaymentType.Type;
                 }
-                else if (loop.Sale.ReminderID == 3)
-                {
-                    TimeSpan daysLeft = loop.Sale.Date.AddDays(10) - DateTime.Now;
-                    dynobject.Reminder = daysLeft.Days;
-                    dynobject.PaymentType = loop.Sale.PaymentType.Type;
-                }
+
 
                 newlist.Add(dynobject);
 

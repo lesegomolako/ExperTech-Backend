@@ -6,9 +6,9 @@
     </Key>
     <Property Name="AdminID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="Surname" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Surname" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="ContactNo" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="UserID" Type="Int32" Nullable="false" />
     <NavigationProperty Name="User" Relationship="Self.FK_Admin_User" FromRole="Admin" ToRole="User" />
     <NavigationProperty Name="StockTakes" Relationship="Self.FK_StockTake_Admin" FromRole="Admin" ToRole="StockTake" />
@@ -24,9 +24,9 @@
   </EntityType>
   <EntityType Name="BasketLine">
     <Key>
-      <PropertyRef Name="BasketID" />
-      <PropertyRef Name="ProductID" />
+      <PropertyRef Name="LineID" />
     </Key>
+    <Property Name="LineID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="BasketID" Type="Int32" Nullable="false" />
     <Property Name="ProductID" Type="Int32" Nullable="false" />
     <Property Name="Quantity" Type="Int32" Nullable="false" />
@@ -46,26 +46,28 @@
     <NavigationProperty Name="Reminder" Relationship="Self.FK_Booking_Reminder" FromRole="Booking" ToRole="Reminder" />
     <NavigationProperty Name="BookingLines" Relationship="Self.FK_BookingLine_Booking" FromRole="Booking" ToRole="BookingLine" />
     <NavigationProperty Name="BookingNotes" Relationship="Self.FK_BookingNotes_Booking" FromRole="Booking" ToRole="BookingNotes" />
+    <NavigationProperty Name="DateRequesteds" Relationship="Self.FK_DateRequested_Booking" FromRole="Booking" ToRole="DateRequested" />
     <NavigationProperty Name="EmployeeSchedules" Relationship="Self.FK_EmployeeSchedule_Booking" FromRole="Booking" ToRole="EmployeeSchedule" />
   </EntityType>
   <EntityType Name="BookingLine">
     <Key>
-      <PropertyRef Name="BookingID" />
-      <PropertyRef Name="ServiceID" />
+      <PropertyRef Name="LineID" />
     </Key>
+    <Property Name="LineID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="BookingID" Type="Int32" Nullable="false" />
     <Property Name="ServiceID" Type="Int32" Nullable="false" />
     <Property Name="OptionID" Type="Int32" />
     <NavigationProperty Name="Booking" Relationship="Self.FK_BookingLine_Booking" FromRole="BookingLine" ToRole="Booking" />
     <NavigationProperty Name="Service" Relationship="Self.FK_BookingLine_Service" FromRole="BookingLine" ToRole="Service" />
-    <NavigationProperty Name="ServiceOption" Relationship="Self.FK_BookingLine_ServiceOption" FromRole="BookingLine" ToRole="ServiceOption" />
+    <NavigationProperty Name="ServiceTypeOption" Relationship="Self.FK_BookingLine_ServiceTypeOption" FromRole="BookingLine" ToRole="ServiceTypeOption" />
+    <NavigationProperty Name="PackageInstances" Relationship="Self.FK_PackageInstance_BookingLine" FromRole="BookingLine" ToRole="PackageInstance" />
   </EntityType>
   <EntityType Name="BookingNote">
     <Key>
       <PropertyRef Name="NotesID" />
     </Key>
     <Property Name="NotesID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-    <Property Name="Notes" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Note" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="BookingID" Type="Int32" Nullable="false" />
     <NavigationProperty Name="Booking" Relationship="Self.FK_BookingNotes_Booking" FromRole="BookingNotes" ToRole="Booking" />
   </EntityType>
@@ -83,10 +85,10 @@
     </Key>
     <Property Name="ClientID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="Surname" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Surname" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="ContactNo" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-    <Property Name="UserID" Type="Int32" Nullable="false" />
+    <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="UserID" Type="Int32" />
     <NavigationProperty Name="Baskets" Relationship="Self.FK_Basket_Client" FromRole="Client" ToRole="Basket" />
     <NavigationProperty Name="Bookings" Relationship="Self.FK_Booking_Client" FromRole="Client" ToRole="Booking" />
     <NavigationProperty Name="User" Relationship="Self.FK_Client_User" FromRole="Client" ToRole="User" />
@@ -110,7 +112,7 @@
       <PropertyRef Name="InfoID" />
     </Key>
     <Property Name="InfoID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-    <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Address" Type="String" MaxLength="250" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="ContactNo" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
   </EntityType>
@@ -122,6 +124,16 @@
     <Property Name="Date1" Type="DateTime" Nullable="false" Precision="0" />
     <NavigationProperty Name="Schedules" Relationship="Self.FK_Schedule_Date" FromRole="Date" ToRole="Schedule" />
   </EntityType>
+  <EntityType Name="DateRequested">
+    <Key>
+      <PropertyRef Name="RequestedID" />
+    </Key>
+    <Property Name="RequestedID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="BookingID" Type="Int32" />
+    <Property Name="Date" Type="DateTime" Precision="0" />
+    <Property Name="StartTime" Type="Time" Precision="7" />
+    <NavigationProperty Name="Booking" Relationship="Self.FK_DateRequested_Booking" FromRole="DateRequested" ToRole="Booking" />
+  </EntityType>
   <EntityType Name="Employee">
     <Key>
       <PropertyRef Name="EmployeeID" />
@@ -130,38 +142,36 @@
     <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Surname" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="ContactNo" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-    <Property Name="UserID" Type="Int32" Nullable="false" />
+    <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="UserID" Type="Int32" />
     <NavigationProperty Name="User" Relationship="Self.FK_Employee_User" FromRole="Employee" ToRole="User" />
+    <NavigationProperty Name="EmployeeSchedules" Relationship="Self.FK_EmployeeSchedule_Employee" FromRole="Employee" ToRole="EmployeeSchedule" />
     <NavigationProperty Name="EmployeeServiceTypes" Relationship="Self.FK_EmployeeServiceType_Employee" FromRole="Employee" ToRole="EmployeeServiceType" />
   </EntityType>
   <EntityType Name="EmployeeSchedule">
     <Key>
-      <PropertyRef Name="TypeID" />
       <PropertyRef Name="EmployeeID" />
       <PropertyRef Name="TimeID" />
       <PropertyRef Name="DateID" />
     </Key>
-    <Property Name="TypeID" Type="Int32" Nullable="false" />
     <Property Name="EmployeeID" Type="Int32" Nullable="false" />
     <Property Name="TimeID" Type="Int32" Nullable="false" />
     <Property Name="DateID" Type="Int32" Nullable="false" />
     <Property Name="StatusID" Type="Int32" Nullable="false" />
     <Property Name="BookingID" Type="Int32" />
     <NavigationProperty Name="Booking" Relationship="Self.FK_EmployeeSchedule_Booking" FromRole="EmployeeSchedule" ToRole="Booking" />
-    <NavigationProperty Name="EmployeeServiceType" Relationship="Self.FK_EmployeeSchedule_EmployeeServiceType" FromRole="EmployeeSchedule" ToRole="EmployeeServiceType" />
+    <NavigationProperty Name="Employee" Relationship="Self.FK_EmployeeSchedule_Employee" FromRole="EmployeeSchedule" ToRole="Employee" />
     <NavigationProperty Name="Schedule" Relationship="Self.FK_EmployeeSchedule_Schedule" FromRole="EmployeeSchedule" ToRole="Schedule" />
     <NavigationProperty Name="ScheduleStatu" Relationship="Self.FK_EmployeeSchedule_ScheduleStatus" FromRole="EmployeeSchedule" ToRole="ScheduleStatus" />
   </EntityType>
   <EntityType Name="EmployeeServiceType">
     <Key>
-      <PropertyRef Name="TypeID" />
-      <PropertyRef Name="EmployeeID" />
+      <PropertyRef Name="EmpTypeID" />
     </Key>
-    <Property Name="TypeID" Type="Int32" Nullable="false" />
+    <Property Name="EmpTypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="EmployeeID" Type="Int32" Nullable="false" />
+    <Property Name="TypeID" Type="Int32" Nullable="false" />
     <NavigationProperty Name="Employee" Relationship="Self.FK_EmployeeServiceType_Employee" FromRole="EmployeeServiceType" ToRole="Employee" />
-    <NavigationProperty Name="EmployeeSchedules" Relationship="Self.FK_EmployeeSchedule_EmployeeServiceType" FromRole="EmployeeServiceType" ToRole="EmployeeSchedule" />
     <NavigationProperty Name="ServiceType" Relationship="Self.FK_EmployeeServiceType_ServiceType" FromRole="EmployeeServiceType" ToRole="ServiceType" />
   </EntityType>
   <EntityType Name="InstanceStatu">
@@ -180,15 +190,17 @@
     <Property Name="SaleID" Type="Int32" Nullable="false" />
     <Property Name="PackageID" Type="Int32" Nullable="false" />
     <Property Name="StatusID" Type="Int32" Nullable="false" />
-    <Property Name="Date" Type="DateTime" Nullable="false" Precision="0" />
+    <Property Name="LineID" Type="Int32" />
+    <Property Name="Date" Type="DateTime" Precision="0" />
+    <NavigationProperty Name="BookingLine" Relationship="Self.FK_PackageInstance_BookingLine" FromRole="PackageInstance" ToRole="BookingLine" />
     <NavigationProperty Name="ClientPackage" Relationship="Self.FK_PackageInstance_ClientPackage" FromRole="PackageInstance" ToRole="ClientPackage" />
     <NavigationProperty Name="InstanceStatu" Relationship="Self.FK_PackageInstance_InstanceStatus" FromRole="PackageInstance" ToRole="InstanceStatus" />
   </EntityType>
   <EntityType Name="PaymentType">
     <Key>
-      <PropertyRef Name="TypeID" />
+      <PropertyRef Name="PaymentTypeID" />
     </Key>
-    <Property Name="TypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="PaymentTypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="Type" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
     <NavigationProperty Name="Sales" Relationship="Self.FK_Sale_PaymentType" FromRole="PaymentType" ToRole="Sale" />
   </EntityType>
@@ -201,7 +213,7 @@
     <Property Name="CategoryID" Type="Int32" Nullable="false" />
     <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="QuantityOnHand" Type="Int32" Nullable="false" />
-    <Property Name="Description" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
+    <Property Name="Description" Type="String" MaxLength="150" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Price" Type="Decimal" Precision="6" Scale="2" Nullable="false" />
     <NavigationProperty Name="BasketLines" Relationship="Self.FK_BasketLine_Product" FromRole="Product" ToRole="BasketLine" />
     <NavigationProperty Name="ProductCategory" Relationship="Self.FK_Product_ProductCategory" FromRole="Product" ToRole="ProductCategory" />
@@ -223,7 +235,7 @@
     </Key>
     <Property Name="PhotoID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="ProductID" Type="Int32" Nullable="false" />
-    <Property Name="Photo" Type="Binary" MaxLength="Max" FixedLength="false" Nullable="false" />
+    <Property Name="Photo" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
     <NavigationProperty Name="Product" Relationship="Self.FK_ProductPhoto_Product" FromRole="ProductPhoto" ToRole="Product" />
   </EntityType>
   <EntityType Name="Reminder">
@@ -231,9 +243,20 @@
       <PropertyRef Name="ReminderID" />
     </Key>
     <Property Name="ReminderID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="TypeID" Type="Int32" Nullable="false" />
     <Property Name="Text" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="NumHours" Type="Int32" Nullable="false" />
     <NavigationProperty Name="Bookings" Relationship="Self.FK_Booking_Reminder" FromRole="Reminder" ToRole="Booking" />
+    <NavigationProperty Name="ReminderType" Relationship="Self.FK_Reminder_ReminderType" FromRole="Reminder" ToRole="ReminderType" />
     <NavigationProperty Name="Sales" Relationship="Self.FK_Sale_Reminder" FromRole="Reminder" ToRole="Sale" />
+  </EntityType>
+  <EntityType Name="ReminderType">
+    <Key>
+      <PropertyRef Name="TypeID" />
+    </Key>
+    <Property Name="TypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Type" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+    <NavigationProperty Name="Reminders" Relationship="Self.FK_Reminder_ReminderType" FromRole="ReminderType" ToRole="Reminder" />
   </EntityType>
   <EntityType Name="Sale">
     <Key>
@@ -242,9 +265,9 @@
     <Property Name="SaleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="StatusID" Type="Int32" Nullable="false" />
     <Property Name="ReminderID" Type="Int32" />
-    <Property Name="TypeID" Type="Int32" />
-    <Property Name="Description" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="PaymentTypeID" Type="Int32" />
     <Property Name="ClientID" Type="Int32" Nullable="false" />
+    <Property Name="SaleTypeID" Type="Int32" Nullable="false" />
     <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
     <Property Name="Payment" Type="Decimal" Precision="6" Scale="2" />
     <NavigationProperty Name="Client" Relationship="Self.FK_Sale_Client" FromRole="Sale" ToRole="Client" />
@@ -252,13 +275,14 @@
     <NavigationProperty Name="PaymentType" Relationship="Self.FK_Sale_PaymentType" FromRole="Sale" ToRole="PaymentType" />
     <NavigationProperty Name="Reminder" Relationship="Self.FK_Sale_Reminder" FromRole="Sale" ToRole="Reminder" />
     <NavigationProperty Name="SaleStatu" Relationship="Self.FK_Sale_SaleStatus" FromRole="Sale" ToRole="SaleStatus" />
+    <NavigationProperty Name="SaleType" Relationship="Self.FK_Sale_SaleType" FromRole="Sale" ToRole="SaleType" />
     <NavigationProperty Name="SaleLines" Relationship="Self.FK_SaleLine_Sale" FromRole="Sale" ToRole="SaleLine" />
   </EntityType>
   <EntityType Name="SaleLine">
     <Key>
-      <PropertyRef Name="ProductID" />
-      <PropertyRef Name="SaleID" />
+      <PropertyRef Name="LineID" />
     </Key>
+    <Property Name="LineID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="ProductID" Type="Int32" Nullable="false" />
     <Property Name="SaleID" Type="Int32" Nullable="false" />
     <Property Name="Quantity" Type="Int32" Nullable="false" />
@@ -270,16 +294,24 @@
       <PropertyRef Name="StatusID" />
     </Key>
     <Property Name="StatusID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-    <Property Name="Status" Type="String" MaxLength="15" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Status" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
     <NavigationProperty Name="Sales" Relationship="Self.FK_Sale_SaleStatus" FromRole="SaleStatus" ToRole="Sale" />
+  </EntityType>
+  <EntityType Name="SaleType">
+    <Key>
+      <PropertyRef Name="SaleTypeID" />
+    </Key>
+    <Property Name="SaleTypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Type" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <NavigationProperty Name="Sales" Relationship="Self.FK_Sale_SaleType" FromRole="SaleType" ToRole="Sale" />
   </EntityType>
   <EntityType Name="Schedule">
     <Key>
-      <PropertyRef Name="TimeID" />
       <PropertyRef Name="DateID" />
+      <PropertyRef Name="TimeID" />
     </Key>
-    <Property Name="TimeID" Type="Int32" Nullable="false" />
     <Property Name="DateID" Type="Int32" Nullable="false" />
+    <Property Name="TimeID" Type="Int32" Nullable="false" />
     <NavigationProperty Name="Date" Relationship="Self.FK_Schedule_Date" FromRole="Schedule" ToRole="Date" />
     <NavigationProperty Name="EmployeeSchedules" Relationship="Self.FK_EmployeeSchedule_Schedule" FromRole="Schedule" ToRole="EmployeeSchedule" />
     <NavigationProperty Name="Timeslot" Relationship="Self.FK_Schedule_Timeslot" FromRole="Schedule" ToRole="Timeslot" />
@@ -298,7 +330,7 @@
     </Key>
     <Property Name="ServiceID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="TypeID" Type="Int32" Nullable="false" />
-    <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Description" Type="String" MaxLength="240" FixedLength="false" Unicode="false" />
     <Property Name="Duration" Type="Int32" Nullable="false" />
     <NavigationProperty Name="BookingLines" Relationship="Self.FK_BookingLine_Service" FromRole="Service" ToRole="BookingLine" />
@@ -315,7 +347,6 @@
     <Property Name="OptionID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="Name" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Duration" Type="Int32" Nullable="false" />
-    <NavigationProperty Name="BookingLines" Relationship="Self.FK_BookingLine_ServiceOption" FromRole="ServiceOption" ToRole="BookingLine" />
     <NavigationProperty Name="ServiceTypeOptions" Relationship="Self.FK_ServiceTypeOption_ServiceOption" FromRole="ServiceOption" ToRole="ServiceTypeOption" />
   </EntityType>
   <EntityType Name="ServicePackage">
@@ -324,9 +355,10 @@
     </Key>
     <Property Name="PackageID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="ServiceID" Type="Int32" Nullable="false" />
-    <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Price" Type="Decimal" Precision="6" Scale="2" Nullable="false" />
     <Property Name="Quantity" Type="Int32" Nullable="false" />
+    <Property Name="Duration" Type="Int32" Nullable="false" />
     <NavigationProperty Name="ClientPackages" Relationship="Self.FK_ClientPackage_ServicePackage" FromRole="ServicePackage" ToRole="ClientPackage" />
     <NavigationProperty Name="Service" Relationship="Self.FK_ServicePackage_Service" FromRole="ServicePackage" ToRole="Service" />
   </EntityType>
@@ -336,7 +368,7 @@
     </Key>
     <Property Name="PhotoID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="ServiceID" Type="Int32" Nullable="false" />
-    <Property Name="Photo" Type="Binary" MaxLength="Max" FixedLength="false" Nullable="false" />
+    <Property Name="Photo" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
     <NavigationProperty Name="Service" Relationship="Self.FK_ServicePhoto_Service" FromRole="ServicePhoto" ToRole="Service" />
   </EntityType>
   <EntityType Name="ServicePrice">
@@ -356,8 +388,8 @@
       <PropertyRef Name="TypeID" />
     </Key>
     <Property Name="TypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-    <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="Description" Type="String" MaxLength="240" FixedLength="false" Unicode="false" />
+    <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Description" Type="String" MaxLength="240" FixedLength="false" Unicode="false" Nullable="false" />
     <NavigationProperty Name="EmployeeServiceTypes" Relationship="Self.FK_EmployeeServiceType_ServiceType" FromRole="ServiceType" ToRole="EmployeeServiceType" />
     <NavigationProperty Name="Services" Relationship="Self.FK_Service_ServiceType" FromRole="ServiceType" ToRole="Service" />
   </EntityType>
@@ -368,6 +400,7 @@
     </Key>
     <Property Name="ServiceID" Type="Int32" Nullable="false" />
     <Property Name="OptionID" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="BookingLines" Relationship="Self.FK_BookingLine_ServiceTypeOption" FromRole="ServiceTypeOption" ToRole="BookingLine" />
     <NavigationProperty Name="Service" Relationship="Self.FK_ServiceTypeOption_Service" FromRole="ServiceTypeOption" ToRole="Service" />
     <NavigationProperty Name="ServiceOption" Relationship="Self.FK_ServiceTypeOption_ServiceOption" FromRole="ServiceTypeOption" ToRole="ServiceOption" />
     <NavigationProperty Name="ServicePrices" Relationship="Self.FK_ServicePrice_ServiceTypeOption" FromRole="ServiceTypeOption" ToRole="ServicePrice" />
@@ -378,8 +411,9 @@
     </Key>
     <Property Name="ItemID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="Description" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
+    <Property Name="Description" Type="String" MaxLength="150" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Price" Type="Decimal" Precision="6" Scale="2" Nullable="false" />
+    <Property Name="QuantityInStock" Type="Int32" Nullable="false" />
     <NavigationProperty Name="StockItemLines" Relationship="Self.FK_StockItemLine_StockItem" FromRole="StockItem" ToRole="StockItemLine" />
     <NavigationProperty Name="StockTakeLines" Relationship="Self.FK_StockTakeLine_StockItem" FromRole="StockItem" ToRole="StockTakeLine" />
     <NavigationProperty Name="WriteOffLines" Relationship="Self.FK_WriteOffLine_StockItem" FromRole="StockItem" ToRole="WriteOffLine" />
@@ -391,7 +425,7 @@
     </Key>
     <Property Name="ItemID" Type="Int32" Nullable="false" />
     <Property Name="OrderID" Type="Int32" Nullable="false" />
-    <Property Name="Quantity" Type="Int32" Nullable="false" />
+    <Property Name="Quantity" Type="Int32" />
     <NavigationProperty Name="StockItem" Relationship="Self.FK_StockItemLine_StockItem" FromRole="StockItemLine" ToRole="StockItem" />
     <NavigationProperty Name="SupplierOrder" Relationship="Self.FK_StockItemLine_SupplierOrder" FromRole="StockItemLine" ToRole="SupplierOrder" />
   </EntityType>
@@ -408,9 +442,9 @@
   </EntityType>
   <EntityType Name="StockTakeLine">
     <Key>
-      <PropertyRef Name="ItemID" />
-      <PropertyRef Name="StockTakeID" />
+      <PropertyRef Name="LineID" />
     </Key>
+    <Property Name="LineID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="ItemID" Type="Int32" Nullable="false" />
     <Property Name="StockTakeID" Type="Int32" Nullable="false" />
     <Property Name="Quantity" Type="Int32" Nullable="false" />
@@ -422,8 +456,7 @@
       <PropertyRef Name="WriteOffID" />
     </Key>
     <Property Name="WriteOffID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-    <Property Name="Reason" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="Quantity" Type="Int32" Nullable="false" />
+    <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Date" Type="DateTime" Nullable="false" Precision="0" />
     <NavigationProperty Name="WriteOffLines" Relationship="Self.FK_WriteOffLine_StockWriteOff" FromRole="StockWriteOff" ToRole="WriteOffLine" />
   </EntityType>
@@ -432,9 +465,9 @@
       <PropertyRef Name="SupplierID" />
     </Key>
     <Property Name="SupplierID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-    <Property Name="Name" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="ContactNo" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Address" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
     <NavigationProperty Name="Products" Relationship="Self.FK_Product_Supplier" FromRole="Supplier" ToRole="Product" />
     <NavigationProperty Name="SupplierOrders" Relationship="Self.FK_SupplierOrder_Supplier" FromRole="Supplier" ToRole="SupplierOrder" />
@@ -478,7 +511,7 @@
     <Property Name="RoleID" Type="Int32" Nullable="false" />
     <Property Name="Username" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Password" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="SessionID" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+    <Property Name="SessionID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
     <NavigationProperty Name="Admins" Relationship="Self.FK_Admin_User" FromRole="User" ToRole="Admin" />
     <NavigationProperty Name="Clients" Relationship="Self.FK_Client_User" FromRole="User" ToRole="Client" />
     <NavigationProperty Name="Employees" Relationship="Self.FK_Employee_User" FromRole="User" ToRole="Employee" />
@@ -500,6 +533,7 @@
     <Property Name="ItemID" Type="Int32" Nullable="false" />
     <Property Name="WriteOffID" Type="Int32" Nullable="false" />
     <Property Name="Reason" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Quantity" Type="Int32" Nullable="false" />
     <NavigationProperty Name="StockItem" Relationship="Self.FK_WriteOffLine_StockItem" FromRole="WriteOffLine" ToRole="StockItem" />
     <NavigationProperty Name="StockWriteOff" Relationship="Self.FK_WriteOffLine_StockWriteOff" FromRole="WriteOffLine" ToRole="StockWriteOff" />
   </EntityType>
@@ -623,6 +657,18 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_DateRequested_Booking">
+    <End Role="Booking" Type="Self.Booking" Multiplicity="0..1" />
+    <End Role="DateRequested" Type="Self.DateRequested" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Booking">
+        <PropertyRef Name="BookingID" />
+      </Principal>
+      <Dependent Role="DateRequested">
+        <PropertyRef Name="BookingID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_EmployeeSchedule_Booking">
     <End Role="Booking" Type="Self.Booking" Multiplicity="0..1" />
     <End Role="EmployeeSchedule" Type="Self.EmployeeSchedule" Multiplicity="*" />
@@ -647,20 +693,34 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
-  <Association Name="FK_BookingLine_ServiceOption">
-    <End Role="ServiceOption" Type="Self.ServiceOption" Multiplicity="0..1" />
+  <Association Name="FK_BookingLine_ServiceTypeOption">
+    <End Role="ServiceTypeOption" Type="Self.ServiceTypeOption" Multiplicity="0..1" />
     <End Role="BookingLine" Type="Self.BookingLine" Multiplicity="*" />
     <ReferentialConstraint>
-      <Principal Role="ServiceOption">
+      <Principal Role="ServiceTypeOption">
+        <PropertyRef Name="ServiceID" />
         <PropertyRef Name="OptionID" />
       </Principal>
       <Dependent Role="BookingLine">
+        <PropertyRef Name="ServiceID" />
         <PropertyRef Name="OptionID" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_PackageInstance_BookingLine">
+    <End Role="BookingLine" Type="Self.BookingLine" Multiplicity="0..1" />
+    <End Role="PackageInstance" Type="Self.PackageInstance" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="BookingLine">
+        <PropertyRef Name="LineID" />
+      </Principal>
+      <Dependent Role="PackageInstance">
+        <PropertyRef Name="LineID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_Client_User">
-    <End Role="User" Type="Self.User" Multiplicity="1" />
+    <End Role="User" Type="Self.User" Multiplicity="0..1" />
     <End Role="Client" Type="Self.Client" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="User">
@@ -734,7 +794,7 @@
     </ReferentialConstraint>
   </Association>
   <Association Name="FK_Employee_User">
-    <End Role="User" Type="Self.User" Multiplicity="1" />
+    <End Role="User" Type="Self.User" Multiplicity="0..1" />
     <End Role="Employee" Type="Self.Employee" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="User">
@@ -742,6 +802,18 @@
       </Principal>
       <Dependent Role="Employee">
         <PropertyRef Name="UserID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_EmployeeSchedule_Employee">
+    <End Role="Employee" Type="Self.Employee" Multiplicity="1" />
+    <End Role="EmployeeSchedule" Type="Self.EmployeeSchedule" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Employee">
+        <PropertyRef Name="EmployeeID" />
+      </Principal>
+      <Dependent Role="EmployeeSchedule">
+        <PropertyRef Name="EmployeeID" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -757,31 +829,17 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
-  <Association Name="FK_EmployeeSchedule_EmployeeServiceType">
-    <End Role="EmployeeServiceType" Type="Self.EmployeeServiceType" Multiplicity="1" />
-    <End Role="EmployeeSchedule" Type="Self.EmployeeSchedule" Multiplicity="*" />
-    <ReferentialConstraint>
-      <Principal Role="EmployeeServiceType">
-        <PropertyRef Name="TypeID" />
-        <PropertyRef Name="EmployeeID" />
-      </Principal>
-      <Dependent Role="EmployeeSchedule">
-        <PropertyRef Name="TypeID" />
-        <PropertyRef Name="EmployeeID" />
-      </Dependent>
-    </ReferentialConstraint>
-  </Association>
   <Association Name="FK_EmployeeSchedule_Schedule">
     <End Role="Schedule" Type="Self.Schedule" Multiplicity="1" />
     <End Role="EmployeeSchedule" Type="Self.EmployeeSchedule" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="Schedule">
-        <PropertyRef Name="TimeID" />
         <PropertyRef Name="DateID" />
+        <PropertyRef Name="TimeID" />
       </Principal>
       <Dependent Role="EmployeeSchedule">
-        <PropertyRef Name="TimeID" />
         <PropertyRef Name="DateID" />
+        <PropertyRef Name="TimeID" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -826,10 +884,10 @@
     <End Role="Sale" Type="Self.Sale" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="PaymentType">
-        <PropertyRef Name="TypeID" />
+        <PropertyRef Name="PaymentTypeID" />
       </Principal>
       <Dependent Role="Sale">
-        <PropertyRef Name="TypeID" />
+        <PropertyRef Name="PaymentTypeID" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -881,6 +939,18 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_Reminder_ReminderType">
+    <End Role="ReminderType" Type="Self.ReminderType" Multiplicity="1" />
+    <End Role="Reminder" Type="Self.Reminder" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="ReminderType">
+        <PropertyRef Name="TypeID" />
+      </Principal>
+      <Dependent Role="Reminder">
+        <PropertyRef Name="TypeID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_Sale_Reminder">
     <End Role="Reminder" Type="Self.Reminder" Multiplicity="0..1" />
     <End Role="Sale" Type="Self.Sale" Multiplicity="*" />
@@ -902,6 +972,18 @@
       </Principal>
       <Dependent Role="Sale">
         <PropertyRef Name="StatusID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Sale_SaleType">
+    <End Role="SaleType" Type="Self.SaleType" Multiplicity="1" />
+    <End Role="Sale" Type="Self.Sale" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="SaleType">
+        <PropertyRef Name="SaleTypeID" />
+      </Principal>
+      <Dependent Role="Sale">
+        <PropertyRef Name="SaleTypeID" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -1123,6 +1205,7 @@
     <EntitySet Name="ClientPackages" EntityType="Self.ClientPackage" />
     <EntitySet Name="CompanyInfoes" EntityType="Self.CompanyInfo" />
     <EntitySet Name="Dates" EntityType="Self.Date" />
+    <EntitySet Name="DateRequesteds" EntityType="Self.DateRequested" />
     <EntitySet Name="Employees" EntityType="Self.Employee" />
     <EntitySet Name="EmployeeSchedules" EntityType="Self.EmployeeSchedule" />
     <EntitySet Name="EmployeeServiceTypes" EntityType="Self.EmployeeServiceType" />
@@ -1133,9 +1216,11 @@
     <EntitySet Name="ProductCategories" EntityType="Self.ProductCategory" />
     <EntitySet Name="ProductPhotoes" EntityType="Self.ProductPhoto" />
     <EntitySet Name="Reminders" EntityType="Self.Reminder" />
+    <EntitySet Name="ReminderTypes" EntityType="Self.ReminderType" />
     <EntitySet Name="Sales" EntityType="Self.Sale" />
     <EntitySet Name="SaleLines" EntityType="Self.SaleLine" />
     <EntitySet Name="SaleStatus" EntityType="Self.SaleStatu" />
+    <EntitySet Name="SaleTypes" EntityType="Self.SaleType" />
     <EntitySet Name="Schedules" EntityType="Self.Schedule" />
     <EntitySet Name="ScheduleStatus" EntityType="Self.ScheduleStatu" />
     <EntitySet Name="Services" EntityType="Self.Service" />
@@ -1197,6 +1282,10 @@
       <End Role="Booking" EntitySet="Bookings" />
       <End Role="BookingNotes" EntitySet="BookingNotes" />
     </AssociationSet>
+    <AssociationSet Name="FK_DateRequested_Booking" Association="Self.FK_DateRequested_Booking">
+      <End Role="Booking" EntitySet="Bookings" />
+      <End Role="DateRequested" EntitySet="DateRequesteds" />
+    </AssociationSet>
     <AssociationSet Name="FK_EmployeeSchedule_Booking" Association="Self.FK_EmployeeSchedule_Booking">
       <End Role="Booking" EntitySet="Bookings" />
       <End Role="EmployeeSchedule" EntitySet="EmployeeSchedules" />
@@ -1205,9 +1294,13 @@
       <End Role="Service" EntitySet="Services" />
       <End Role="BookingLine" EntitySet="BookingLines" />
     </AssociationSet>
-    <AssociationSet Name="FK_BookingLine_ServiceOption" Association="Self.FK_BookingLine_ServiceOption">
-      <End Role="ServiceOption" EntitySet="ServiceOptions" />
+    <AssociationSet Name="FK_BookingLine_ServiceTypeOption" Association="Self.FK_BookingLine_ServiceTypeOption">
+      <End Role="ServiceTypeOption" EntitySet="ServiceTypeOptions" />
       <End Role="BookingLine" EntitySet="BookingLines" />
+    </AssociationSet>
+    <AssociationSet Name="FK_PackageInstance_BookingLine" Association="Self.FK_PackageInstance_BookingLine">
+      <End Role="BookingLine" EntitySet="BookingLines" />
+      <End Role="PackageInstance" EntitySet="PackageInstances" />
     </AssociationSet>
     <AssociationSet Name="FK_Client_User" Association="Self.FK_Client_User">
       <End Role="User" EntitySet="Users" />
@@ -1237,13 +1330,13 @@
       <End Role="User" EntitySet="Users" />
       <End Role="Employee" EntitySet="Employees" />
     </AssociationSet>
+    <AssociationSet Name="FK_EmployeeSchedule_Employee" Association="Self.FK_EmployeeSchedule_Employee">
+      <End Role="Employee" EntitySet="Employees" />
+      <End Role="EmployeeSchedule" EntitySet="EmployeeSchedules" />
+    </AssociationSet>
     <AssociationSet Name="FK_EmployeeServiceType_Employee" Association="Self.FK_EmployeeServiceType_Employee">
       <End Role="Employee" EntitySet="Employees" />
       <End Role="EmployeeServiceType" EntitySet="EmployeeServiceTypes" />
-    </AssociationSet>
-    <AssociationSet Name="FK_EmployeeSchedule_EmployeeServiceType" Association="Self.FK_EmployeeSchedule_EmployeeServiceType">
-      <End Role="EmployeeServiceType" EntitySet="EmployeeServiceTypes" />
-      <End Role="EmployeeSchedule" EntitySet="EmployeeSchedules" />
     </AssociationSet>
     <AssociationSet Name="FK_EmployeeSchedule_Schedule" Association="Self.FK_EmployeeSchedule_Schedule">
       <End Role="Schedule" EntitySet="Schedules" />
@@ -1281,12 +1374,20 @@
       <End Role="Product" EntitySet="Products" />
       <End Role="SaleLine" EntitySet="SaleLines" />
     </AssociationSet>
+    <AssociationSet Name="FK_Reminder_ReminderType" Association="Self.FK_Reminder_ReminderType">
+      <End Role="ReminderType" EntitySet="ReminderTypes" />
+      <End Role="Reminder" EntitySet="Reminders" />
+    </AssociationSet>
     <AssociationSet Name="FK_Sale_Reminder" Association="Self.FK_Sale_Reminder">
       <End Role="Reminder" EntitySet="Reminders" />
       <End Role="Sale" EntitySet="Sales" />
     </AssociationSet>
     <AssociationSet Name="FK_Sale_SaleStatus" Association="Self.FK_Sale_SaleStatus">
       <End Role="SaleStatus" EntitySet="SaleStatus" />
+      <End Role="Sale" EntitySet="Sales" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Sale_SaleType" Association="Self.FK_Sale_SaleType">
+      <End Role="SaleType" EntitySet="SaleTypes" />
       <End Role="Sale" EntitySet="Sales" />
     </AssociationSet>
     <AssociationSet Name="FK_SaleLine_Sale" Association="Self.FK_SaleLine_Sale">

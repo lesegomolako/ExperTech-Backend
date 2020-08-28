@@ -159,7 +159,7 @@ namespace ExperTech_Api.Controllers
                     newObject.ItemID = lines.ItemID;
                     newObject.WriteOffID = WriteOffID;
                     newObject.Reason = lines.Reason;
-                    newObject.Quantity = lines.Quantity;
+                    //newObject.Quantity = lines.Quantity;
 
                     db.WriteOffLines.Add(newObject);
                     db.SaveChanges();
