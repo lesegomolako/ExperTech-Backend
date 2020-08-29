@@ -122,7 +122,6 @@ namespace ExperTech_Api.Controllers
                 return null;
             }
         }
-
         //*********************************employee availability****************************
         [Route("api/Employee/getSchedule")]
         [System.Web.Mvc.HttpGet]
@@ -145,6 +144,63 @@ namespace ExperTech_Api.Controllers
             }
             return TimesList;
         }
+
+        //********************************************************************************read employee type****************************************************************************************
+
+        [Route("api/Employee/getEmployeeType")]
+        [HttpGet]
+        public List<dynamic> getEmployeeType()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            return getEmployeeTypeID(db.ServiceTypes.ToList());
+        }
+        private List<dynamic> getEmployeeTypeID(List<ServiceType> forEST)
+        {
+            List<dynamic> dymaminEmplType = new List<dynamic>();
+            foreach (ServiceType ESTname in forEST)
+            {
+                dynamic dynamicEST = new ExpandoObject();
+                dynamicEST.TypeID = ESTname.TypeID;
+                dynamicEST.Name = ESTname.Name;
+                dynamicEST.Description = ESTname.Description;
+
+                dymaminEmplType.Add(dynamicEST);
+            }
+            return dymaminEmplType;
+        }
+
+        //********************************************************************************update employee type****************************************************************************************
+        [Route("api/Employee/updateEST")]
+        [HttpPut]
+        public object updateEST([FromBody] ServiceType forEST)
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            if (ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                ServiceType serviceType = db.ServiceTypes.Find(forEST.TypeID);   //lol
+
+                if (serviceType != null)
+                {
+                    serviceType.TypeID = forEST.TypeID;
+                    serviceType.Name = forEST.Name;
+                    serviceType.Description = forEST.Description;
+
+                    db.SaveChanges();
+
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return Ok(forEST);
+
+        }
+
         //*********************************employee availability****************************
         [Route("api/Employee/getTime")]
         [HttpGet]

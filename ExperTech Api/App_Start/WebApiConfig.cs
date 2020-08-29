@@ -20,6 +20,7 @@ namespace ExperTech_Api
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+           // GlobalConfiguration.Configure(WebApiConfig.Register);
 
             EnableCorsAttribute newCors = new EnableCorsAttribute("*", "*", "*");
             config.EnableCors(newCors);
