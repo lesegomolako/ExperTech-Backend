@@ -11,7 +11,7 @@ using System.Web.Http.Description;
 using ExperTech_Api.Models;
 using System.Dynamic;
 using Microsoft.Ajax.Utilities;
-
+using System.Runtime.Serialization;
 
 namespace ExperTech_Api.Controllers
 {
@@ -61,6 +61,7 @@ namespace ExperTech_Api.Controllers
             foreach (ServiceType Item in Modell)
             {
                 dynamic newObject = new ExpandoObject();
+                newObject.TypeID = Item.TypeID;
                 newObject.Name = Item.Name;
                 newObject.Description = Item.Description;
                 makeList.Add(newObject);
@@ -113,10 +114,12 @@ namespace ExperTech_Api.Controllers
             db.Configuration.ProxyCreationEnabled = false;
             try
             {   //checks for dupicate service
+                
                 Service Verify = db.Services.Where(zz => zz.Name == Modell.Name).FirstOrDefault();
                 if (Verify == null)
                 {
                     //if not duplicate, execute SaveService()
+                    //Service ServiceObject = FormatServices(Modell);
                     return SaveService(Modell);
                 }
                 else
@@ -130,6 +133,18 @@ namespace ExperTech_Api.Controllers
                 return err.Message;
             }
         } 
+
+        private Service FormatServices(dynamic Modell)
+        {
+            Service newService = new Service();
+            newService.TypeID = (int)Modell.TypeID;
+            newService.Name = Modell.Name;
+            newService.Description = Modell.Description;
+            newService.Duration = Modell.Duration;
+            
+            //newService.TypeID = Modell
+            return newService;
+        }
 
         private dynamic SaveService(Service Modell)
         {
@@ -330,7 +345,7 @@ namespace ExperTech_Api.Controllers
         }
 
         [Route("api/Services/UpdateService")]
-        [HttpDelete]
+        [HttpPost]
         public dynamic UpdateService([FromBody] Service Modell)
         {
             try
@@ -390,7 +405,7 @@ namespace ExperTech_Api.Controllers
         public List<ServiceOption> GetServiceOption()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            List<ServiceOption> mylist = db.ServiceOptions.Include(zz => zz.ServiceTypeOptions).ToList();
+            List<ServiceOption> mylist = db.ServiceOptions.ToList();
             return mylist;
         }
 
@@ -536,6 +551,68 @@ namespace ExperTech_Api.Controllers
             }
             
             return getList;
+        }
+
+        [Route("api/Services/getBookings")]
+        [HttpGet]
+        public dynamic getBookings()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            List<Booking> findBooking = db.Bookings.Include(zz => zz.EmployeeSchedules).Include(zz => zz.DateRequesteds)
+                .Include(zz => zz.Client).Include(zz=> zz.BookingLines).Include(zz => zz.BookingNotes).ToList();
+            return viewBooking(findBooking);
+        }
+
+        private dynamic viewBooking(List<Booking> findBooking)
+        {
+            List<dynamic> BookingList = new List<dynamic>();
+            foreach(Booking items in findBooking)
+            {
+                dynamic BookingObject = new ExpandoObject();
+                BookingObject.BookingID = items.BookingID;
+                BookingObject.BookingStatusID = items.StatusID;
+                BookingObject.BookingStatus = db.BookingStatus.Where(zz => zz.StatusID == items.StatusID).Select(zz => zz.Status).FirstOrDefault(); ;
+                BookingObject.Client = items.Client.Name;
+
+                foreach (DateRequested requests in items.DateRequesteds)
+                {
+                    dynamic requestObject = new ExpandoObject();
+                    requestObject.Dates = requests.Date;
+                    requestObject.Time = requests.StartTime;
+                    BookingObject.BookingRequest = requestObject;
+                }
+
+                List<dynamic> getSchedule = new List<dynamic>();
+                foreach(EmployeeSchedule booking in items.EmployeeSchedules)
+                {
+                    dynamic scheduleObject = new ExpandoObject();  //can you change employee after confirmed booking && where does the advise get saved
+                    scheduleObject.Employee = db.Employees.Where(zz => zz.EmployeeID == booking.EmployeeID).Select(zz => zz.Name).FirstOrDefault();
+                    scheduleObject.Dates = db.Dates.Where(zz => zz.DateID == booking.DateID).Select(zz => zz.Date1).FirstOrDefault();
+                    scheduleObject.StartTime = db.Timeslots.Where(zz => zz.TimeID == booking.TimeID).Select(zz => zz.StartTime).FirstOrDefault();
+                    scheduleObject.EndTime = db.Timeslots.Where(zz => zz.TimeID == booking.TimeID).Select(zz => zz.EndTime).FirstOrDefault();
+                    scheduleObject.Status = db.ScheduleStatus.Where(zz => zz.StatusID == booking.StatusID).Select(zz => zz.Status).FirstOrDefault(); ;
+
+                    getSchedule.Add(scheduleObject);
+                }
+                if(getSchedule.Count != 0)
+                BookingObject.BookingSchedule = getSchedule;
+
+                List<dynamic> getLines = new List<dynamic>();
+                foreach(BookingLine lineItems in items.BookingLines)
+                {
+                    dynamic lineObject = new ExpandoObject();
+                    lineObject.Service = db.Services.Where(zz => zz.ServiceID == lineItems.ServiceID).Select(zz => zz.Name).FirstOrDefault(); ;
+                    lineObject.Option = db.ServiceOptions.Where(zz => zz.OptionID == lineItems.OptionID).Select(zz => zz.Name).FirstOrDefault(); ;
+
+                    getLines.Add(lineObject);
+                }
+                BookingObject.BookingLine = getLines;
+
+
+                BookingList.Add(BookingObject);
+            }
+
+            return BookingList;
         }
 
     }

@@ -14,12 +14,21 @@ namespace ExperTech_Api.Models
     
     public partial class BookingLine
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public BookingLine()
+        {
+            this.PackageInstances = new HashSet<PackageInstance>();
+        }
+    
+        public int LineID { get; set; }
         public int BookingID { get; set; }
         public int ServiceID { get; set; }
         public Nullable<int> OptionID { get; set; }
     
         public virtual Booking Booking { get; set; }
         public virtual Service Service { get; set; }
-        public virtual ServiceOption ServiceOption { get; set; }
+        public virtual ServiceTypeOption ServiceTypeOption { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<PackageInstance> PackageInstances { get; set; }
     }
 }

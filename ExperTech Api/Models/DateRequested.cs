@@ -12,12 +12,13 @@ namespace ExperTech_Api.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class sysdiagram
+    public partial class DateRequested
     {
-        public string name { get; set; }
-        public int principal_id { get; set; }
-        public int diagram_id { get; set; }
-        public Nullable<int> version { get; set; }
-        public byte[] definition { get; set; }
+        public int RequestedID { get; set; }
+        public Nullable<int> BookingID { get; set; }
+        public Nullable<System.DateTime> Date { get; set; }
+        public Nullable<System.TimeSpan> StartTime { get; set; }
+    
+        public virtual Booking Booking { get; set; }
     }
 }

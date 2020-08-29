@@ -14,6 +14,7 @@ namespace ExperTech_Api.Models
     
     public partial class BasketLine
     {
+        public int LineID { get; set; }
         public int BasketID { get; set; }
         public int ProductID { get; set; }
         public int Quantity { get; set; }

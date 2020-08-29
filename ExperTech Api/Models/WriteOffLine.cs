@@ -17,6 +17,7 @@ namespace ExperTech_Api.Models
         public int ItemID { get; set; }
         public int WriteOffID { get; set; }
         public string Reason { get; set; }
+        public int Quantity { get; set; }
     
         public virtual StockItem StockItem { get; set; }
         public virtual StockWriteOff StockWriteOff { get; set; }

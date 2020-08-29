@@ -36,6 +36,7 @@ namespace ExperTech_Api.Models
         public virtual DbSet<ClientPackage> ClientPackages { get; set; }
         public virtual DbSet<CompanyInfo> CompanyInfoes { get; set; }
         public virtual DbSet<Date> Dates { get; set; }
+        public virtual DbSet<DateRequested> DateRequesteds { get; set; }
         public virtual DbSet<Employee> Employees { get; set; }
         public virtual DbSet<EmployeeSchedule> EmployeeSchedules { get; set; }
         public virtual DbSet<EmployeeServiceType> EmployeeServiceTypes { get; set; }
@@ -46,9 +47,11 @@ namespace ExperTech_Api.Models
         public virtual DbSet<ProductCategory> ProductCategories { get; set; }
         public virtual DbSet<ProductPhoto> ProductPhotoes { get; set; }
         public virtual DbSet<Reminder> Reminders { get; set; }
+        public virtual DbSet<ReminderType> ReminderTypes { get; set; }
         public virtual DbSet<Sale> Sales { get; set; }
         public virtual DbSet<SaleLine> SaleLines { get; set; }
         public virtual DbSet<SaleStatu> SaleStatus { get; set; }
+        public virtual DbSet<SaleType> SaleTypes { get; set; }
         public virtual DbSet<Schedule> Schedules { get; set; }
         public virtual DbSet<ScheduleStatu> ScheduleStatus { get; set; }
         public virtual DbSet<Service> Services { get; set; }
@@ -65,7 +68,6 @@ namespace ExperTech_Api.Models
         public virtual DbSet<StockWriteOff> StockWriteOffs { get; set; }
         public virtual DbSet<Supplier> Suppliers { get; set; }
         public virtual DbSet<SupplierOrder> SupplierOrders { get; set; }
-        public virtual DbSet<sysdiagram> sysdiagrams { get; set; }
         public virtual DbSet<Timeslot> Timeslots { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserRole> UserRoles { get; set; }

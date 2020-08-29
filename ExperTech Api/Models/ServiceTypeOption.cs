@@ -17,12 +17,15 @@ namespace ExperTech_Api.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public ServiceTypeOption()
         {
+            this.BookingLines = new HashSet<BookingLine>();
             this.ServicePrices = new HashSet<ServicePrice>();
         }
     
         public int ServiceID { get; set; }
         public int OptionID { get; set; }
     
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<BookingLine> BookingLines { get; set; }
         public virtual Service Service { get; set; }
         public virtual ServiceOption ServiceOption { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

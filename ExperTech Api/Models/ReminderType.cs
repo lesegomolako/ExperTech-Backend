@@ -12,13 +12,18 @@ namespace ExperTech_Api.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class EmployeeServiceType
+    public partial class ReminderType
     {
-        public int EmpTypeID { get; set; }
-        public int EmployeeID { get; set; }
-        public int TypeID { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public ReminderType()
+        {
+            this.Reminders = new HashSet<Reminder>();
+        }
     
-        public virtual Employee Employee { get; set; }
-        public virtual ServiceType ServiceType { get; set; }
+        public int TypeID { get; set; }
+        public string Type { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Reminder> Reminders { get; set; }
     }
 }
