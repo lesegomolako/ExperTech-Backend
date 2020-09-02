@@ -17,6 +17,7 @@ namespace ExperTech_Api.Controllers
     public class ClientController : ApiController
     {
         ExperTechEntities1 db = new ExperTechEntities1();
+
         [System.Web.Mvc.HttpPost]
         [System.Web.Http.Route("api/Clients/registerUser")]
         public object registerUser([FromBody] User client)
@@ -24,10 +25,12 @@ namespace ExperTech_Api.Controllers
 
             try
             {
+                dynamic toReturn = new ExpandoObject();
                 //var jg = client;
                 User Verify = db.Users.Where(zz => zz.Username == client.Username).FirstOrDefault();
                 if (Verify == null)
                 {
+
                     db.Configuration.ProxyCreationEnabled = false;
                     //var hash = GenerateHash(ApplySomeSalt(client.Password));
                     User clu = new User();
@@ -67,7 +70,9 @@ namespace ExperTech_Api.Controllers
 
 
                     }
-                    return "success";
+                    toReturn.Message = "success";
+                    toReturn.SessionID = clu.SessionID;
+                    return toReturn;
                 }
                 else
                 {
@@ -112,12 +117,12 @@ namespace ExperTech_Api.Controllers
 
         [System.Web.Http.Route("api/Client/getALLClientsWithUser")]
         [System.Web.Mvc.HttpGet]
-        public List<dynamic> getALLClientsWithUser(dynamic sess)
+        public List<dynamic> getALLClientsWithUser()
         {
 
-            string sessionId = sess.token;
-            var user = db.Users.Where(zz => zz.SessionID == sessionId).FirstOrDefault();
             db.Configuration.ProxyCreationEnabled = false;
+
+
             List<Client> CLIENT = db.Clients.Include(zz => zz.User).ToList();
             return getALLClientsWithUser(CLIENT);
 
@@ -207,42 +212,7 @@ namespace ExperTech_Api.Controllers
             return Ok(clienT);
         }
 
-        [System.Web.Mvc.HttpPut]
-        [System.Web.Http.Route("api/User/ForgotPassword")]
-        public IHttpActionResult PutUserMaster(User useR)
-        {
-            db.Configuration.ProxyCreationEnabled = false;
-            var hash = GenerateHash(ApplySomeSalt(useR.Password));
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
 
-            try
-            {
-                User objuse = db.Users.Find(useR.UserID);
-
-
-                if (objuse != null)
-                {
-                    objuse.Password = hash;
-                    Guid g = Guid.NewGuid();
-
-
-
-                }
-
-
-                int i = this.db.SaveChanges();
-
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            return Ok(useR);
-
-        }
 
         //View service package 
         [System.Web.Http.Route("api/Client/getClientPackage")]
@@ -251,8 +221,16 @@ namespace ExperTech_Api.Controllers
         {
 
             db.Configuration.ProxyCreationEnabled = false;
+
+
             List<ClientPackage> CLINETPAKCAGE = db.ClientPackages.Include(zz => zz.ServicePackage).Include(ii => ii.PackageInstances).ToList();
+
+
             return getClientPackagewithWervicePackage(CLINETPAKCAGE);
+
+
+
+
 
         }
         private List<dynamic> getClientPackagewithWervicePackage(List<ClientPackage> forPAckage)
@@ -278,9 +256,10 @@ namespace ExperTech_Api.Controllers
 
 
             dynamic dynamicServicePackage = new ExpandoObject();
-            dynamicServicePackage.Name = service.Name;
+            dynamicServicePackage.Name = service.Service.Name;
             dynamicServicePackage.PackageID = service.PackageID;
             dynamicServicePackage.Quantity = service.Quantity;
+
             return dynamicServicePackage;
         }
         private dynamic getInstancePackage(ClientPackage service)
@@ -376,6 +355,7 @@ namespace ExperTech_Api.Controllers
         public void addtBasketline(int BasketID, [FromBody]BasketLine forProduct)
         {
 
+
             BasketLine findBasket = db.BasketLines.Where(zz => zz.BasketID == forProduct.BasketID && zz.ProductID == forProduct.ProductID).FirstOrDefault();
             Debug.Write("Adding Product", forProduct.Quantity.ToString());
             if (findBasket == null)
@@ -394,11 +374,13 @@ namespace ExperTech_Api.Controllers
                     db.BasketLines.Remove(findBasket);
                 }
                 else
-                    findBasket.Quantity = forProduct.Quantity;
+                    findBasket.Quantity += forProduct.Quantity;
 
 
                 db.SaveChanges();
             }
+
+
 
 
 
@@ -407,11 +389,15 @@ namespace ExperTech_Api.Controllers
         [System.Web.Http.Route("api/Client/Updatebasketline")]
         public IHttpActionResult PutbasketlineMaster(BasketLine line)
         {
+
             db.Configuration.ProxyCreationEnabled = false;
+
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+
 
             try
             {
@@ -440,8 +426,11 @@ namespace ExperTech_Api.Controllers
         {
 
             db.Configuration.ProxyCreationEnabled = false;
+
             List<BasketLine> linebasket = db.BasketLines.Include(zz => zz.Product).Include(dd => dd.Basket).ToList();
             return getBasketlinewithProduct(linebasket);
+
+
 
         }
         private List<dynamic> getBasketlinewithProduct(List<BasketLine> forProduct)
@@ -527,9 +516,10 @@ namespace ExperTech_Api.Controllers
 
         [System.Web.Mvc.HttpDelete]
         [System.Web.Http.Route("api/Client/DeleteClientBasket")]
-        public IHttpActionResult DeleteClientBasket(int BasketID, int ProductID)
+        public dynamic DeleteClientBasket(int BasketID, int ProductID)
         {
             db.Configuration.ProxyCreationEnabled = false;
+
 
             BasketLine basket = db.BasketLines.Where(zz => zz.ProductID == ProductID && zz.BasketID == BasketID).FirstOrDefault();
             if (basket == null)
@@ -539,9 +529,12 @@ namespace ExperTech_Api.Controllers
 
             db.BasketLines.Remove(basket);
             db.SaveChanges();
-
-            return Ok(basket);
+            return "sucess";
         }
+
+
+
+
 
 
         [System.Web.Mvc.HttpDelete]
@@ -567,29 +560,27 @@ namespace ExperTech_Api.Controllers
                 }
 
             }
-
-
             return Ok(id);
         }
 
-        //the one the client does
-        [System.Web.Mvc.HttpPut]
-        [System.Web.Http.Route("api/Client/AcceptClientBooking")]
-        public IHttpActionResult AcceptClientBooking(int bookingID)
+        [System.Web.Mvc.HttpDelete]
+        [System.Web.Http.Route("api/Clients/cenceleClientBooking")]
+        public IHttpActionResult cenceleClientBooking(int id)
         {
 
             db.Configuration.ProxyCreationEnabled = false;
-            Booking bookings = db.Bookings.Where(zz => zz.BookingID == bookingID).FirstOrDefault();
-            db.Configuration.ProxyCreationEnabled = false;
+            Booking bookings = db.Bookings.Where(zz => zz.BookingID == id).FirstOrDefault();
 
-            //bookings.BookingID = bookingID;
-            //bookings.ClientID = bookingID;
-            bookings.StatusID = 4;
+            bookings.StatusID = 5;
             db.SaveChanges();
+
             foreach (EmployeeSchedule emschedule in bookings.EmployeeSchedules)
             {
                 EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.EmployeeID == emschedule.EmployeeID
                 && zz.DateID == emschedule.DateID && zz.TimeID == emschedule.TimeID).FirstOrDefault();
+                DateTime getDate = db.Dates.Where(zz => zz.DateID == bookinglist.DateID).Select(zz => zz.Date1).FirstOrDefault();
+                TimeSpan getTime = db.Timeslots.Where(zz => zz.TimeID == bookinglist.TimeID).Select(zz => zz.StartTime).FirstOrDefault();
+                //if(getDate.AddDays(1) )
                 if (bookinglist != null)
                 {
                     bookinglist.StatusID = 1;
@@ -598,8 +589,36 @@ namespace ExperTech_Api.Controllers
                 }
 
             }
+            return Ok(id);
+        }
 
-            return Ok(bookings);
+
+
+
+
+        //the one the client does
+        [System.Web.Mvc.HttpPut]
+        [System.Web.Http.Route("api/Client/AcceptClientBooking")]
+        public dynamic AcceptClientBooking(int bookingID)
+        {
+
+
+
+
+            Booking bookings = db.Bookings.Where(zz => zz.BookingID == bookingID).FirstOrDefault();
+
+            bookings.StatusID = 4;
+
+
+            EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.BookingID == bookingID).FirstOrDefault();
+            if (bookinglist != null)
+            {
+                bookinglist.StatusID = 3;
+                bookinglist.BookingID = bookingID;
+                db.SaveChanges();
+
+            }
+            return "success";
         }
 
 
