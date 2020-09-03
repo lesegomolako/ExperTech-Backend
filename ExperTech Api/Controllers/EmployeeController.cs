@@ -201,6 +201,71 @@ namespace ExperTech_Api.Controllers
 
         }
 
+        //***********************************************final availability******************************************************
+        [Route("api/Employee/EmployeeAvailability")]
+        [HttpPost]
+        public dynamic EmployeeAvailability(dynamic Stuff)
+        {
+            //var httpRequest = HttpContext.Current.Request;
+
+            try
+            {
+                DateTime StartDate = Convert.ToDateTime(Stuff.StartDate);
+                DateTime EndDate = Convert.ToDateTime(Stuff.EndDate);
+
+                int Avail = Convert.ToInt32(Stuff.Availabilness);
+
+                TimeSpan StartTime = Convert.ToDateTime(Stuff.StartTime);
+                TimeSpan EndTime = Convert.ToDateTime(Stuff.EndTime);
+
+                int StartDateID = db.Dates.Where(zz => zz.Date1 == StartDate).Select(zz => zz.DateID).FirstOrDefault();
+                int EndDateID = db.Dates.Where(zz => zz.Date1 == EndDate).Select(zz => zz.DateID).FirstOrDefault();
+
+                int StartTimeID = db.Timeslots.Where(zz => zz.StartTime == StartTime).Select(zz => zz.TimeID).FirstOrDefault();
+                int EndTimeID = db.Timeslots.Where(zz => zz.EndTime == EndTime).Select(zz => zz.TimeID).FirstOrDefault();
+
+                for (int j = StartDateID; j < EndDateID; j++)
+                {
+                    List<EmployeeSchedule> findSchedule = db.EmployeeSchedules.Where(zz => zz.DateID == j).ToList();
+                    for (int k = StartTimeID; k < EndTimeID; k++)
+                    {
+                        if (Avail == 1)
+                        {
+                            if (findSchedule[k].TimeID == k)
+                            {
+                                findSchedule[k].StatusID = 1;
+                                db.SaveChanges();
+                            }
+                            else
+                            {
+                                findSchedule[k].StatusID = 2;
+                                db.SaveChanges();
+                            }
+                        }
+                        else
+                        {
+                            if (findSchedule[k].TimeID == k)
+                            {
+                                findSchedule[k].StatusID = 2;
+                                db.SaveChanges();
+                            }
+                            else
+                            {
+                                findSchedule[k].StatusID = 1;
+                                db.SaveChanges();
+                            }
+                        }
+                    }
+                }
+
+                return Ok("success");
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         //*********************************employee availability****************************
         [Route("api/Employee/getTime")]
         [HttpGet]
