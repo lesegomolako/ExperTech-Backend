@@ -6,11 +6,14 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Net.Mail;
+using System.Data.Entity;
 
-namespace ExperTech_Api.Controllers
+namespace SteveAPI.Controllers
 {
     public class SaleController : ApiController
     {
+
         private ExperTechEntities db = new ExperTechEntities();
 
         [Route("api/Sale/GetSaleList")]
@@ -19,7 +22,7 @@ namespace ExperTech_Api.Controllers
         public List<dynamic> GetSaleList()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            return SaleList(db.Sales.ToList());
+            return SaleList(db.Sales.Include(zz => zz.SaleLines).ToList());
 
 
         }
@@ -43,13 +46,26 @@ namespace ExperTech_Api.Controllers
                     dynobject.Reminder = daysLeft.Days;
                 }
 
-
+                List<dynamic> saleThings = new List<dynamic>();
+                foreach (SaleLine items in loop.SaleLines)
+                {
+                    dynamic newObject = new ExpandoObject();
+                    newObject.ProductID = items.ProductID;
+                    Product findProds = db.Products.Where(zz => zz.ProductID == items.ProductID).FirstOrDefault();
+                    newObject.ProductName = findProds.Name;
+                    newObject.Price = findProds.Price;
+                    newObject.Quantity = items.Quantity;
+                    saleThings.Add(newObject);
+                }
+                dynobject.Products = saleThings;
                 newlist.Add(dynobject);
 
 
             }
             return newlist;
         }
+
+
 
         [Route("api/Sale/AddMakeSale")]
         [HttpPost]
@@ -95,6 +111,35 @@ namespace ExperTech_Api.Controllers
 
         //10.7 Regenerate Supplier Order   
 
+        public static void Email(int AdminID, string Email)
+        {
+            try
+            {
+                MailMessage message = new MailMessage();
+                SmtpClient smtp = new SmtpClient();
+                message.From = new MailAddress("hairexhilaration@gmail.com");
+                message.To.Add(new MailAddress(Email));
+                message.Subject = "Exhilartion Hair & Beauty Registration";
+                message.IsBodyHtml = false;
+                message.Body = "Click the link below to setup account:" + "/n" + "hhtp://localhost:4200/" + AdminID.ToString();
+                smtp.Port = 587;
+                smtp.Host = "smtp.gmail.com";
+                smtp.EnableSsl = true;
+                smtp.EnableSsl = true;
+                smtp.UseDefaultCredentials = false;
+                smtp.Credentials = new NetworkCredential("hairexhilaration@gmail.com", "@Exhileration1");
+                smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+                smtp.Send(message);
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
     }
+    //8.6 Regenerate Sale Invoice 
+
+
 
 }
