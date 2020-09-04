@@ -18,7 +18,6 @@ namespace ExperTech_Api.Controllers
     {
         ExperTechEntities1 db = new ExperTechEntities1();
 
-
         [System.Web.Http.Route("api/Booking/getALLemployees")]
         [System.Web.Mvc.HttpGet]
         public List<dynamic> getALLemployees()
@@ -453,20 +452,12 @@ namespace ExperTech_Api.Controllers
             db.Configuration.ProxyCreationEnabled = false;
 
             Booking bookings = db.Bookings.Where(zz => zz.BookingID == BookingID).FirstOrDefault();
-            bookings.StatusID = 2;
+            bookings.StatusID = 4;
 
             db.SaveChanges();
 
             return Ok(bookings);
         }
-
-
-        ////advise on booking 
-        //[System.Web.Mvc.HttpPut]
-        //[System.Web.Http.Route("api/Booking/AdviseOnBooking")]
-        //public dynamic AdviseOnBooking()
-        //{
-        //}
 
 
         //Request Booking
@@ -539,6 +530,31 @@ namespace ExperTech_Api.Controllers
                 return err.Message;
             }
         }
+
+
+        //[System.Web.Http.Route("api/Booking/getReminder")]
+        //[System.Web.Mvc.HttpGet]
+        //public dynamic getReminder(int id)
+        //{
+
+        //    db.Configuration.ProxyCreationEnabled = false;
+        //    return db.Reminders.Where(zz => zz.ReminderID == id).Where(ii=> ii.TypeID ==  2).FirstOrDefault();
+
+        //}
+        //private List<dynamic> getReminderReturnList(List<Reminder> ForReminder)
+        //{
+        //    List<dynamic> dymanicReminders = new List<dynamic>();
+        //    foreach (Reminder reminder in ForReminder)
+        //    {
+        //        dynamic dynamicReminder = new ExpandoObject();
+        //        dynamicReminder.ReminderID = reminder.ReminderID;
+        //        dynamicReminder.ReminderType = reminder.ReminderType;
+        //        dynamicReminder.Text = reminder.Text;
+
+        //        dymanicReminders.Add(dynamicReminder);
+        //    }
+        //    return dymanicReminders;
+        //}
 
     }
 }

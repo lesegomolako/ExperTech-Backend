@@ -243,8 +243,9 @@ namespace ExperTech_Api.Controllers
                 obForPackage.PackageID = CLINETPAKCAGE.PackageID;
                 obForPackage.Date = CLINETPAKCAGE.Date;
                 obForPackage.ExpiryDate = CLINETPAKCAGE.ExpiryDate;
+                obForPackage.TotalAvailable = db.PackageInstances.Where(zz => zz.PackageID == CLINETPAKCAGE.PackageID && zz.StatusID == 1).Count();
                 obForPackage.ServicePackage = getServicePackage(CLINETPAKCAGE.ServicePackage);
-                obForPackage.getInstancePackage = getInstancePackage(CLINETPAKCAGE);
+                obForPackage.InstancePackage = getInstancePackage(CLINETPAKCAGE);
 
 
                 dymanicPackages.Add(obForPackage);
@@ -256,7 +257,7 @@ namespace ExperTech_Api.Controllers
 
 
             dynamic dynamicServicePackage = new ExpandoObject();
-            dynamicServicePackage.Name = service.Service.Name;
+            dynamicServicePackage.Name = db.Services.Where(zz => zz.ServiceID == service.ServiceID).Select(zz => zz.Name).FirstOrDefault();
             dynamicServicePackage.PackageID = service.PackageID;
             dynamicServicePackage.Quantity = service.Quantity;
 
@@ -265,7 +266,7 @@ namespace ExperTech_Api.Controllers
         private dynamic getInstancePackage(ClientPackage service)
         {
             List<dynamic> dymanicinstances = new List<dynamic>();
-            int Total = 0;
+            //int Total = 0;
             foreach (PackageInstance pack in service.PackageInstances)
             {
                 dynamic dynamicInstancePackage = new ExpandoObject();
@@ -275,9 +276,10 @@ namespace ExperTech_Api.Controllers
                 dynamicInstancePackage.StatusID = pack.StatusID;
                 InstanceStatu stat = db.InstanceStatus.Where(zz => zz.StatusID == pack.StatusID).FirstOrDefault();
                 dynamicInstancePackage.Status = stat.Status;
-                if (stat.Status == "Active")
-                    Total++;
-                dynamicInstancePackage.TotalAvailable = Total;
+                //if (stat.Status == "Active")
+                //    Total++;
+
+                //dynamicInstancePackage.TotalAvailable = Total;
 
                 dymanicinstances.Add(dynamicInstancePackage);
 
@@ -387,7 +389,7 @@ namespace ExperTech_Api.Controllers
         }
         [System.Web.Mvc.HttpPut]
         [System.Web.Http.Route("api/Client/Updatebasketline")]
-        public IHttpActionResult PutbasketlineMaster(BasketLine line)
+        public IHttpActionResult Updatebasketline(BasketLine line)
         {
 
             db.Configuration.ProxyCreationEnabled = false;
@@ -401,7 +403,7 @@ namespace ExperTech_Api.Controllers
 
             try
             {
-                BasketLine objEmp = db.BasketLines.Find(line.BasketID);
+                BasketLine objEmp = db.BasketLines.Where(zz => zz.BasketID == line.BasketID && zz.ProductID == line.ProductID).FirstOrDefault();
 
                 if (objEmp != null)
                 {
@@ -564,8 +566,8 @@ namespace ExperTech_Api.Controllers
         }
 
         [System.Web.Mvc.HttpDelete]
-        [System.Web.Http.Route("api/Clients/cenceleClientBooking")]
-        public IHttpActionResult cenceleClientBooking(int id)
+        [System.Web.Http.Route("api/Clients/CancelClientBooking")]
+        public IHttpActionResult CancelClientBooking(int id)
         {
 
             db.Configuration.ProxyCreationEnabled = false;
@@ -578,9 +580,6 @@ namespace ExperTech_Api.Controllers
             {
                 EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.EmployeeID == emschedule.EmployeeID
                 && zz.DateID == emschedule.DateID && zz.TimeID == emschedule.TimeID).FirstOrDefault();
-                DateTime getDate = db.Dates.Where(zz => zz.DateID == bookinglist.DateID).Select(zz => zz.Date1).FirstOrDefault();
-                TimeSpan getTime = db.Timeslots.Where(zz => zz.TimeID == bookinglist.TimeID).Select(zz => zz.StartTime).FirstOrDefault();
-                //if(getDate.AddDays(1) )
                 if (bookinglist != null)
                 {
                     bookinglist.StatusID = 1;
@@ -597,29 +596,72 @@ namespace ExperTech_Api.Controllers
 
 
         //the one the client does
-        [System.Web.Mvc.HttpPut]
-        [System.Web.Http.Route("api/Client/AcceptClientBooking")]
-        public dynamic AcceptClientBooking(int bookingID)
+        [HttpPost]
+        [Route("api/Clients/AcceptClientsBooking")]
+        public dynamic AcceptClientsBooking(int bookingID)
         {
-
-
-
-
-            Booking bookings = db.Bookings.Where(zz => zz.BookingID == bookingID).FirstOrDefault();
-
-            bookings.StatusID = 4;
-
-
-            EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.BookingID == bookingID).FirstOrDefault();
-            if (bookinglist != null)
+            try
             {
-                bookinglist.StatusID = 3;
-                bookinglist.BookingID = bookingID;
+                Booking bookings = db.Bookings.Where(zz => zz.BookingID == bookingID).FirstOrDefault();
+
+                bookings.StatusID = 4;
                 db.SaveChanges();
 
+                EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.BookingID == bookingID).FirstOrDefault();
+                if (bookinglist != null)
+                {
+                    bookinglist.StatusID = 3;
+                    bookinglist.BookingID = bookingID;
+                    db.SaveChanges();
+
+                }
+                return "success";
             }
-            return "success";
+            catch (Exception err)
+            {
+                return err.Message;
+            }
         }
+
+        ////[System.Web.Mvc.HttpDelete]
+        //[System.Web.Http.Route("api/Clients/AccpetClientBooking")]
+        //public IHttpActionResult AccpetClientBooking(int id)
+        //{
+
+        //    db.Configuration.ProxyCreationEnabled = false;
+        //    Booking bookings = db.Bookings.Where(zz => zz.BookingID == id).FirstOrDefault();
+
+        //    bookings.StatusID = 4;
+        //    db.SaveChanges();
+
+        //    foreach (EmployeeSchedule emschedule in bookings.EmployeeSchedules)
+        //    {
+        //        EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.EmployeeID == emschedule.EmployeeID
+        //        && zz.DateID == emschedule.DateID && zz.TimeID == emschedule.TimeID).FirstOrDefault();
+        //        if (bookinglist != null)
+        //        {
+        //            bookinglist.StatusID = 1;
+        //            bookinglist.BookingID = null;
+        //            db.SaveChanges();
+        //        }
+
+        //    }
+        //    return Ok(id);
+        //}
+
+        //[Route("api/Clients/RetrieveBookings")]
+        //[HttpGet]
+        //public dynamic RetrieveBookings()
+        //{
+        //    db.Configuration.ProxyCreationEnabled = false;
+        //    List<Booking> findBookings = db.Bookings.Include(zz => zz.BookingLines).Include(zz => zz.EmployeeSchedules).Include(zz => zz.DateRequesteds).ToList();
+        //    return formatBookings(findBookings);
+        //}
+
+        //private dynamic formatBookings(List<Booking> Modell)
+        //{
+
+        //}
 
 
 
