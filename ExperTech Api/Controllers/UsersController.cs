@@ -207,7 +207,101 @@ namespace ExperTech_Api.Controllers
             }
             return Ok(usr);
         }
-        //****************************************************************************Payments
+        //****************************user details******************************
+        [Route("api/User/getUser")]
+        [HttpGet]
+        public List<dynamic> getUser([FromBody] User forUser)
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            return getUserID(db.Users.ToList());
+            // return getAdminID(db.Admins.ToList());
+        }
+        private List<dynamic> getUserID(List<User> forUser)
+        {
+            List<dynamic> dynamicUsers = new List<dynamic>();
+            foreach (User username in forUser)
+            {
+                dynamic dynamicUser = new ExpandoObject();
+                dynamicUser.UserID = username.UserID;
+                dynamicUser.Username = username.Username;
+                dynamicUser.Password = username.Password;
+                dynamicUsers.Add(dynamicUser);
+            }
+            return dynamicUsers;
+        }
+        [Route("api/User/userSetup")]
+        [HttpPut]
+        public IHttpActionResult userSetup([FromBody] User forsetup)
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                User usr = db.Users.Find(forsetup.UserID);
+                if (usr != null)
+                {
+                    usr.Username = forsetup.Username;
+                    usr.Password = forsetup.Password;
+                    db.SaveChanges();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return Ok(forsetup);
+
+        }
+        //*********************************************************make sale payment*******************************************************
+        [Route("api/User/salePayment")]
+        [HttpPut]
+        public object salePayment([FromBody]Sale sayle)
+        {
+            try
+            {
+
+                Sale findSale = db.Sales.Where(zz => zz.SaleID == sayle.SaleID).FirstOrDefault();
+                findSale.StatusID = 1;
+                findSale.Payment = sayle.Payment;
+                findSale.PaymentTypeID = sayle.PaymentTypeID;
+                findSale.Description = sayle.Description;
+                db.SaveChanges();
+                return findSale;
+
+            }
+            catch
+            {
+                return "error";
+            }
+        }
+        //**********************************************************make booking paynent***************************************************
+        [Route("api/User/bookingPayment")]
+        [HttpPut]
+        public object bookingPayment([FromBody] Booking bkings)
+        {
+            try
+            {
+                Booking findBookings = db.Bookings.Where(zz => zz.BookingID == bkings.BookingID).FirstOrDefault();
+                findBookings.BookingID = 4;
+
+                Sale sayle = new Sale();
+                //booking, client array, sale
+
+                //Client client = new Client();
+                //client.Client = bkings.Client;
+                //client.ClientID.ToString() = bkings.ClientID;
+                db.SaveChanges();
+
+                return findBookings;
+            }
+            catch
+            {
+                return "error";
+            }
+        }
         //****************************************************************************make sale payment
         [Route("api/User/salePayment")]
         [HttpPut]

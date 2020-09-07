@@ -200,7 +200,6 @@ namespace ExperTech_Api.Controllers
             return Ok(forEST);
 
         }
-
         //***********************************************final availability******************************************************
         [Route("api/Employee/EmployeeAvailability")]
         [HttpPost]
@@ -265,7 +264,6 @@ namespace ExperTech_Api.Controllers
                 throw;
             }
         }
-
         //*********************************employee availability****************************
         [Route("api/Employee/getTime")]
         [HttpGet]
