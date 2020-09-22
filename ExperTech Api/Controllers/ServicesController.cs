@@ -7,11 +7,16 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web;
 using System.Web.Http.Description;
 using ExperTech_Api.Models;
 using System.Dynamic;
 using Microsoft.Ajax.Utilities;
 using System.Runtime.Serialization;
+using System.IO;
+using System.Drawing;
+using System.Drawing.Imaging;
+using Newtonsoft.Json;
 
 namespace ExperTech_Api.Controllers
 {
@@ -96,6 +101,12 @@ namespace ExperTech_Api.Controllers
             try
             {
                 db.Configuration.ProxyCreationEnabled = false;
+                List<Service> findService = db.Services.Where(zz => zz.TypeID == TypeID).ToList();
+                foreach(Service items in findService)
+                {
+                    items.TypeID = null;
+                    db.SaveChanges();
+                }
                 ServiceType find = db.ServiceTypes.Where(zz => zz.TypeID == TypeID).FirstOrDefault();
                 db.ServiceTypes.Remove(find);
                 db.SaveChanges();
@@ -134,23 +145,12 @@ namespace ExperTech_Api.Controllers
             }
         }
 
-        private Service FormatServices(dynamic Modell)
-        {
-            Service newService = new Service();
-            newService.TypeID = (int)Modell.TypeID;
-            newService.Name = Modell.Name;
-            newService.Description = Modell.Description;
-            newService.Duration = Modell.Duration;
-
-            //newService.TypeID = Modell
-            return newService;
-        }
-
+       
         private dynamic SaveService(Service Modell)
         {
+            dynamic toReturn = new ExpandoObject();
             try
             {
-
                 db.Configuration.ProxyCreationEnabled = false;
                 //first Save the service information
                 Service myObject = new Service();
@@ -164,60 +164,52 @@ namespace ExperTech_Api.Controllers
                 //retrieve the service ID from the info that were just saved
                 int ServiceID = db.Services.Where(zz => zz.Name == Modell.Name).Select(zz => zz.ServiceID).FirstOrDefault();
 
-                foreach (ServicePrice Items in Modell.ServicePrices)
+                if (Modell.ServicePrices != null)
                 {
-                    //Save the Service price object
-                    ServicePrice PriceObject = new ServicePrice();
-                    PriceObject.ServiceID = ServiceID;
-                    //PriceObject.OptionID = Items.OptionID;
-                    PriceObject.Price = Items.Price;
-                    PriceObject.Date = DateTime.Now;
-                    db.ServicePrices.Add(PriceObject);
-
-                    db.SaveChanges();
-                }
-
-                foreach (ServiceTypeOption Items in Modell.ServiceTypeOptions)
-                {
-                    //saves the OptionID and ServiceID into bride entity
-                    ServiceTypeOption newObject = new ServiceTypeOption();
-                    newObject.ServiceID = ServiceID;
-                    int OptionID = (int)Items.OptionID;
-                    newObject.OptionID = OptionID;
-                    db.ServiceTypeOptions.Add(newObject);
-                    db.SaveChanges();
-
-                    foreach (ServicePrice PriceItem in Items.ServicePrices)
+                    foreach (ServicePrice Items in Modell.ServicePrices)
                     {
+                        //Save the Service price object
                         ServicePrice PriceObject = new ServicePrice();
                         PriceObject.ServiceID = ServiceID;
-                        PriceObject.OptionID = PriceItem.OptionID;
-                        PriceObject.Price = PriceItem.Price;
+                        //PriceObject.OptionID = Items.OptionID;
+                        PriceObject.Price = Items.Price;
                         PriceObject.Date = DateTime.Now;
                         db.ServicePrices.Add(PriceObject);
 
                         db.SaveChanges();
                     }
-
                 }
 
-                //check if service object has photos
-                if (Modell.ServicePhotoes != null)
+                if (Modell.ServiceTypeOptions != null)
                 {
-                    foreach (ServicePhoto Items in Modell.ServicePhotoes)
+                    foreach (ServiceTypeOption Items in Modell.ServiceTypeOptions)
                     {
-                        //then save the photos
-                        ServicePhoto AddPhoto = new ServicePhoto();
-                        AddPhoto.Photo = Items.Photo;
-                        AddPhoto.ServiceID = ServiceID;
-                        db.ServicePhotoes.Add(AddPhoto);
+                        //saves the OptionID and ServiceID into bride entity
+                        ServiceTypeOption newObject = new ServiceTypeOption();
+                        newObject.ServiceID = ServiceID;
+                        int OptionID = (int)Items.OptionID;
+                        newObject.OptionID = OptionID;
+                        db.ServiceTypeOptions.Add(newObject);
                         db.SaveChanges();
+
+                        foreach (ServicePrice PriceItem in Items.ServicePrices)
+                        {
+                            ServicePrice PriceObject = new ServicePrice();
+                            PriceObject.ServiceID = ServiceID;
+                            PriceObject.OptionID = OptionID;
+                            PriceObject.Price = PriceItem.Price;
+                            PriceObject.Date = DateTime.Now;
+                            db.ServicePrices.Add(PriceObject);
+
+                            db.SaveChanges();
+                        }
+
                     }
-
-
                 }
-
-                return "success";
+              
+                toReturn.Message = "success";
+                toReturn.ServiceID = ServiceID;
+                return toReturn;
             }
             catch (Exception err)
             {
@@ -233,29 +225,7 @@ namespace ExperTech_Api.Controllers
             try
             {
                 Service find = db.Services.Where(zz => zz.ServiceID == ServiceID).FirstOrDefault();
-                List<ServicePrice> findPrices = db.ServicePrices.Where(zz => zz.ServiceID == ServiceID).ToList();
-                List<ServicePhoto> findPhotos = db.ServicePhotoes.Where(zz => zz.ServiceID == ServiceID).ToList();
-                List<ServiceTypeOption> findTypeOption = db.ServiceTypeOptions.Where(zz => zz.ServiceID == ServiceID).ToList();
-
-                if (findPrices != null)
-                {
-                    db.ServicePrices.RemoveRange(findPrices);
-                    db.SaveChanges();
-                }
-
-                if (findPhotos != null)
-                {
-                    db.ServicePhotoes.RemoveRange(findPhotos);
-                    db.SaveChanges();
-                }
-
-                if (findTypeOption != null)
-                {
-                    db.ServiceTypeOptions.RemoveRange(findTypeOption);
-                    db.SaveChanges();
-                }
-
-                db.Services.Remove(find);
+                find.Deleted = true;
                 db.SaveChanges();
                 return "success";
             }
@@ -272,7 +242,7 @@ namespace ExperTech_Api.Controllers
         {
             db.Configuration.ProxyCreationEnabled = false;
             List<Service> myList = db.Services.Include(zz => zz.ServicePrices).Include(zz => zz.ServiceType)
-                                    .Include(zz => zz.ServicePhotoes).Include(zz => zz.ServiceTypeOptions).ToList();
+                                    .Include(zz => zz.ServicePhotoes).Include(zz => zz.ServiceTypeOptions).Where(zz => zz.Deleted == false).ToList();
             return getServices(myList);
         }
 
@@ -357,6 +327,7 @@ namespace ExperTech_Api.Controllers
                 findService.TypeID = Modell.TypeID;
                 db.SaveChanges();
 
+                //it hits here
                 foreach (ServicePrice Items in Modell.ServicePrices)
                 {
                     ServicePrice findPrice = db.ServicePrices.Where(zz => zz.PriceID == Items.PriceID && zz.Price == Items.Price).FirstOrDefault();
@@ -405,7 +376,7 @@ namespace ExperTech_Api.Controllers
         public List<ServiceOption> GetServiceOption()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            List<ServiceOption> mylist = db.ServiceOptions.ToList();
+            List<ServiceOption> mylist = db.ServiceOptions.Where(zz=> zz.Deleted == false).ToList();
             return mylist;
         }
 
@@ -432,11 +403,11 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Services/DeleteServiceOption")]
         [HttpDelete]
-        public dynamic DeleteServiceOption(ServiceOption Modell)
+        public dynamic DeleteServiceOption(int OptionID)
         {
             db.Configuration.ProxyCreationEnabled = false;
-            ServiceOption findOption = db.ServiceOptions.Where(zz => zz.OptionID == Modell.OptionID).FirstOrDefault();
-            db.ServiceOptions.Remove(findOption);
+            ServiceOption findOption = db.ServiceOptions.Find(OptionID);
+            findOption.Deleted = true;
             db.SaveChanges();
             return "success";
         }
@@ -448,7 +419,7 @@ namespace ExperTech_Api.Controllers
         {
             try
             {
-                ServicePackage findPackage = db.ServicePackages.Where(zz => zz.Name == Modell.Name).FirstOrDefault();
+                ServicePackage findPackage = db.ServicePackages.Where(zz => zz.ServiceID == Modell.ServiceID && zz.Quantity == Modell.Quantity).FirstOrDefault();
 
                 if (findPackage == null)
                 {
@@ -473,7 +444,7 @@ namespace ExperTech_Api.Controllers
         public dynamic RetrieveServicePackage()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            List<ServicePackage> mylist = db.ServicePackages.Include(zz => zz.Service).ToList();
+            List<ServicePackage> mylist = db.ServicePackages.Include(zz => zz.Service).Where(zz => zz.Deleted == false).ToList();
             return getPackage(mylist);
         }
 
@@ -483,10 +454,12 @@ namespace ExperTech_Api.Controllers
             foreach (ServicePackage items in Modell)
             {
                 dynamic myObject = new ExpandoObject();
-                myObject.Service = items.Service.Name;
-                myObject.Description = items.Name;
+                myObject.PackageID = items.PackageID;
+                myObject.Name = items.Service.Name;
+                myObject.Description = items.Description;
                 myObject.Price = items.Price;
                 myObject.Quantity = items.Quantity;
+                myObject.Duration = items.Duration;
 
                 thisList.Add(myObject);
             }
@@ -502,7 +475,8 @@ namespace ExperTech_Api.Controllers
             {
                 db.Configuration.ProxyCreationEnabled = false;
                 ServicePackage findPackage = db.ServicePackages.Where(zz => zz.PackageID == PackageID).FirstOrDefault();
-                db.ServicePackages.Remove(findPackage);
+                findPackage.Deleted = true;
+                db.SaveChanges();
                 return "success";
             }
             catch (Exception err)
@@ -553,66 +527,54 @@ namespace ExperTech_Api.Controllers
             return getList;
         }
 
-        [Route("api/Services/getBookings")]
-        [HttpGet]
-        public dynamic getBookings()
+        
+        //****************************************************testing*******************************************************
+        [Route("api/Services/AddServicePhoto")]
+        [HttpPost]
+        public HttpResponseMessage AddServicePhoto()
         {
-            db.Configuration.ProxyCreationEnabled = false;
-            List<Booking> findBooking = db.Bookings.Include(zz => zz.EmployeeSchedules).Include(zz => zz.DateRequesteds)
-                .Include(zz => zz.Client).Include(zz => zz.BookingLines).Include(zz => zz.BookingNotes).ToList();
-            return viewBooking(findBooking);
-        }
+            var httpRequest = HttpContext.Current.Request;
+            string imageName = "";
 
-        private dynamic viewBooking(List<Booking> findBooking)
-        {
-            List<dynamic> BookingList = new List<dynamic>();
-            foreach (Booking items in findBooking)
+            try
             {
-                dynamic BookingObject = new ExpandoObject();
-                BookingObject.BookingID = items.BookingID;
-                BookingObject.BookingStatusID = items.StatusID;
-                BookingObject.BookingStatus = db.BookingStatus.Where(zz => zz.StatusID == items.StatusID).Select(zz => zz.Status).FirstOrDefault(); ;
-                BookingObject.Client = items.Client.Name;
-
-                foreach (DateRequested requests in items.DateRequesteds)
-                {
-                    dynamic requestObject = new ExpandoObject();
-                    requestObject.Dates = requests.Date;
-                    requestObject.Time = requests.StartTime;
-                    BookingObject.BookingRequest = requestObject;
-                }
-
-                List<dynamic> getSchedule = new List<dynamic>();
-                foreach (EmployeeSchedule booking in items.EmployeeSchedules)
-                {
-                    dynamic scheduleObject = new ExpandoObject();  //can you change employee after confirmed booking && where does the advise get saved
-                    scheduleObject.Employee = db.Employees.Where(zz => zz.EmployeeID == booking.EmployeeID).Select(zz => zz.Name).FirstOrDefault();
-                    scheduleObject.Dates = db.Dates.Where(zz => zz.DateID == booking.DateID).Select(zz => zz.Date1).FirstOrDefault();
-                    scheduleObject.StartTime = db.Timeslots.Where(zz => zz.TimeID == booking.TimeID).Select(zz => zz.StartTime).FirstOrDefault();
-                    scheduleObject.EndTime = db.Timeslots.Where(zz => zz.TimeID == booking.TimeID).Select(zz => zz.EndTime).FirstOrDefault();
-                    scheduleObject.Status = db.ScheduleStatus.Where(zz => zz.StatusID == booking.StatusID).Select(zz => zz.Status).FirstOrDefault(); ;
-
-                    getSchedule.Add(scheduleObject);
-                }
-                if (getSchedule.Count != 0)
-                    BookingObject.BookingSchedule = getSchedule;
-
-                List<dynamic> getLines = new List<dynamic>();
-                foreach (BookingLine lineItems in items.BookingLines)
-                {
-                    dynamic lineObject = new ExpandoObject();
-                    lineObject.Service = db.Services.Where(zz => zz.ServiceID == lineItems.ServiceID).Select(zz => zz.Name).FirstOrDefault(); ;
-                    lineObject.Option = db.ServiceOptions.Where(zz => zz.OptionID == lineItems.OptionID).Select(zz => zz.Name).FirstOrDefault(); ;
-
-                    getLines.Add(lineObject);
-                }
-                BookingObject.BookingLine = getLines;
-
-
-                BookingList.Add(BookingObject);
+                var postedFile = httpRequest.Files["Image"];
+                imageName = new String(Path.GetFileNameWithoutExtension(postedFile.FileName).Take(postedFile.FileName.Length).ToArray()).Replace(" ", "-");
+                imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(postedFile.FileName);
+                var FilePath = HttpContext.Current.Server.MapPath("~/Images/" + imageName);
+                postedFile.SaveAs(FilePath);
+            }
+            catch (Exception err)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Image was not saved (" + err.Message + ")");
             }
 
-            return BookingList;
+            try
+            {
+                int ServiceID = Convert.ToInt32(httpRequest["ServiceID"]);
+                Service verify = db.Services.Where(zz => zz.ServiceID == ServiceID).FirstOrDefault();
+                if (verify != null)
+                {
+       
+                    if (imageName != null)
+                    {
+                        ServicePhoto photo = new ServicePhoto();
+                        photo.ServiceID = ServiceID;
+                        photo.Photo = imageName;
+
+                        db.ServicePhotoes.Add(photo);
+                        db.SaveChanges();
+                    }
+
+                }
+            }
+            catch
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Image details are invalid");
+            }
+
+            return Request.CreateResponse(HttpStatusCode.Created);
+
         }
 
     }

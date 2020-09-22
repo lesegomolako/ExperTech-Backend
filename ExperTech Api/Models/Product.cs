@@ -23,12 +23,13 @@ namespace ExperTech_Api.Models
         }
     
         public int ProductID { get; set; }
-        public int SupplierID { get; set; }
-        public int CategoryID { get; set; }
+        public Nullable<int> SupplierID { get; set; }
+        public Nullable<int> CategoryID { get; set; }
         public string Name { get; set; }
         public int QuantityOnHand { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
+        public bool Deleted { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<BasketLine> BasketLines { get; set; }

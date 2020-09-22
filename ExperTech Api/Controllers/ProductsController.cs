@@ -9,6 +9,10 @@ using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Dynamic;
 using Microsoft.Ajax.Utilities;
+using System.Web;
+using System.IO;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace ExperTech_Api.Controllers
 {
@@ -16,43 +20,127 @@ namespace ExperTech_Api.Controllers
     {
         ExperTechEntities db = new ExperTechEntities();
 
+
+
         [Route("api/Products/AddProduct")]
         [HttpPost]
-        public dynamic AddProduct([FromBody] Product Modell)
+        public HttpResponseMessage AddProduct()
         {
+            var httpRequest = HttpContext.Current.Request;
+            string imageName = "";
+
             try
             {
-                db.Configuration.ProxyCreationEnabled = false;
-                Product findProduct = db.Products.Where(zz => zz.Name == Modell.Name).FirstOrDefault();
-                if (findProduct == null)
-                {
-                    db.Products.Add(Modell);
-                    db.SaveChanges();
-
-                    int ProductID = db.Products.Where(zz => zz.Name == Modell.Name).Select(zz => zz.ProductID).FirstOrDefault();
-
-                    if (Modell.ProductPhotoes != null)
-                    {
-                        foreach (ProductPhoto Items in Modell.ProductPhotoes)
-                        {
-                            ProductPhoto Images = new ProductPhoto();
-                            Images.ProductID = ProductID;
-                            Images.Photo = Items.Photo;
-                        }
-                    }
-                    return "success";
-                }
-                else
-                {
-                    return "duplicate";
-                }
+                var postedFile = httpRequest.Files["Image"];
+                imageName = new String(Path.GetFileNameWithoutExtension(postedFile.FileName).Take(postedFile.FileName.Length).ToArray()).Replace(" ", "-");
+                imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(postedFile.FileName);
+                var FilePath = HttpContext.Current.Server.MapPath("~/Images/" + imageName);
+                postedFile.SaveAs(FilePath);
             }
             catch (Exception err)
             {
-                return err.Message;
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Image was not saved (" + err.Message + ")");
             }
 
+            try
+            {
+                string name = httpRequest["Name"];
+                Product verify = db.Products.Where(zz => zz.Name == name).FirstOrDefault();
+                if (verify == null)
+                {
+                    Product newProd = new Product();
+
+                    newProd.Name = httpRequest["Name"];
+                    newProd.Description = httpRequest["Description"];
+                    newProd.CategoryID = Convert.ToInt32(httpRequest["CategoryID"]);
+                    newProd.Price = Convert.ToDecimal(httpRequest["Price"]);
+                    newProd.SupplierID = Convert.ToInt32(httpRequest["SupplierID"]);
+                    newProd.QuantityOnHand = Convert.ToInt32(httpRequest["QuantityOnHand"]);
+
+                    db.Products.Add(newProd);
+                    db.SaveChanges();
+                    db.Entry(newProd).GetDatabaseValues();
+                    int ProdID = newProd.ProductID;
+
+                    ProductPhoto photo = new ProductPhoto();
+                    photo.ProductID = ProdID;
+                    photo.Photo = imageName;
+
+                    db.ProductPhotoes.Add(photo);
+                    db.SaveChanges();
+
+                    
+                }      
+            }
+            catch
+            {
+               return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Product details are invalid");
+            }
+
+            return Request.CreateResponse(HttpStatusCode.Created);
+
         }
+
+        [Route("api/Products/GetProduct")]
+        [HttpGet]
+        public IHttpActionResult GetProduct()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            return GetProductz(db.Products.Include(zz => zz.ProductPhotoes).Include(zz => zz.ProductCategory).ToList());
+        }
+
+        private IHttpActionResult GetProductz(List<Product> Modell)
+        {
+            List<dynamic> ProductList = new List<dynamic>();
+            foreach (Product items in Modell)
+            {
+                dynamic ProdObject = new ExpandoObject();
+                ProdObject.ProductID = items.ProductID;
+                ProdObject.Name = items.Name;
+                ProdObject.Description = items.Description;
+                ProdObject.Price = items.Price;
+                ProdObject.QuantityOnHand = items.QuantityOnHand;
+                ProdObject.SupplierID = items.SupplierID;
+                ProdObject.CategoryID = items.CategoryID;
+                ProdObject.Category = items.ProductCategory.Category;
+
+
+                List<dynamic> photoList = new List<dynamic>();
+                foreach (ProductPhoto photo in items.ProductPhotoes)
+                {
+                    dynamic newObject = new ExpandoObject();
+                    newObject.Photo = photo.Photo;
+                    photoList.Add(newObject);
+                    string filePath = HttpContext.Current.Server.MapPath("~/Images/" + photo.Photo);
+                    try
+                    {
+                        using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
+                        {
+                            using (var memoryStream = new MemoryStream())
+                            {
+                                fileStream.CopyTo(memoryStream);
+                                Bitmap image = new Bitmap(1, 1);
+                                image.Save(memoryStream, ImageFormat.Png);
+
+                                byte[] byteImage = memoryStream.ToArray();
+                                string base64String = Convert.ToBase64String(byteImage);
+                                ProdObject.Image = "data:image/png;base64," + base64String;
+                                
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        ProdObject.Image = "";
+                    }
+                }
+                ProdObject.Photos = photoList;
+                ProductList.Add(ProdObject);
+            }
+           // HttpResponseMessage response = Request.CreateResponse(ProductList);
+            return Ok(ProductList) ;
+        }
+
 
         [Route("api/Products/UpdateProduct")]
         [HttpPost]
@@ -73,18 +161,14 @@ namespace ExperTech_Api.Controllers
         public dynamic DeleteProduct(int ProductID)
         {
             Product findProduct = db.Products.Where(zz => zz.ProductID == ProductID).FirstOrDefault();
-
             foreach (ProductPhoto photo in findProduct.ProductPhotoes)
             {
                 db.ProductPhotoes.Remove(photo);
                 db.SaveChanges();
             }
-
             db.Products.Remove(findProduct);
             db.SaveChanges();
             return "success";
-
-
         }
 
         [Route("api/Products/GetProducts")]
@@ -151,6 +235,90 @@ namespace ExperTech_Api.Controllers
             db.Configuration.ProxyCreationEnabled = false;
             List<ProductCategory> getCategory = db.ProductCategories.ToList();
             return getCategory;
+        }
+
+        //[HttpGet]
+        //[Route("api/Products/populateDates")]
+        //public dynamic populateDates()
+        //{
+        //    db.Configuration.ProxyCreationEnabled = false;
+        //    List<dynamic> DateList = new List<dynamic>();
+        //    List<Date> DatesList = new List<Date>();
+
+        //    for (int j = 1; j < 107; j++)
+        //    {
+        //        DateTime getDate = Convert.ToDateTime("2020 - 10 - 04");
+        //        dynamic newObject = new ExpandoObject();
+        //        newObject.nDate = getDate.AddDays(j);
+        //        DateList.Add(newObject);
+
+        //        Date Modell = new Date();
+        //        Modell.Date1 = getDate.AddDays(j);
+        //        DatesList.Add(Modell);
+
+        //    }
+        //    db.Dates.AddRange(DatesList);
+        //    db.SaveChanges();
+        //    return DateList;
+        //}
+
+        //[HttpGet]
+        //[Route("api/Products/populateTimes")]
+        //public dynamic populateTimes()
+        //{
+        //    db.Configuration.ProxyCreationEnabled = false;
+
+        //    List<Date> DatesList = db.Dates.ToList();
+        //    List<Schedule> newList = new List<Schedule>();
+        //    for (int j = 1; j < DatesList.Count; j++)
+        //    {
+        //        List<Schedule> newSchedge = db.Schedules.Where(zz => zz.DateID == j).ToList();
+        //        if (newSchedge.Count == 0)
+        //        {
+        //            List<Timeslot> newTimes = db.Timeslots.ToList();
+        //            for (int k=1; k < newTimes.Count; k++)
+        //            {
+        //                Schedule newTime = new Schedule();
+        //                newTime.DateID = j;
+        //                newTime.TimeID = k;
+        //                newList.Add(newTime);
+        //            }
+        //        }
+
+        //    }
+        //    db.Schedules.AddRange(newList);
+        //    db.SaveChanges();
+        //    return newList;
+        //}
+
+        [HttpGet]
+        [Route("api/Products/populateEmployeeTimes")]
+        public dynamic populateTimes()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+
+            List<Schedule> ScheduleList = db.Schedules.ToList();
+            List<EmployeeSchedule> newList = new List<EmployeeSchedule>();
+            for (int j = 0; j < ScheduleList.Count; j++)
+            {
+                int thisDateID = ScheduleList[j].DateID;
+                int thisTimeID = ScheduleList[j].TimeID;
+                EmployeeSchedule newSchedge = db.EmployeeSchedules.Where(zz => zz.DateID == thisDateID && zz.TimeID == thisTimeID).FirstOrDefault();
+                if (newSchedge == null)
+                {
+                    EmployeeSchedule items = new EmployeeSchedule();
+                    items.EmployeeID = 1;
+                    items.DateID = thisDateID;
+                    items.TimeID = thisTimeID;
+                    items.StatusID = 1;
+                    newList.Add(items);
+                }
+
+            }
+            db.EmployeeSchedules.AddRange(newList);
+            
+            db.SaveChanges();
+            return "success";
         }
     }
 }

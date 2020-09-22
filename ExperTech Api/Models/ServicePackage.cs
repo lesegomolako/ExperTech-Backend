@@ -25,6 +25,8 @@ namespace ExperTech_Api.Models
         public string Description { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }
+        public int Duration { get; set; }
+        public bool Deleted { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ClientPackage> ClientPackages { get; set; }

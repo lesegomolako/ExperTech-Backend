@@ -25,10 +25,11 @@ namespace ExperTech_Api.Models
         }
     
         public int ServiceID { get; set; }
-        public int TypeID { get; set; }
+        public Nullable<int> TypeID { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public int Duration { get; set; }
+        public bool Deleted { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<BookingLine> BookingLines { get; set; }

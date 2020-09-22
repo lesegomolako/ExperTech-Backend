@@ -14,6 +14,7 @@ namespace ExperTech_Api.Models
     
     public partial class SaleLine
     {
+        public int LineID { get; set; }
         public int ProductID { get; set; }
         public int SaleID { get; set; }
         public int Quantity { get; set; }

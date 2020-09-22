@@ -18,8 +18,10 @@ namespace ExperTech_Api.Models
         public int SaleID { get; set; }
         public int PackageID { get; set; }
         public int StatusID { get; set; }
-        public System.DateTime Date { get; set; }
+        public Nullable<int> LineID { get; set; }
+        public Nullable<System.DateTime> Date { get; set; }
     
+        public virtual BookingLine BookingLine { get; set; }
         public virtual ClientPackage ClientPackage { get; set; }
         public virtual InstanceStatu InstanceStatu { get; set; }
     }

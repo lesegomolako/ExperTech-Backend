@@ -10,6 +10,7 @@
           <ScalarProperty Name="ContactNo" ColumnName="ContactNo" />
           <ScalarProperty Name="Email" ColumnName="Email" />
           <ScalarProperty Name="UserID" ColumnName="UserID" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -24,6 +25,7 @@
     <EntitySetMapping Name="BasketLines">
       <EntityTypeMapping TypeName="ExperTechModel.BasketLine">
         <MappingFragment StoreEntitySet="BasketLine">
+          <ScalarProperty Name="LineID" ColumnName="LineID" />
           <ScalarProperty Name="BasketID" ColumnName="BasketID" />
           <ScalarProperty Name="ProductID" ColumnName="ProductID" />
           <ScalarProperty Name="Quantity" ColumnName="Quantity" />
@@ -37,12 +39,14 @@
           <ScalarProperty Name="StatusID" ColumnName="StatusID" />
           <ScalarProperty Name="ClientID" ColumnName="ClientID" />
           <ScalarProperty Name="ReminderID" ColumnName="ReminderID" />
+          <ScalarProperty Name="SaleID" ColumnName="SaleID" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
     <EntitySetMapping Name="BookingLines">
       <EntityTypeMapping TypeName="ExperTechModel.BookingLine">
         <MappingFragment StoreEntitySet="BookingLine">
+          <ScalarProperty Name="LineID" ColumnName="LineID" />
           <ScalarProperty Name="BookingID" ColumnName="BookingID" />
           <ScalarProperty Name="ServiceID" ColumnName="ServiceID" />
           <ScalarProperty Name="OptionID" ColumnName="OptionID" />
@@ -53,7 +57,7 @@
       <EntityTypeMapping TypeName="ExperTechModel.BookingNote">
         <MappingFragment StoreEntitySet="BookingNotes">
           <ScalarProperty Name="NotesID" ColumnName="NotesID" />
-          <ScalarProperty Name="Notes" ColumnName="Notes" />
+          <ScalarProperty Name="Note" ColumnName="Note" />
           <ScalarProperty Name="BookingID" ColumnName="BookingID" />
         </MappingFragment>
       </EntityTypeMapping>
@@ -75,6 +79,7 @@
           <ScalarProperty Name="ContactNo" ColumnName="ContactNo" />
           <ScalarProperty Name="Email" ColumnName="Email" />
           <ScalarProperty Name="UserID" ColumnName="UserID" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -106,6 +111,16 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <EntitySetMapping Name="DateRequesteds">
+      <EntityTypeMapping TypeName="ExperTechModel.DateRequested">
+        <MappingFragment StoreEntitySet="DateRequested">
+          <ScalarProperty Name="RequestedID" ColumnName="RequestedID" />
+          <ScalarProperty Name="BookingID" ColumnName="BookingID" />
+          <ScalarProperty Name="Date" ColumnName="Date" />
+          <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
     <EntitySetMapping Name="Employees">
       <EntityTypeMapping TypeName="ExperTechModel.Employee">
         <MappingFragment StoreEntitySet="Employee">
@@ -115,13 +130,13 @@
           <ScalarProperty Name="ContactNo" ColumnName="ContactNo" />
           <ScalarProperty Name="Email" ColumnName="Email" />
           <ScalarProperty Name="UserID" ColumnName="UserID" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
     <EntitySetMapping Name="EmployeeSchedules">
       <EntityTypeMapping TypeName="ExperTechModel.EmployeeSchedule">
         <MappingFragment StoreEntitySet="EmployeeSchedule">
-          <ScalarProperty Name="TypeID" ColumnName="TypeID" />
           <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
           <ScalarProperty Name="TimeID" ColumnName="TimeID" />
           <ScalarProperty Name="DateID" ColumnName="DateID" />
@@ -133,8 +148,9 @@
     <EntitySetMapping Name="EmployeeServiceTypes">
       <EntityTypeMapping TypeName="ExperTechModel.EmployeeServiceType">
         <MappingFragment StoreEntitySet="EmployeeServiceType">
-          <ScalarProperty Name="TypeID" ColumnName="TypeID" />
+          <ScalarProperty Name="EmpTypeID" ColumnName="EmpTypeID" />
           <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
+          <ScalarProperty Name="TypeID" ColumnName="TypeID" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -153,6 +169,7 @@
           <ScalarProperty Name="SaleID" ColumnName="SaleID" />
           <ScalarProperty Name="PackageID" ColumnName="PackageID" />
           <ScalarProperty Name="StatusID" ColumnName="StatusID" />
+          <ScalarProperty Name="LineID" ColumnName="LineID" />
           <ScalarProperty Name="Date" ColumnName="Date" />
         </MappingFragment>
       </EntityTypeMapping>
@@ -160,7 +177,7 @@
     <EntitySetMapping Name="PaymentTypes">
       <EntityTypeMapping TypeName="ExperTechModel.PaymentType">
         <MappingFragment StoreEntitySet="PaymentType">
-          <ScalarProperty Name="TypeID" ColumnName="TypeID" />
+          <ScalarProperty Name="PaymentTypeID" ColumnName="PaymentTypeID" />
           <ScalarProperty Name="Type" ColumnName="Type" />
         </MappingFragment>
       </EntityTypeMapping>
@@ -175,6 +192,7 @@
           <ScalarProperty Name="QuantityOnHand" ColumnName="QuantityOnHand" />
           <ScalarProperty Name="Description" ColumnName="Description" />
           <ScalarProperty Name="Price" ColumnName="Price" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -199,7 +217,17 @@
       <EntityTypeMapping TypeName="ExperTechModel.Reminder">
         <MappingFragment StoreEntitySet="Reminder">
           <ScalarProperty Name="ReminderID" ColumnName="ReminderID" />
+          <ScalarProperty Name="TypeID" ColumnName="TypeID" />
           <ScalarProperty Name="Text" ColumnName="Text" />
+          <ScalarProperty Name="NumHours" ColumnName="NumHours" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="ReminderTypes">
+      <EntityTypeMapping TypeName="ExperTechModel.ReminderType">
+        <MappingFragment StoreEntitySet="ReminderType">
+          <ScalarProperty Name="TypeID" ColumnName="TypeID" />
+          <ScalarProperty Name="Type" ColumnName="Type" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -209,9 +237,9 @@
           <ScalarProperty Name="SaleID" ColumnName="SaleID" />
           <ScalarProperty Name="StatusID" ColumnName="StatusID" />
           <ScalarProperty Name="ReminderID" ColumnName="ReminderID" />
-          <ScalarProperty Name="TypeID" ColumnName="TypeID" />
-          <ScalarProperty Name="Description" ColumnName="Description" />
+          <ScalarProperty Name="PaymentTypeID" ColumnName="PaymentTypeID" />
           <ScalarProperty Name="ClientID" ColumnName="ClientID" />
+          <ScalarProperty Name="SaleTypeID" ColumnName="SaleTypeID" />
           <ScalarProperty Name="Date" ColumnName="Date" />
           <ScalarProperty Name="Payment" ColumnName="Payment" />
         </MappingFragment>
@@ -220,6 +248,7 @@
     <EntitySetMapping Name="SaleLines">
       <EntityTypeMapping TypeName="ExperTechModel.SaleLine">
         <MappingFragment StoreEntitySet="SaleLine">
+          <ScalarProperty Name="LineID" ColumnName="LineID" />
           <ScalarProperty Name="ProductID" ColumnName="ProductID" />
           <ScalarProperty Name="SaleID" ColumnName="SaleID" />
           <ScalarProperty Name="Quantity" ColumnName="Quantity" />
@@ -234,11 +263,19 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <EntitySetMapping Name="SaleTypes">
+      <EntityTypeMapping TypeName="ExperTechModel.SaleType">
+        <MappingFragment StoreEntitySet="SaleType">
+          <ScalarProperty Name="SaleTypeID" ColumnName="SaleTypeID" />
+          <ScalarProperty Name="Type" ColumnName="Type" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
     <EntitySetMapping Name="Schedules">
       <EntityTypeMapping TypeName="ExperTechModel.Schedule">
         <MappingFragment StoreEntitySet="Schedule">
-          <ScalarProperty Name="TimeID" ColumnName="TimeID" />
           <ScalarProperty Name="DateID" ColumnName="DateID" />
+          <ScalarProperty Name="TimeID" ColumnName="TimeID" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -258,6 +295,7 @@
           <ScalarProperty Name="Name" ColumnName="Name" />
           <ScalarProperty Name="Description" ColumnName="Description" />
           <ScalarProperty Name="Duration" ColumnName="Duration" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -267,6 +305,7 @@
           <ScalarProperty Name="OptionID" ColumnName="OptionID" />
           <ScalarProperty Name="Name" ColumnName="Name" />
           <ScalarProperty Name="Duration" ColumnName="Duration" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -278,6 +317,8 @@
           <ScalarProperty Name="Description" ColumnName="Description" />
           <ScalarProperty Name="Price" ColumnName="Price" />
           <ScalarProperty Name="Quantity" ColumnName="Quantity" />
+          <ScalarProperty Name="Duration" ColumnName="Duration" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -318,6 +359,15 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <EntitySetMapping Name="SocialMedias">
+      <EntityTypeMapping TypeName="ExperTechModel.SocialMedia">
+        <MappingFragment StoreEntitySet="SocialMedia">
+          <ScalarProperty Name="SocialID" ColumnName="SocialID" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Link" ColumnName="Link" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
     <EntitySetMapping Name="StockItems">
       <EntityTypeMapping TypeName="ExperTechModel.StockItem">
         <MappingFragment StoreEntitySet="StockItem">
@@ -325,12 +375,15 @@
           <ScalarProperty Name="Name" ColumnName="Name" />
           <ScalarProperty Name="Description" ColumnName="Description" />
           <ScalarProperty Name="Price" ColumnName="Price" />
+          <ScalarProperty Name="QuantityInStock" ColumnName="QuantityInStock" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
     <EntitySetMapping Name="StockItemLines">
       <EntityTypeMapping TypeName="ExperTechModel.StockItemLine">
         <MappingFragment StoreEntitySet="StockItemLine">
+          <ScalarProperty Name="LineID" ColumnName="LineID" />
           <ScalarProperty Name="ItemID" ColumnName="ItemID" />
           <ScalarProperty Name="OrderID" ColumnName="OrderID" />
           <ScalarProperty Name="Quantity" ColumnName="Quantity" />
@@ -350,6 +403,7 @@
     <EntitySetMapping Name="StockTakeLines">
       <EntityTypeMapping TypeName="ExperTechModel.StockTakeLine">
         <MappingFragment StoreEntitySet="StockTakeLine">
+          <ScalarProperty Name="LineID" ColumnName="LineID" />
           <ScalarProperty Name="ItemID" ColumnName="ItemID" />
           <ScalarProperty Name="StockTakeID" ColumnName="StockTakeID" />
           <ScalarProperty Name="Quantity" ColumnName="Quantity" />
@@ -360,8 +414,7 @@
       <EntityTypeMapping TypeName="ExperTechModel.StockWriteOff">
         <MappingFragment StoreEntitySet="StockWriteOff">
           <ScalarProperty Name="WriteOffID" ColumnName="WriteOffID" />
-          <ScalarProperty Name="Reason" ColumnName="Reason" />
-          <ScalarProperty Name="Quantity" ColumnName="Quantity" />
+          <ScalarProperty Name="Description" ColumnName="Description" />
           <ScalarProperty Name="Date" ColumnName="Date" />
         </MappingFragment>
       </EntityTypeMapping>
@@ -374,6 +427,7 @@
           <ScalarProperty Name="ContactNo" ColumnName="ContactNo" />
           <ScalarProperty Name="Email" ColumnName="Email" />
           <ScalarProperty Name="Address" ColumnName="Address" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -388,23 +442,13 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
-    <EntitySetMapping Name="sysdiagrams">
-      <EntityTypeMapping TypeName="ExperTechModel.sysdiagram">
-        <MappingFragment StoreEntitySet="sysdiagrams">
-          <ScalarProperty Name="name" ColumnName="name" />
-          <ScalarProperty Name="principal_id" ColumnName="principal_id" />
-          <ScalarProperty Name="diagram_id" ColumnName="diagram_id" />
-          <ScalarProperty Name="version" ColumnName="version" />
-          <ScalarProperty Name="definition" ColumnName="definition" />
-        </MappingFragment>
-      </EntityTypeMapping>
-    </EntitySetMapping>
     <EntitySetMapping Name="Timeslots">
       <EntityTypeMapping TypeName="ExperTechModel.Timeslot">
         <MappingFragment StoreEntitySet="Timeslot">
           <ScalarProperty Name="TimeID" ColumnName="TimeID" />
           <ScalarProperty Name="StartTime" ColumnName="StartTime" />
           <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -430,9 +474,11 @@
     <EntitySetMapping Name="WriteOffLines">
       <EntityTypeMapping TypeName="ExperTechModel.WriteOffLine">
         <MappingFragment StoreEntitySet="WriteOffLine">
+          <ScalarProperty Name="LineID" ColumnName="LineID" />
           <ScalarProperty Name="ItemID" ColumnName="ItemID" />
           <ScalarProperty Name="WriteOffID" ColumnName="WriteOffID" />
           <ScalarProperty Name="Reason" ColumnName="Reason" />
+          <ScalarProperty Name="Quantity" ColumnName="Quantity" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

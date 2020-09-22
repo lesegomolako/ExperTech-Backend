@@ -14,18 +14,11 @@ namespace ExperTech_Api.Models
     
     public partial class EmployeeServiceType
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public EmployeeServiceType()
-        {
-            this.EmployeeSchedules = new HashSet<EmployeeSchedule>();
-        }
-    
-        public int TypeID { get; set; }
+        public int EmpTypeID { get; set; }
         public int EmployeeID { get; set; }
+        public int TypeID { get; set; }
     
         public virtual Employee Employee { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<EmployeeSchedule> EmployeeSchedules { get; set; }
         public virtual ServiceType ServiceType { get; set; }
     }
 }

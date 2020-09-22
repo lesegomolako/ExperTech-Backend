@@ -6,10 +6,11 @@
     </Key>
     <Property Name="AdminID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
-    <Property Name="Surname" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="Surname" Type="varchar" MaxLength="100" Nullable="false" />
     <Property Name="ContactNo" Type="varchar" MaxLength="10" Nullable="false" />
-    <Property Name="Email" Type="varchar" MaxLength="50" />
-    <Property Name="UserID" Type="int" Nullable="false" />
+    <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="UserID" Type="int" />
+    <Property Name="Deleted" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="Basket">
     <Key>
@@ -20,9 +21,9 @@
   </EntityType>
   <EntityType Name="BasketLine">
     <Key>
-      <PropertyRef Name="BasketID" />
-      <PropertyRef Name="ProductID" />
+      <PropertyRef Name="LineID" />
     </Key>
+    <Property Name="LineID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="BasketID" Type="int" Nullable="false" />
     <Property Name="ProductID" Type="int" Nullable="false" />
     <Property Name="Quantity" Type="int" Nullable="false" />
@@ -35,12 +36,13 @@
     <Property Name="StatusID" Type="int" Nullable="false" />
     <Property Name="ClientID" Type="int" Nullable="false" />
     <Property Name="ReminderID" Type="int" Nullable="false" />
+    <Property Name="SaleID" Type="int" />
   </EntityType>
   <EntityType Name="BookingLine">
     <Key>
-      <PropertyRef Name="BookingID" />
-      <PropertyRef Name="ServiceID" />
+      <PropertyRef Name="LineID" />
     </Key>
+    <Property Name="LineID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="BookingID" Type="int" Nullable="false" />
     <Property Name="ServiceID" Type="int" Nullable="false" />
     <Property Name="OptionID" Type="int" />
@@ -50,7 +52,7 @@
       <PropertyRef Name="NotesID" />
     </Key>
     <Property Name="NotesID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="Notes" Type="varchar" MaxLength="100" Nullable="false" />
+    <Property Name="Note" Type="varchar" MaxLength="100" Nullable="false" />
     <Property Name="BookingID" Type="int" Nullable="false" />
   </EntityType>
   <EntityType Name="BookingStatus">
@@ -66,10 +68,11 @@
     </Key>
     <Property Name="ClientID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
-    <Property Name="Surname" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="Surname" Type="varchar" MaxLength="100" Nullable="false" />
     <Property Name="ContactNo" Type="varchar" MaxLength="10" Nullable="false" />
-    <Property Name="Email" Type="varchar" MaxLength="50" />
-    <Property Name="UserID" Type="int" Nullable="false" />
+    <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="UserID" Type="int" />
+    <Property Name="Deleted" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="ClientPackage">
     <Key>
@@ -86,7 +89,7 @@
       <PropertyRef Name="InfoID" />
     </Key>
     <Property Name="InfoID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="Name" Type="varchar" MaxLength="20" Nullable="false" />
+    <Property Name="Name" Type="varchar" MaxLength="150" Nullable="false" />
     <Property Name="Address" Type="varchar" MaxLength="250" Nullable="false" />
     <Property Name="ContactNo" Type="varchar" MaxLength="10" Nullable="false" />
   </EntityType>
@@ -97,6 +100,15 @@
     <Property Name="DateID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Date" Type="date" Nullable="false" />
   </EntityType>
+  <EntityType Name="DateRequested">
+    <Key>
+      <PropertyRef Name="RequestedID" />
+    </Key>
+    <Property Name="RequestedID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="BookingID" Type="int" Nullable="false" />
+    <Property Name="Date" Type="date" Nullable="false" />
+    <Property Name="StartTime" Type="time" Precision="7" Nullable="false" />
+  </EntityType>
   <EntityType Name="Employee">
     <Key>
       <PropertyRef Name="EmployeeID" />
@@ -105,17 +117,16 @@
     <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="Surname" Type="varchar" MaxLength="100" Nullable="false" />
     <Property Name="ContactNo" Type="varchar" MaxLength="10" Nullable="false" />
-    <Property Name="Email" Type="varchar" MaxLength="50" />
-    <Property Name="UserID" Type="int" Nullable="false" />
+    <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="UserID" Type="int" />
+    <Property Name="Deleted" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="EmployeeSchedule">
     <Key>
-      <PropertyRef Name="TypeID" />
       <PropertyRef Name="EmployeeID" />
       <PropertyRef Name="TimeID" />
       <PropertyRef Name="DateID" />
     </Key>
-    <Property Name="TypeID" Type="int" Nullable="false" />
     <Property Name="EmployeeID" Type="int" Nullable="false" />
     <Property Name="TimeID" Type="int" Nullable="false" />
     <Property Name="DateID" Type="int" Nullable="false" />
@@ -124,11 +135,11 @@
   </EntityType>
   <EntityType Name="EmployeeServiceType">
     <Key>
-      <PropertyRef Name="TypeID" />
-      <PropertyRef Name="EmployeeID" />
+      <PropertyRef Name="EmpTypeID" />
     </Key>
-    <Property Name="TypeID" Type="int" Nullable="false" />
+    <Property Name="EmpTypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="EmployeeID" Type="int" Nullable="false" />
+    <Property Name="TypeID" Type="int" Nullable="false" />
   </EntityType>
   <EntityType Name="InstanceStatus">
     <Key>
@@ -145,13 +156,14 @@
     <Property Name="SaleID" Type="int" Nullable="false" />
     <Property Name="PackageID" Type="int" Nullable="false" />
     <Property Name="StatusID" Type="int" Nullable="false" />
-    <Property Name="Date" Type="date" Nullable="false" />
+    <Property Name="LineID" Type="int" />
+    <Property Name="Date" Type="date" />
   </EntityType>
   <EntityType Name="PaymentType">
     <Key>
-      <PropertyRef Name="TypeID" />
+      <PropertyRef Name="PaymentTypeID" />
     </Key>
-    <Property Name="TypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="PaymentTypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Type" Type="varchar" MaxLength="25" Nullable="false" />
   </EntityType>
   <EntityType Name="Product">
@@ -159,12 +171,13 @@
       <PropertyRef Name="ProductID" />
     </Key>
     <Property Name="ProductID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="SupplierID" Type="int" Nullable="false" />
-    <Property Name="CategoryID" Type="int" Nullable="false" />
+    <Property Name="SupplierID" Type="int" />
+    <Property Name="CategoryID" Type="int" />
     <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="QuantityOnHand" Type="int" Nullable="false" />
-    <Property Name="Description" Type="varchar" MaxLength="150" />
+    <Property Name="Description" Type="varchar" MaxLength="150" Nullable="false" />
     <Property Name="Price" Type="decimal" Precision="6" Scale="2" Nullable="false" />
+    <Property Name="Deleted" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="ProductCategory">
     <Key>
@@ -179,14 +192,23 @@
     </Key>
     <Property Name="PhotoID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="ProductID" Type="int" Nullable="false" />
-    <Property Name="Photo" Type="image" Nullable="false" />
+    <Property Name="Photo" Type="varchar(max)" Nullable="false" />
   </EntityType>
   <EntityType Name="Reminder">
     <Key>
       <PropertyRef Name="ReminderID" />
     </Key>
     <Property Name="ReminderID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="TypeID" Type="int" Nullable="false" />
     <Property Name="Text" Type="varchar" MaxLength="100" Nullable="false" />
+    <Property Name="NumHours" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="ReminderType">
+    <Key>
+      <PropertyRef Name="TypeID" />
+    </Key>
+    <Property Name="TypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Type" Type="varchar" MaxLength="20" Nullable="false" />
   </EntityType>
   <EntityType Name="Sale">
     <Key>
@@ -195,17 +217,17 @@
     <Property Name="SaleID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="StatusID" Type="int" Nullable="false" />
     <Property Name="ReminderID" Type="int" />
-    <Property Name="TypeID" Type="int" />
-    <Property Name="Description" Type="varchar" MaxLength="100" Nullable="false" />
+    <Property Name="PaymentTypeID" Type="int" />
     <Property Name="ClientID" Type="int" Nullable="false" />
+    <Property Name="SaleTypeID" Type="int" Nullable="false" />
     <Property Name="Date" Type="datetime" Nullable="false" />
     <Property Name="Payment" Type="decimal" Precision="6" Scale="2" />
   </EntityType>
   <EntityType Name="SaleLine">
     <Key>
-      <PropertyRef Name="ProductID" />
-      <PropertyRef Name="SaleID" />
+      <PropertyRef Name="LineID" />
     </Key>
+    <Property Name="LineID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="ProductID" Type="int" Nullable="false" />
     <Property Name="SaleID" Type="int" Nullable="false" />
     <Property Name="Quantity" Type="int" Nullable="false" />
@@ -215,15 +237,22 @@
       <PropertyRef Name="StatusID" />
     </Key>
     <Property Name="StatusID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="Status" Type="varchar" MaxLength="15" Nullable="false" />
+    <Property Name="Status" Type="varchar" MaxLength="15" />
+  </EntityType>
+  <EntityType Name="SaleType">
+    <Key>
+      <PropertyRef Name="SaleTypeID" />
+    </Key>
+    <Property Name="SaleTypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Type" Type="varchar" MaxLength="50" Nullable="false" />
   </EntityType>
   <EntityType Name="Schedule">
     <Key>
-      <PropertyRef Name="TimeID" />
       <PropertyRef Name="DateID" />
+      <PropertyRef Name="TimeID" />
     </Key>
-    <Property Name="TimeID" Type="int" Nullable="false" />
     <Property Name="DateID" Type="int" Nullable="false" />
+    <Property Name="TimeID" Type="int" Nullable="false" />
   </EntityType>
   <EntityType Name="ScheduleStatus">
     <Key>
@@ -237,10 +266,11 @@
       <PropertyRef Name="ServiceID" />
     </Key>
     <Property Name="ServiceID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="TypeID" Type="int" Nullable="false" />
-    <Property Name="Name" Type="varchar" MaxLength="20" Nullable="false" />
+    <Property Name="TypeID" Type="int" />
+    <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="Description" Type="varchar" MaxLength="240" />
     <Property Name="Duration" Type="int" Nullable="false" />
+    <Property Name="Deleted" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="ServiceOption">
     <Key>
@@ -249,6 +279,7 @@
     <Property Name="OptionID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Name" Type="varchar" MaxLength="25" Nullable="false" />
     <Property Name="Duration" Type="int" Nullable="false" />
+    <Property Name="Deleted" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="ServicePackage">
     <Key>
@@ -259,6 +290,8 @@
     <Property Name="Description" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="Price" Type="decimal" Precision="6" Scale="2" Nullable="false" />
     <Property Name="Quantity" Type="int" Nullable="false" />
+    <Property Name="Duration" Type="int" Nullable="false" />
+    <Property Name="Deleted" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="ServicePhoto">
     <Key>
@@ -266,7 +299,7 @@
     </Key>
     <Property Name="PhotoID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="ServiceID" Type="int" Nullable="false" />
-    <Property Name="Photo" Type="image" Nullable="false" />
+    <Property Name="Photo" Type="varchar(max)" Nullable="false" />
   </EntityType>
   <EntityType Name="ServicePrice">
     <Key>
@@ -283,8 +316,8 @@
       <PropertyRef Name="TypeID" />
     </Key>
     <Property Name="TypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="Name" Type="varchar" MaxLength="20" Nullable="false" />
-    <Property Name="Description" Type="varchar" MaxLength="240" />
+    <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="Description" Type="varchar" MaxLength="240" Nullable="false" />
   </EntityType>
   <EntityType Name="ServiceTypeOption">
     <Key>
@@ -294,23 +327,33 @@
     <Property Name="ServiceID" Type="int" Nullable="false" />
     <Property Name="OptionID" Type="int" Nullable="false" />
   </EntityType>
+  <EntityType Name="SocialMedia">
+    <Key>
+      <PropertyRef Name="SocialID" />
+    </Key>
+    <Property Name="SocialID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="Link" Type="varchar" MaxLength="150" Nullable="false" />
+  </EntityType>
   <EntityType Name="StockItem">
     <Key>
       <PropertyRef Name="ItemID" />
     </Key>
     <Property Name="ItemID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
-    <Property Name="Description" Type="varchar" MaxLength="150" />
+    <Property Name="Description" Type="varchar" MaxLength="150" Nullable="false" />
     <Property Name="Price" Type="decimal" Precision="6" Scale="2" Nullable="false" />
+    <Property Name="QuantityInStock" Type="int" Nullable="false" />
+    <Property Name="Deleted" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="StockItemLine">
     <Key>
-      <PropertyRef Name="ItemID" />
-      <PropertyRef Name="OrderID" />
+      <PropertyRef Name="LineID" />
     </Key>
+    <Property Name="LineID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="ItemID" Type="int" Nullable="false" />
     <Property Name="OrderID" Type="int" Nullable="false" />
-    <Property Name="Quantity" Type="int" Nullable="false" />
+    <Property Name="Quantity" Type="int" />
   </EntityType>
   <EntityType Name="StockTake">
     <Key>
@@ -323,9 +366,9 @@
   </EntityType>
   <EntityType Name="StockTakeLine">
     <Key>
-      <PropertyRef Name="ItemID" />
-      <PropertyRef Name="StockTakeID" />
+      <PropertyRef Name="LineID" />
     </Key>
+    <Property Name="LineID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="ItemID" Type="int" Nullable="false" />
     <Property Name="StockTakeID" Type="int" Nullable="false" />
     <Property Name="Quantity" Type="int" Nullable="false" />
@@ -335,8 +378,7 @@
       <PropertyRef Name="WriteOffID" />
     </Key>
     <Property Name="WriteOffID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="Reason" Type="varchar" MaxLength="25" Nullable="false" />
-    <Property Name="Quantity" Type="int" Nullable="false" />
+    <Property Name="Description" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="Date" Type="date" Nullable="false" />
   </EntityType>
   <EntityType Name="Supplier">
@@ -344,30 +386,21 @@
       <PropertyRef Name="SupplierID" />
     </Key>
     <Property Name="SupplierID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="Name" Type="varchar" MaxLength="25" Nullable="false" />
+    <Property Name="Name" Type="varchar" MaxLength="100" Nullable="false" />
     <Property Name="ContactNo" Type="varchar" MaxLength="10" Nullable="false" />
-    <Property Name="Email" Type="varchar" MaxLength="50" />
+    <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="Address" Type="varchar" MaxLength="100" Nullable="false" />
+    <Property Name="Deleted" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="SupplierOrder">
     <Key>
       <PropertyRef Name="OrderID" />
     </Key>
     <Property Name="OrderID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="SupplierID" Type="int" Nullable="false" />
+    <Property Name="SupplierID" Type="int" />
     <Property Name="Description" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="Price" Type="decimal" Precision="6" Scale="2" Nullable="false" />
     <Property Name="Date" Type="date" Nullable="false" />
-  </EntityType>
-  <EntityType Name="sysdiagrams">
-    <Key>
-      <PropertyRef Name="diagram_id" />
-    </Key>
-    <Property Name="name" Type="nvarchar" MaxLength="128" Nullable="false" />
-    <Property Name="principal_id" Type="int" Nullable="false" />
-    <Property Name="diagram_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="version" Type="int" />
-    <Property Name="definition" Type="varbinary(max)" />
   </EntityType>
   <EntityType Name="Timeslot">
     <Key>
@@ -376,6 +409,7 @@
     <Property Name="TimeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="StartTime" Type="time" Precision="7" Nullable="false" />
     <Property Name="EndTime" Type="time" Precision="7" Nullable="false" />
+    <Property Name="Deleted" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="User">
     <Key>
@@ -384,8 +418,8 @@
     <Property Name="UserID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="RoleID" Type="int" Nullable="false" />
     <Property Name="Username" Type="varchar" MaxLength="50" Nullable="false" />
-    <Property Name="Password" Type="varchar" MaxLength="50" Nullable="false" />
-    <Property Name="SessionID" Type="varchar(max)" />
+    <Property Name="Password" Type="varchar" MaxLength="300" Nullable="false" />
+    <Property Name="SessionID" Type="varchar" MaxLength="100" />
   </EntityType>
   <EntityType Name="UserRole">
     <Key>
@@ -396,15 +430,16 @@
   </EntityType>
   <EntityType Name="WriteOffLine">
     <Key>
-      <PropertyRef Name="ItemID" />
-      <PropertyRef Name="WriteOffID" />
+      <PropertyRef Name="LineID" />
     </Key>
+    <Property Name="LineID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="ItemID" Type="int" Nullable="false" />
     <Property Name="WriteOffID" Type="int" Nullable="false" />
     <Property Name="Reason" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="Quantity" Type="int" Nullable="false" />
   </EntityType>
   <Association Name="FK_Admin_User">
-    <End Role="User" Type="Self.User" Multiplicity="1" />
+    <End Role="User" Type="Self.User" Multiplicity="0..1" />
     <End Role="Admin" Type="Self.Admin" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="User">
@@ -487,6 +522,18 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_Booking_Sale">
+    <End Role="Sale" Type="Self.Sale" Multiplicity="0..1" />
+    <End Role="Booking" Type="Self.Booking" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Sale">
+        <PropertyRef Name="SaleID" />
+      </Principal>
+      <Dependent Role="Booking">
+        <PropertyRef Name="SaleID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_BookingLine_Booking">
     <End Role="Booking" Type="Self.Booking" Multiplicity="1" />
     <End Role="BookingLine" Type="Self.BookingLine" Multiplicity="*" />
@@ -511,14 +558,16 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
-  <Association Name="FK_BookingLine_ServiceOption">
-    <End Role="ServiceOption" Type="Self.ServiceOption" Multiplicity="0..1" />
+  <Association Name="FK_BookingLine_ServiceTypeOption">
+    <End Role="ServiceTypeOption" Type="Self.ServiceTypeOption" Multiplicity="0..1" />
     <End Role="BookingLine" Type="Self.BookingLine" Multiplicity="*" />
     <ReferentialConstraint>
-      <Principal Role="ServiceOption">
+      <Principal Role="ServiceTypeOption">
+        <PropertyRef Name="ServiceID" />
         <PropertyRef Name="OptionID" />
       </Principal>
       <Dependent Role="BookingLine">
+        <PropertyRef Name="ServiceID" />
         <PropertyRef Name="OptionID" />
       </Dependent>
     </ReferentialConstraint>
@@ -536,7 +585,7 @@
     </ReferentialConstraint>
   </Association>
   <Association Name="FK_Client_User">
-    <End Role="User" Type="Self.User" Multiplicity="1" />
+    <End Role="User" Type="Self.User" Multiplicity="0..1" />
     <End Role="Client" Type="Self.Client" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="User">
@@ -571,8 +620,20 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_DateRequested_Booking">
+    <End Role="Booking" Type="Self.Booking" Multiplicity="1" />
+    <End Role="DateRequested" Type="Self.DateRequested" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Booking">
+        <PropertyRef Name="BookingID" />
+      </Principal>
+      <Dependent Role="DateRequested">
+        <PropertyRef Name="BookingID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_Employee_User">
-    <End Role="User" Type="Self.User" Multiplicity="1" />
+    <End Role="User" Type="Self.User" Multiplicity="0..1" />
     <End Role="Employee" Type="Self.Employee" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="User">
@@ -595,16 +656,14 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
-  <Association Name="FK_EmployeeSchedule_EmployeeServiceType">
-    <End Role="EmployeeServiceType" Type="Self.EmployeeServiceType" Multiplicity="1" />
+  <Association Name="FK_EmployeeSchedule_Employee">
+    <End Role="Employee" Type="Self.Employee" Multiplicity="1" />
     <End Role="EmployeeSchedule" Type="Self.EmployeeSchedule" Multiplicity="*" />
     <ReferentialConstraint>
-      <Principal Role="EmployeeServiceType">
-        <PropertyRef Name="TypeID" />
+      <Principal Role="Employee">
         <PropertyRef Name="EmployeeID" />
       </Principal>
       <Dependent Role="EmployeeSchedule">
-        <PropertyRef Name="TypeID" />
         <PropertyRef Name="EmployeeID" />
       </Dependent>
     </ReferentialConstraint>
@@ -614,12 +673,12 @@
     <End Role="EmployeeSchedule" Type="Self.EmployeeSchedule" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="Schedule">
-        <PropertyRef Name="TimeID" />
         <PropertyRef Name="DateID" />
+        <PropertyRef Name="TimeID" />
       </Principal>
       <Dependent Role="EmployeeSchedule">
-        <PropertyRef Name="TimeID" />
         <PropertyRef Name="DateID" />
+        <PropertyRef Name="TimeID" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -659,6 +718,18 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_PackageInstance_BookingLine">
+    <End Role="BookingLine" Type="Self.BookingLine" Multiplicity="0..1" />
+    <End Role="PackageInstance" Type="Self.PackageInstance" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="BookingLine">
+        <PropertyRef Name="LineID" />
+      </Principal>
+      <Dependent Role="PackageInstance">
+        <PropertyRef Name="LineID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_PackageInstance_ClientPackage">
     <End Role="ClientPackage" Type="Self.ClientPackage" Multiplicity="1" />
     <End Role="PackageInstance" Type="Self.PackageInstance" Multiplicity="*" />
@@ -686,7 +757,7 @@
     </ReferentialConstraint>
   </Association>
   <Association Name="FK_Product_ProductCategory">
-    <End Role="ProductCategory" Type="Self.ProductCategory" Multiplicity="1" />
+    <End Role="ProductCategory" Type="Self.ProductCategory" Multiplicity="0..1" />
     <End Role="Product" Type="Self.Product" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="ProductCategory">
@@ -698,7 +769,7 @@
     </ReferentialConstraint>
   </Association>
   <Association Name="FK_Product_Supplier">
-    <End Role="Supplier" Type="Self.Supplier" Multiplicity="1" />
+    <End Role="Supplier" Type="Self.Supplier" Multiplicity="0..1" />
     <End Role="Product" Type="Self.Product" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="Supplier">
@@ -721,6 +792,18 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_Reminder_ReminderType">
+    <End Role="ReminderType" Type="Self.ReminderType" Multiplicity="1" />
+    <End Role="Reminder" Type="Self.Reminder" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="ReminderType">
+        <PropertyRef Name="TypeID" />
+      </Principal>
+      <Dependent Role="Reminder">
+        <PropertyRef Name="TypeID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_Sale_Client">
     <End Role="Client" Type="Self.Client" Multiplicity="1" />
     <End Role="Sale" Type="Self.Sale" Multiplicity="*" />
@@ -738,10 +821,10 @@
     <End Role="Sale" Type="Self.Sale" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="PaymentType">
-        <PropertyRef Name="TypeID" />
+        <PropertyRef Name="PaymentTypeID" />
       </Principal>
       <Dependent Role="Sale">
-        <PropertyRef Name="TypeID" />
+        <PropertyRef Name="PaymentTypeID" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -766,6 +849,18 @@
       </Principal>
       <Dependent Role="Sale">
         <PropertyRef Name="StatusID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Sale_SaleType">
+    <End Role="SaleType" Type="Self.SaleType" Multiplicity="1" />
+    <End Role="Sale" Type="Self.Sale" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="SaleType">
+        <PropertyRef Name="SaleTypeID" />
+      </Principal>
+      <Dependent Role="Sale">
+        <PropertyRef Name="SaleTypeID" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -818,7 +913,7 @@
     </ReferentialConstraint>
   </Association>
   <Association Name="FK_Service_ServiceType">
-    <End Role="ServiceType" Type="Self.ServiceType" Multiplicity="1" />
+    <End Role="ServiceType" Type="Self.ServiceType" Multiplicity="0..1" />
     <End Role="Service" Type="Self.Service" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="ServiceType">
@@ -964,7 +1059,7 @@
     </ReferentialConstraint>
   </Association>
   <Association Name="FK_SupplierOrder_Supplier">
-    <End Role="Supplier" Type="Self.Supplier" Multiplicity="1" />
+    <End Role="Supplier" Type="Self.Supplier" Multiplicity="0..1" />
     <End Role="SupplierOrder" Type="Self.SupplierOrder" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="Supplier">
@@ -1023,6 +1118,7 @@
     <EntitySet Name="ClientPackage" EntityType="Self.ClientPackage" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="CompanyInfo" EntityType="Self.CompanyInfo" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="Date" EntityType="Self.Date" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="DateRequested" EntityType="Self.DateRequested" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="Employee" EntityType="Self.Employee" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="EmployeeSchedule" EntityType="Self.EmployeeSchedule" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="EmployeeServiceType" EntityType="Self.EmployeeServiceType" Schema="dbo" store:Type="Tables" />
@@ -1033,9 +1129,11 @@
     <EntitySet Name="ProductCategory" EntityType="Self.ProductCategory" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ProductPhoto" EntityType="Self.ProductPhoto" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="Reminder" EntityType="Self.Reminder" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ReminderType" EntityType="Self.ReminderType" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="Sale" EntityType="Self.Sale" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="SaleLine" EntityType="Self.SaleLine" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="SaleStatus" EntityType="Self.SaleStatus" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="SaleType" EntityType="Self.SaleType" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="Schedule" EntityType="Self.Schedule" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ScheduleStatus" EntityType="Self.ScheduleStatus" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="Service" EntityType="Self.Service" Schema="dbo" store:Type="Tables" />
@@ -1045,6 +1143,7 @@
     <EntitySet Name="ServicePrice" EntityType="Self.ServicePrice" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ServiceType" EntityType="Self.ServiceType" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ServiceTypeOption" EntityType="Self.ServiceTypeOption" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="SocialMedia" EntityType="Self.SocialMedia" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="StockItem" EntityType="Self.StockItem" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="StockItemLine" EntityType="Self.StockItemLine" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="StockTake" EntityType="Self.StockTake" Schema="dbo" store:Type="Tables" />
@@ -1052,7 +1151,6 @@
     <EntitySet Name="StockWriteOff" EntityType="Self.StockWriteOff" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="Supplier" EntityType="Self.Supplier" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="SupplierOrder" EntityType="Self.SupplierOrder" Schema="dbo" store:Type="Tables" />
-    <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="Timeslot" EntityType="Self.Timeslot" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="User" EntityType="Self.User" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="UserRole" EntityType="Self.UserRole" Schema="dbo" store:Type="Tables" />
@@ -1085,6 +1183,10 @@
       <End Role="Reminder" EntitySet="Reminder" />
       <End Role="Booking" EntitySet="Booking" />
     </AssociationSet>
+    <AssociationSet Name="FK_Booking_Sale" Association="Self.FK_Booking_Sale">
+      <End Role="Sale" EntitySet="Sale" />
+      <End Role="Booking" EntitySet="Booking" />
+    </AssociationSet>
     <AssociationSet Name="FK_BookingLine_Booking" Association="Self.FK_BookingLine_Booking">
       <End Role="Booking" EntitySet="Booking" />
       <End Role="BookingLine" EntitySet="BookingLine" />
@@ -1093,8 +1195,8 @@
       <End Role="Service" EntitySet="Service" />
       <End Role="BookingLine" EntitySet="BookingLine" />
     </AssociationSet>
-    <AssociationSet Name="FK_BookingLine_ServiceOption" Association="Self.FK_BookingLine_ServiceOption">
-      <End Role="ServiceOption" EntitySet="ServiceOption" />
+    <AssociationSet Name="FK_BookingLine_ServiceTypeOption" Association="Self.FK_BookingLine_ServiceTypeOption">
+      <End Role="ServiceTypeOption" EntitySet="ServiceTypeOption" />
       <End Role="BookingLine" EntitySet="BookingLine" />
     </AssociationSet>
     <AssociationSet Name="FK_BookingNotes_Booking" Association="Self.FK_BookingNotes_Booking">
@@ -1113,6 +1215,10 @@
       <End Role="ServicePackage" EntitySet="ServicePackage" />
       <End Role="ClientPackage" EntitySet="ClientPackage" />
     </AssociationSet>
+    <AssociationSet Name="FK_DateRequested_Booking" Association="Self.FK_DateRequested_Booking">
+      <End Role="Booking" EntitySet="Booking" />
+      <End Role="DateRequested" EntitySet="DateRequested" />
+    </AssociationSet>
     <AssociationSet Name="FK_Employee_User" Association="Self.FK_Employee_User">
       <End Role="User" EntitySet="User" />
       <End Role="Employee" EntitySet="Employee" />
@@ -1121,8 +1227,8 @@
       <End Role="Booking" EntitySet="Booking" />
       <End Role="EmployeeSchedule" EntitySet="EmployeeSchedule" />
     </AssociationSet>
-    <AssociationSet Name="FK_EmployeeSchedule_EmployeeServiceType" Association="Self.FK_EmployeeSchedule_EmployeeServiceType">
-      <End Role="EmployeeServiceType" EntitySet="EmployeeServiceType" />
+    <AssociationSet Name="FK_EmployeeSchedule_Employee" Association="Self.FK_EmployeeSchedule_Employee">
+      <End Role="Employee" EntitySet="Employee" />
       <End Role="EmployeeSchedule" EntitySet="EmployeeSchedule" />
     </AssociationSet>
     <AssociationSet Name="FK_EmployeeSchedule_Schedule" Association="Self.FK_EmployeeSchedule_Schedule">
@@ -1140,6 +1246,10 @@
     <AssociationSet Name="FK_EmployeeServiceType_ServiceType" Association="Self.FK_EmployeeServiceType_ServiceType">
       <End Role="ServiceType" EntitySet="ServiceType" />
       <End Role="EmployeeServiceType" EntitySet="EmployeeServiceType" />
+    </AssociationSet>
+    <AssociationSet Name="FK_PackageInstance_BookingLine" Association="Self.FK_PackageInstance_BookingLine">
+      <End Role="BookingLine" EntitySet="BookingLine" />
+      <End Role="PackageInstance" EntitySet="PackageInstance" />
     </AssociationSet>
     <AssociationSet Name="FK_PackageInstance_ClientPackage" Association="Self.FK_PackageInstance_ClientPackage">
       <End Role="ClientPackage" EntitySet="ClientPackage" />
@@ -1161,6 +1271,10 @@
       <End Role="Product" EntitySet="Product" />
       <End Role="ProductPhoto" EntitySet="ProductPhoto" />
     </AssociationSet>
+    <AssociationSet Name="FK_Reminder_ReminderType" Association="Self.FK_Reminder_ReminderType">
+      <End Role="ReminderType" EntitySet="ReminderType" />
+      <End Role="Reminder" EntitySet="Reminder" />
+    </AssociationSet>
     <AssociationSet Name="FK_Sale_Client" Association="Self.FK_Sale_Client">
       <End Role="Client" EntitySet="Client" />
       <End Role="Sale" EntitySet="Sale" />
@@ -1175,6 +1289,10 @@
     </AssociationSet>
     <AssociationSet Name="FK_Sale_SaleStatus" Association="Self.FK_Sale_SaleStatus">
       <End Role="SaleStatus" EntitySet="SaleStatus" />
+      <End Role="Sale" EntitySet="Sale" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Sale_SaleType" Association="Self.FK_Sale_SaleType">
+      <End Role="SaleType" EntitySet="SaleType" />
       <End Role="Sale" EntitySet="Sale" />
     </AssociationSet>
     <AssociationSet Name="FK_SaleLine_Product" Association="Self.FK_SaleLine_Product">

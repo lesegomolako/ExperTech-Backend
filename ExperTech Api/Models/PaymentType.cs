@@ -20,7 +20,7 @@ namespace ExperTech_Api.Models
             this.Sales = new HashSet<Sale>();
         }
     
-        public int TypeID { get; set; }
+        public int PaymentTypeID { get; set; }
         public string Type { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

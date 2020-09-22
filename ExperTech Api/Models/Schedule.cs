@@ -20,8 +20,8 @@ namespace ExperTech_Api.Models
             this.EmployeeSchedules = new HashSet<EmployeeSchedule>();
         }
     
-        public int TimeID { get; set; }
         public int DateID { get; set; }
+        public int TimeID { get; set; }
     
         public virtual Date Date { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

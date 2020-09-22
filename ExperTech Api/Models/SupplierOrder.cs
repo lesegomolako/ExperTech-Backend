@@ -21,7 +21,7 @@ namespace ExperTech_Api.Models
         }
     
         public int OrderID { get; set; }
-        public int SupplierID { get; set; }
+        public Nullable<int> SupplierID { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
         public System.DateTime Date { get; set; }

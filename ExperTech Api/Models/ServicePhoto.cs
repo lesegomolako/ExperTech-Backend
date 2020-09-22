@@ -16,7 +16,7 @@ namespace ExperTech_Api.Models
     {
         public int PhotoID { get; set; }
         public int ServiceID { get; set; }
-        public byte[] Photo { get; set; }
+        public string Photo { get; set; }
     
         public virtual Service Service { get; set; }
     }
