@@ -291,34 +291,34 @@ namespace ExperTech_Api.Controllers
         //    return newList;
         //}
 
-        [HttpGet]
-        [Route("api/Products/populateEmployeeTimes")]
-        public dynamic populateTimes()
-        {
-            db.Configuration.ProxyCreationEnabled = false;
+        //[HttpGet]
+        //[Route("api/Products/populateEmployeeTimes")]
+        //public dynamic populateTimes()
+        //{
+        //    db.Configuration.ProxyCreationEnabled = false;
 
-            List<Schedule> ScheduleList = db.Schedules.ToList();
-            List<EmployeeSchedule> newList = new List<EmployeeSchedule>();
-            for (int j = 0; j < ScheduleList.Count; j++)
-            {
-                int thisDateID = ScheduleList[j].DateID;
-                int thisTimeID = ScheduleList[j].TimeID;
-                EmployeeSchedule newSchedge = db.EmployeeSchedules.Where(zz => zz.DateID == thisDateID && zz.TimeID == thisTimeID).FirstOrDefault();
-                if (newSchedge == null)
-                {
-                    EmployeeSchedule items = new EmployeeSchedule();
-                    items.EmployeeID = 1;
-                    items.DateID = thisDateID;
-                    items.TimeID = thisTimeID;
-                    items.StatusID = 1;
-                    newList.Add(items);
-                }
+        //    List<Schedule> ScheduleList = db.Schedules.ToList();
+        //    List<EmployeeSchedule> newList = new List<EmployeeSchedule>();
+        //    for (int j = 0; j < ScheduleList.Count; j++)
+        //    {
+        //        int thisDateID = ScheduleList[j].DateID;
+        //        int thisTimeID = ScheduleList[j].TimeID;
+        //        EmployeeSchedule newSchedge = db.EmployeeSchedules.Where(zz => zz.DateID == thisDateID && zz.TimeID == thisTimeID).FirstOrDefault();
+        //        if (newSchedge == null)
+        //        {
+        //            EmployeeSchedule items = new EmployeeSchedule();
+        //            items.EmployeeID = 1;
+        //            items.DateID = thisDateID;
+        //            items.TimeID = thisTimeID;
+        //            items.StatusID = 1;
+        //            newList.Add(items);
+        //        }
 
-            }
-            db.EmployeeSchedules.AddRange(newList);
+        //    }
+        //    db.EmployeeSchedules.AddRange(newList);
             
-            db.SaveChanges();
-            return "success";
-        }
+        //    db.SaveChanges();
+        //    return "success";
+        //}
     }
 }

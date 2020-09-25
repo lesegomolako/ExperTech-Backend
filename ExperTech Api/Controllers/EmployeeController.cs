@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Text;
 using System.Dynamic;
+using System.Data.Entity;
 using ExperTech_Api.Models;
 using System.Web.Http.Cors;
 using System.Web;
@@ -198,6 +199,80 @@ namespace ExperTech_Api.Controllers
                 throw;
             }
             return Ok(forEST);
+        }
+
+        [Route("api/Employees/RetrieveEmployeeBooking")]
+        [HttpGet]
+        public dynamic RetrieveEmployeeBooking(string SessionID)
+        {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser != null)
+            {
+                int EmployeeID = db.Employees.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.EmployeeID).FirstOrDefault();
+                db.Configuration.ProxyCreationEnabled = false;
+                List<EmployeeSchedule> findBookings = db.EmployeeSchedules.Include(zz => zz.Booking).Where(zz => zz.StatusID == 3 && zz.EmployeeID == EmployeeID).ToList();
+                //List<Booking> findBookings = db.Bookings.Include(zz => zz.BookingLines).Include(zz => zz.EmployeeSchedules).Include(zz => zz.Client)
+                //    .Include(zz => zz.DateRequesteds).Include(zz => zz.BookingNotes).Where(zz => zz.EmployeeSchedules.Contains(EmployeeID)).ToList();
+                return formatBookings(findBookings);
+            }
+            else
+            {
+                return "Session is no longer valid";
+            }
+        }
+
+        private dynamic formatBookings(List<EmployeeSchedule> Modell)
+        {
+            List<dynamic> BookingList = new List<dynamic>();
+            foreach (EmployeeSchedule items in Modell)
+            {
+                if (items.Booking.StatusID == 4)
+                {
+                    dynamic BookingObject = new ExpandoObject();
+                    BookingObject.BookingID = items.BookingID;
+                    BookingObject.BookingStatusID = items.Booking.StatusID;
+                    BookingObject.BookingStatus = db.BookingStatus.Where(zz => zz.StatusID == items.Booking.StatusID).Select(zz => zz.Status).FirstOrDefault();
+                    BookingObject.Client = db.Clients.Where(zz => zz.ClientID == items.Booking.ClientID).Select(zz => zz.Name).FirstOrDefault();
+
+
+                    List<dynamic> newList = new List<dynamic>();
+                    dynamic newObject = new ExpandoObject();
+                    newObject.DateID = items.DateID;
+                    newObject.Employee = db.Employees.Where(zz => zz.EmployeeID == items.EmployeeID).Select(zz => zz.Name).FirstOrDefault();
+
+                    DateTime getDate = db.Dates.Where(zz => zz.DateID == items.DateID).Select(zz => zz.Date1).FirstOrDefault();
+                    newObject.Dates = getDate;
+
+                    TimeSpan getTime = db.Timeslots.Where(zz => zz.TimeID == items.TimeID).Select(zz => zz.StartTime).FirstOrDefault();
+                    newObject.StartTime = getTime;
+
+                    newObject.EndTime = db.Timeslots.Where(zz => zz.TimeID == items.TimeID).Select(zz => zz.EndTime).FirstOrDefault();
+                    newObject.Status = db.ScheduleStatus.Where(zz => zz.StatusID == items.StatusID).Select(zz => zz.Status).FirstOrDefault();
+
+                    DateTime makeDT = getDate + getTime;
+                    newObject.DateTime = makeDT;
+                    newList.Add(newObject);
+                    BookingObject.BookingSchedule = newList;
+
+                    List<BookingLine> findLine = db.BookingLines.Where(zz => zz.BookingID == items.BookingID).ToList();
+
+                    List<dynamic> getLines = new List<dynamic>();
+                    foreach (BookingLine lineItems in findLine)
+                    {
+                        dynamic lineObject = new ExpandoObject();
+                        lineObject.Service = db.Services.Where(zz => zz.ServiceID == lineItems.ServiceID).Select(zz => zz.Name).FirstOrDefault(); ;
+                        lineObject.Option = db.ServiceOptions.Where(zz => zz.OptionID == lineItems.OptionID).Select(zz => zz.Name).FirstOrDefault(); ;
+
+                        getLines.Add(lineObject);
+                    }
+                    BookingObject.BookingLines = getLines;
+
+
+                    BookingList.Add(BookingObject);
+                }
+            }
+
+            return BookingList;
         }
     }
 }

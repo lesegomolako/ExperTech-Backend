@@ -838,7 +838,7 @@ namespace ExperTech_Api.Controllers
             List<dynamic> BookingList = new List<dynamic>();
             foreach (Booking items in Modell)
             {
-                if (items.StatusID == 1 || items.StatusID == 4 || items.StatusID == 5 || items.StatusID == 2)
+                if (items.StatusID == 1 || items.StatusID == 4 || items.StatusID == 2)
                 {
                     dynamic BookingObject = new ExpandoObject();
                     BookingObject.BookingID = items.BookingID;

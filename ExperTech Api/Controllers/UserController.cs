@@ -18,9 +18,84 @@ namespace ExperTech_Api.Controllers
     public class UserController : ApiController
     {
         public ExperTechEntities db = new ExperTechEntities();
+
+        [Route("ForgotPassword")]
+        [HttpPost]
+        public dynamic ForgotPassword(string Email)
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            Client findClient = db.Clients.Where(zz => zz.Email == Email && zz.UserID != null).FirstOrDefault();
+            Admin findAdmin = db.Admins.Where(zz => zz.Email == Email && zz.UserID != null).FirstOrDefault();
+            Employee findEmployee = db.Employees.Where(zz => zz.Email == Email && zz.UserID != null).FirstOrDefault();
+
+            if(findClient != null)
+            {
+                User findUser = db.Users.Where(zz => zz.UserID == findClient.UserID).FirstOrDefault();
+                Guid g = Guid.NewGuid();
+                findUser.SessionID = g.ToString();
+                db.SaveChanges();
+
+                ForgotEmail(findUser.SessionID, Email);
+
+                return "success";
+            }
+            else if (findAdmin != null)
+            {
+                User findUser = db.Users.Where(zz => zz.UserID == findAdmin.UserID).FirstOrDefault();
+                Guid g = Guid.NewGuid();
+                findUser.SessionID = g.ToString();
+                db.SaveChanges();
+
+                ForgotEmail(findUser.SessionID, Email);
+
+                return "success";
+            }
+            else if (findEmployee != null)
+            {
+                User findUser = db.Users.Where(zz => zz.UserID == findEmployee.UserID).FirstOrDefault();
+                Guid g = Guid.NewGuid();
+                findUser.SessionID = g.ToString();
+                db.SaveChanges();
+
+                ForgotEmail(findUser.SessionID, Email);
+
+                return "success";
+            }
+            else
+            {
+                return "not found";
+            }
+        }
+
+        private void ForgotEmail(string SessionID, string Email )
+        {
+            try
+            {
+                MailMessage message = new MailMessage();
+                SmtpClient smtp = new SmtpClient();
+                message.From = new MailAddress("hairexhilartion@gmail.com");
+                message.To.Add(new MailAddress(Email));
+                message.Subject = "Exhiliration Hair & Beauty Registration";
+                message.IsBodyHtml = false;
+                message.Body = "Click the link below to reset your passoword:" + "\n" + "http://localhost:4200/reset?SessionID=" + SessionID;
+                smtp.Port = 587;
+                smtp.Host = "smtp.gmail.com";
+                smtp.EnableSsl = true;
+                smtp.EnableSsl = true;
+                smtp.UseDefaultCredentials = false;
+                smtp.Credentials = new NetworkCredential("hairexhilartion@gmail.com", "@Exhilaration1");
+                smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+                smtp.Send(message);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         //****************************************check session***********************************************
         [Route("ValidSession")]
-        [HttpPost]
+        [HttpGet]
         public bool ValidSession(string SessionID)
         {
             db.Configuration.ProxyCreationEnabled = false;
@@ -141,21 +216,18 @@ namespace ExperTech_Api.Controllers
             }
             try
             {
-                User usr = db.Users.Where(zz => zz.SessionID == forsetup.SessionID).FirstOrDefault();
+                User usr = db.Users.Where(zz => zz.SessionID == forsetup.SessionID).FirstOrDefault();             
+
+                 var hash = GenerateHash(ApplySomeSalt(forsetup.Password));
+                 usr.Username = forsetup.Username;
+                 usr.Password = hash;
+
+                 usr.SessionID = Guid.NewGuid().ToString(); ;
+                 db.SaveChanges();
+                 toReturn.Message = "success";
+                 toReturn.SessionID = usr.SessionID;
+                 toReturn.RoleID = usr.RoleID;                  
                 
-
-                if (usr != null)
-                {
-                    var hash = GenerateHash(ApplySomeSalt(forsetup.Password));
-                    usr.Username = forsetup.Username;
-                    usr.Password = hash;
-
-                    usr.SessionID = Guid.NewGuid().ToString(); ;
-                    db.SaveChanges();
-                    toReturn.Message = "success";
-                    toReturn.SessionID = usr.SessionID;
-                   
-                }
                 return toReturn;
             }
             catch (Exception)
@@ -228,20 +300,56 @@ namespace ExperTech_Api.Controllers
                 throw;
             }
         }
-        //***********************************register employee and admin********************************************
-        [Route("RegisterEA")]
+        //***********************************register admin********************************************
+        [Route("RegisterAdmin")]
         [HttpPost]
-        public dynamic RegisterEA(User Modell)
+        public dynamic RegisterAdmin(User Modell)
         {
             try 
             {
                 User UserObject = new User();
                 UserObject.Username = generateUser();
+                UserObject.Password = generatePassword(50);             
+                UserObject.RoleID = Modell.RoleID;              
+                Guid g = Guid.NewGuid();
+                UserObject.SessionID = g.ToString();
+                db.Users.Add(UserObject);
+                db.SaveChanges();
+
+                int UserID = UserObject.UserID;
+                string SessionID = UserObject.SessionID;
+
+
+                foreach (Admin AdminData in Modell.Admins)
+                {
+                    AdminData.UserID = UserID;
+                    db.Admins.Add(AdminData);
+                    db.SaveChanges();
+                    Email(SessionID, AdminData.Email);
+                }
+                
+                return "success";
+            }
+            catch (Exception err)
+            {
+                return err.Message ;
+            }
+        }
+
+        //***********************************register employee and admin********************************************
+        [Route("RegisterEmployee")]
+        [HttpPost]
+        public dynamic RegisterEmployee(EmployeeData Modell)
+        {
+            try
+            {
+                User UserObject = new User();
+                UserObject.Username = generateUser();
                 UserObject.Password = generatePassword(300);
                 //UserObject.Password = GenerateHash(Password);
-                
-                UserObject.RoleID = Modell.RoleID;
-                
+
+                UserObject.RoleID = Modell.UserData.RoleID;
+
                 Guid g = Guid.NewGuid();
                 UserObject.SessionID = g.ToString();
                 db.Users.Add(UserObject);
@@ -251,32 +359,38 @@ namespace ExperTech_Api.Controllers
                 int UserID = UserObject.UserID;
                 string SessionID = UserObject.SessionID;
 
-                if (Modell.RoleID == 3) //register employee
+                foreach (Employee EmployeesData in Modell.UserData.Employees)
                 {
-                    foreach (Employee EmployeeData in Modell.Employees)
+                    EmployeesData.UserID = UserID;
+                    db.Employees.Add(EmployeesData);
+                    db.SaveChanges();
+
+                    populateTimes(EmployeesData.EmployeeID);
+
+
+                    foreach (int types in Modell.ServiceTypes)
                     {
-                        EmployeeData.UserID = UserID;
-                        db.Employees.Add(EmployeeData);
+                        EmployeeServiceType newEmpType = new EmployeeServiceType();
+                        newEmpType.EmployeeID = EmployeesData.EmployeeID;
+                        newEmpType.TypeID = types;
+                        db.EmployeeServiceTypes.Add(newEmpType);
                         db.SaveChanges();
-                        Email(SessionID, EmployeeData.Email);
                     }
+                    Email(SessionID, EmployeesData.Email);
                 }
-                else if (Modell.RoleID == 2) //register admin
-                {
-                    foreach (Admin AdminData in Modell.Admins)
-                    {
-                        AdminData.UserID = UserID;
-                        db.Admins.Add(AdminData);
-                        db.SaveChanges();
-                        Email(SessionID, AdminData.Email);
-                    }
-                }
+              
                 return "success";
             }
             catch (Exception err)
             {
-                return err.Message ;
+                return err.Message;
             }
+        }
+
+        public class EmployeeData
+        {
+            public User UserData { get; set; }
+            public ICollection<int> ServiceTypes { get; set; }
         }
         //***************************generate user*************************************
         private static string generateUser()
@@ -359,43 +473,54 @@ namespace ExperTech_Api.Controllers
         }
         //***********************************make booking paynent*****************************
         [Route("bookingPayment")]
-        [HttpPut]
-        public object bookingPayment(dynamic bkings)
+        [HttpPost]
+        public dynamic bookingPayment(dynamic bkings)
         {
             try
             {
-                int BookingID = (int)bkings.BookingID;
-                int PaymentTypeID = (int)bkings.PaymentTypeID;
-                decimal Price = (decimal)bkings.Price;
+                string SessionID = bkings.SessionID;
+                User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+                if (findUser != null)
+                {
+                    int BookingID = (int)bkings.BookingID;
+                    int PaymentTypeID = (int)bkings.PaymentTypeID;
+                    decimal Price = (decimal)bkings.Price;
 
-                Booking findBookings = db.Bookings.Where(zz => zz.BookingID == BookingID).FirstOrDefault();
+                    Booking findBookings = db.Bookings.Where(zz => zz.BookingID == BookingID).FirstOrDefault();
 
-                Sale makeSale = new Sale();
-                makeSale.PaymentTypeID = PaymentTypeID;
-                makeSale.Payment = Price;
-                makeSale.SaleTypeID = 2;
-                makeSale.ClientID = findBookings.ClientID;
-                makeSale.StatusID = 2;
-                makeSale.Date = DateTime.Now;
-                db.Sales.Add(makeSale);
-                db.SaveChanges();
+                    Sale makeSale = new Sale();
+                    makeSale.PaymentTypeID = PaymentTypeID;
+                    makeSale.Payment = Price;
+                    makeSale.SaleTypeID = 2;
+                    makeSale.ClientID = findBookings.ClientID;
+                    makeSale.StatusID = 2;
+                    makeSale.Date = DateTime.Now;
+                    db.Sales.Add(makeSale);
+                    db.SaveChanges();
 
-                findBookings.StatusID = 6;
-                findBookings.SaleID = makeSale.SaleID;
+                    findBookings.StatusID = 6;
+                    findBookings.SaleID = makeSale.SaleID;
 
-                
-                
-              
 
-                Sale sayle = new Sale();
-                //booking, client array, sale
 
-                //Client client = new Client();
-                //client.Client = bkings.Client;
-                //client.ClientID.ToString() = bkings.ClientID;
-                db.SaveChanges();
 
-                return findBookings;
+
+                    Sale sayle = new Sale();
+                    //booking, client array, sale
+
+                    //Client client = new Client();
+                    //client.Client = bkings.Client;
+                    //client.ClientID.ToString() = bkings.ClientID;
+                    db.SaveChanges();
+                    dynamic toReturn = new ExpandoObject();
+                    toReturn.Message = "success";
+                    toReturn.SessionID = findUser.SessionID;
+                    return toReturn;
+                }
+                else
+                {
+                    return "Session is not valid";
+                }
             }
             catch (Exception err)
             {
@@ -552,6 +677,35 @@ namespace ExperTech_Api.Controllers
                 toReturn.Error = "Guid is no longer valid";
                 return toReturn;
             }
+        }
+
+       
+        private dynamic populateTimes(int EmployeeID)
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+
+            List<Schedule> ScheduleList = db.Schedules.ToList();
+            List<EmployeeSchedule> newList = new List<EmployeeSchedule>();
+            for (int j = 0; j < ScheduleList.Count; j++)
+            {
+                int thisDateID = ScheduleList[j].DateID;
+                int thisTimeID = ScheduleList[j].TimeID;
+                EmployeeSchedule newSchedge = db.EmployeeSchedules.Where(zz => zz.DateID == thisDateID && zz.TimeID == thisTimeID).FirstOrDefault();
+                if (newSchedge == null)
+                {
+                    EmployeeSchedule items = new EmployeeSchedule();
+                    items.EmployeeID = EmployeeID;
+                    items.DateID = thisDateID;
+                    items.TimeID = thisTimeID;
+                    items.StatusID = 1;
+                    newList.Add(items);
+                }
+
+            }
+            db.EmployeeSchedules.AddRange(newList);
+
+            db.SaveChanges();
+            return "success";
         }
 
     }
