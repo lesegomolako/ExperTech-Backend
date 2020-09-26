@@ -19,6 +19,174 @@ namespace ExperTech_Api.Controllers
     {
         public ExperTechEntities db = new ExperTechEntities();
 
+        [System.Web.Http.Route("getProfile")]
+        [System.Web.Mvc.HttpGet]
+        public dynamic getProfile(string SessionID)
+        {
+
+            db.Configuration.ProxyCreationEnabled = false;
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser != null)
+            {
+                int UserID = findUser.UserID;
+                int RoleID = findUser.RoleID;
+                switch(RoleID)
+                {
+                    case 1:
+                        User findClient = db.Users.Include(zz => zz.Clients).Where(zz => zz.UserID == UserID).FirstOrDefault();
+                        return findProfile(findClient);
+
+                    case 2:
+                        User findAdmin = db.Users.Include(zz => zz.Admins).Where(zz => zz.UserID == UserID).FirstOrDefault();
+                        return findProfile(findAdmin);
+
+                    case 3:
+                        User findEmp = db.Users.Include(zz => zz.Employees).Where(zz => zz.UserID == UserID).FirstOrDefault();
+                        return findProfile(findEmp);
+
+                    default:
+                        return "User not found";
+                }
+                
+            }
+            else
+            {
+                return "Session is not valid";
+            }
+
+        }
+
+        private dynamic findProfile(User Modell)
+        {
+            if(Modell.RoleID == 1)
+            {
+                dynamic newObject = new ExpandoObject();
+                newObject.UserID = Modell.UserID;
+                List<dynamic> newList = new List<dynamic>();
+                foreach(Client items in Modell.Clients)
+                {
+                    dynamic myObject = new ExpandoObject();
+                    myObject.Name = items.Name;
+                    myObject.Surname = items.Surname;
+                    myObject.Email = items.Email;
+                    myObject.ContactNo = items.ContactNo;
+                    newList.Add(myObject);
+                }
+                newObject.Clients = newList;
+                return newObject;   
+            }
+            else if (Modell.RoleID == 2)
+            {
+                dynamic newObject = new ExpandoObject();
+                newObject.UserID = Modell.UserID;
+                List<dynamic> newList = new List<dynamic>();
+                foreach (Admin items in Modell.Admins)
+                {
+                    dynamic myObject = new ExpandoObject();
+                    myObject.Name = items.Name;
+                    myObject.Surname = items.Surname;
+                    myObject.Email = items.Email;
+                    myObject.ContactNo = items.ContactNo;
+                    newList.Add(myObject);
+                }
+                newObject.Admins = newList;
+                return newObject;
+            }
+            else if (Modell.RoleID == 3)
+            {
+                dynamic newObject = new ExpandoObject();
+                newObject.UserID = Modell.UserID;
+                List<dynamic> newList = new List<dynamic>();
+                foreach (Employee items in Modell.Employees)
+                {
+                    dynamic myObject = new ExpandoObject();
+                    myObject.Name = items.Name;
+                    myObject.Surname = items.Surname;
+                    myObject.Email = items.Email;
+                    myObject.ContactNo = items.ContactNo;
+                    newList.Add(myObject);
+                }
+                newObject.Employees = newList;
+                return newObject;
+            }
+
+            return "User not found";
+        }
+
+        [Route("updateProfile")]
+        [System.Web.Mvc.HttpPost]
+
+        public dynamic updateProfile([FromBody] User forUser)
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            var us = forUser;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                User findUser = db.Users.Where(zz => zz.SessionID == forUser.SessionID).FirstOrDefault();
+
+                if (findUser != null)
+                {
+                    switch (forUser.RoleID)
+                    {
+                        case 1:
+                            {
+                                Client editClient = db.Clients.Where(zz => zz.UserID == findUser.UserID).FirstOrDefault();
+                                foreach (Client items in forUser.Clients)
+                                {
+                                    editClient.Name = items.Name;
+                                    editClient.Surname = items.Surname;
+                                    editClient.Email = items.Email;
+                                    editClient.ContactNo = items.ContactNo;
+                                }
+                                db.SaveChanges();
+                                return "success";
+                            }
+                        case 2:
+                            {
+                                Admin editAdmin = db.Admins.Where(zz => zz.UserID == findUser.UserID).FirstOrDefault();
+                                foreach (Admin items in forUser.Admins)
+                                {
+                                    editAdmin.Name = items.Name;
+                                    editAdmin.Surname = items.Surname;
+                                    editAdmin.Email = items.Email;
+                                    editAdmin.ContactNo = items.ContactNo;
+                                }
+                                db.SaveChanges();
+                                return "success";
+                            }
+                        case 3:
+                            {
+                                Employee editEmp = db.Employees.Where(zz => zz.UserID == findUser.UserID).FirstOrDefault();
+                                foreach (Employee items in forUser.Employees)
+                                {
+                                    editEmp.Name = items.Name;
+                                    editEmp.Surname = items.Surname;
+                                    editEmp.Email = items.Email;
+                                    editEmp.ContactNo = items.ContactNo;
+                                }
+                                db.SaveChanges();
+                                return "success";
+                            }
+                        default:
+                            return "Profile details are invalid";
+                    }
+
+
+                }
+                return "Session is no longer valid";
+            }
+            catch (Exception err)
+            {
+                return err.Message;
+            }
+
+        }
+
         [Route("ForgotPassword")]
         [HttpPost]
         public dynamic ForgotPassword(string Email)
@@ -65,6 +233,17 @@ namespace ExperTech_Api.Controllers
             {
                 return "not found";
             }
+        }
+
+        [Route("Logout")]
+        [HttpGet]
+        public dynamic Logout(string SessionID)
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            findUser.SessionID = null;
+            db.SaveChanges();
+            return "success";
         }
 
         private void ForgotEmail(string SessionID, string Email )

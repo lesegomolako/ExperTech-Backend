@@ -10,13 +10,14 @@ using System.Net.Mail;
 using System.Data.Entity;
 //using System.Windows.Forms;
 
-namespace SteveAPI.Controllers
+namespace ExperTech_Api.Controllers
 {
     public class SaleController : ApiController
     {
 
          ExperTechEntities db = new ExperTechEntities();
 
+      
         [System.Web.Http.Route("api/Client/getBasketlinewithProduct")]
         [System.Web.Mvc.HttpGet]
         public List<dynamic> getBasketlinewithProduct(string sess)
@@ -147,33 +148,40 @@ namespace SteveAPI.Controllers
 
 
         [Route("api/Sale/AddMakeSale")]
-        [HttpPost]
-        public dynamic AddMakeSale(string sess, [FromBody] Sale AddObject)
+        [HttpGet]
+        public dynamic AddMakeSale(string SessionID)
         {
+
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser == null)
             {
-                var admin = db.Users.Where(zz => zz.SessionID == sess).ToList();
-                if (admin == null)
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "Session is no longer available";
+                return toReturn;
+            }
+
+            try
+            {
+                int ClientID = db.Clients.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.ClientID).FirstOrDefault();
+
+                Sale MakeSale = new Sale();
+                MakeSale.ClientID = ClientID;
+                MakeSale.StatusID = 1;
+                MakeSale.ReminderID = 2;
+                MakeSale.Date = DateTime.Now;
+                MakeSale.SaleTypeID = 1;
+                db.Sales.Add(MakeSale);
+                db.SaveChanges();
+
+                int SaleID = MakeSale.SaleID;
+                int BasketID = db.Baskets.Where(zz => zz.ClientID == ClientID).Select(zz => zz.BasketID).FirstOrDefault();
+
+                List<BasketLine> getBasket = db.BasketLines.Include(zz => zz.Product).Where(zz => zz.BasketID == BasketID).ToList();
+
+                List<dynamic> Problems = new List<dynamic>();
+                foreach (BasketLine items in getBasket)
                 {
-                    dynamic toReturn = new ExpandoObject();
-                    toReturn.Error = "Session is no longer available";
-                    return toReturn;
-                }
-                if (AddObject != null)
-                {
-                    Sale MakeSale = new Sale();
-                    MakeSale.ClientID = AddObject.ClientID;
-                    MakeSale.StatusID = 1;
-                    MakeSale.ReminderID = 2;
-                    MakeSale.Date = DateTime.Now;
-                    db.Sales.Add(MakeSale);
-                    db.SaveChanges();
-
-                    int SaleID = db.Sales.Where(zz => zz.ClientID == AddObject.ClientID).Select(zz => zz.SaleID).LastOrDefault();
-                    int BasketID = db.Baskets.Where(zz => zz.ClientID == AddObject.ClientID).Select(zz => zz.BasketID).FirstOrDefault();
-
-                    List<BasketLine> getBasket = db.BasketLines.Where(zz => zz.BasketID == BasketID).ToList();
-
-                    foreach (BasketLine items in getBasket)
+                    if (items.Product.QuantityOnHand > items.Quantity)
                     {
                         SaleLine AddSaleLine = new SaleLine();
                         AddSaleLine.Quantity = items.Quantity;
@@ -181,16 +189,28 @@ namespace SteveAPI.Controllers
                         AddSaleLine.SaleID = SaleID;
                         db.SaleLines.Add(AddSaleLine);
                         db.SaveChanges();
+
+                        Product decreaseQuantity = db.Products.Where(zz => zz.ProductID == items.ProductID).FirstOrDefault();
+                        decreaseQuantity.QuantityOnHand -= items.Quantity;
+                        db.SaveChanges();
+                   
                     }
-
-                    return "success";
-
+                    else
+                    {
+                        dynamic problem = new ExpandoObject();
+                        problem = "Item: " + items.Product.Name + "(out of stock)";
+                        Problems.Add(problem);
+                    }
                 }
-                else
-                {
-                    return null;
-                }
+                db.BasketLines.RemoveRange(getBasket);
+                db.SaveChanges();
+                return "success";
             }
+            catch(Exception err)
+            {
+                return err.Message;
+            }
+
         }
     }
 }

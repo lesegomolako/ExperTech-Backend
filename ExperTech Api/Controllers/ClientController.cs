@@ -87,38 +87,8 @@ namespace ExperTech_Api.Controllers
 
         }
 
-        //*****************************************update admin****************************************
-        [Route("updateClient")]
-        [System.Web.Mvc.HttpPost]
-
-        public IHttpActionResult updateClient([FromBody] Client forClient)
-        {
-            db.Configuration.ProxyCreationEnabled = false;
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-                Client adminzz = db.Clients.Find(forClient.ClientID);
-
-                if (adminzz != null)
-                {
-                    adminzz.Name = forClient.Name;
-                    adminzz.Surname = forClient.Surname;
-                    adminzz.Email = forClient.Email;
-                    adminzz.ContactNo = forClient.ContactNo;
-                    adminzz.UserID = forClient.UserID;
-
-                    db.SaveChanges();
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            return Ok(forClient);
-        }
+        
+       
 
         //***************delete client from system, i really didn't have to say from system but i did it anyways, lmao************************
         [Route("deleteClient")]
@@ -255,15 +225,7 @@ namespace ExperTech_Api.Controllers
             return dynamicUser;
         }
 
-        [System.Web.Http.Route("getallClients")]
-        [System.Web.Mvc.HttpGet]
-        public dynamic getallClients(int id)
-        {
-
-            db.Configuration.ProxyCreationEnabled = false;
-            return db.Clients.Where(zz => zz.ClientID == id).FirstOrDefault();
-
-        }
+       
         private List<dynamic> getClientReturnList(List<Client> ForClient)
         {
             List<dynamic> dymanicClients = new List<dynamic>();
@@ -578,6 +540,7 @@ namespace ExperTech_Api.Controllers
             product.Name = Modell.Name;
             product.Price = Modell.Price;
             product.Description = Modell.Description;
+            product.QuantityOnHand = Modell.QuantityOnHand;
 
             product.Category = db.ProductCategories.Where(xx => xx.CategoryID == Modell.CategoryID).Select(zz => zz.Category).FirstOrDefault();
             List<ProductPhoto> findPhotos = db.ProductPhotoes.Where(zz => zz.ProductID == Modell.ProductID).ToList();

@@ -12,7 +12,7 @@ using ExperTech_Api.Models;
 using System.Dynamic;
 using System.Security.Cryptography;
 
-namespace SteveAPI.Controllers
+namespace ExperTech_Api.Controllers
 {
     public class StockItemController : ApiController
     {
@@ -100,10 +100,10 @@ namespace SteveAPI.Controllers
 
         [Route("api/StockItem/AddStockItem")]
         [HttpPost]
-        public dynamic AddStockitem(string sess, [FromBody] StockItem AddObject)
+        public dynamic AddStockitem(string SessionID, [FromBody] StockItem AddObject)
         {
             {
-                var admin = db.Users.Where(zz => zz.SessionID == sess).ToList();
+                var admin = db.Users.Where(zz => zz.SessionID == SessionID).ToList();
                 if (admin == null)
                 {
                     dynamic toReturn = new ExpandoObject();

@@ -13,7 +13,7 @@ using System.Reflection;
 using System.Web.Http;
 using System.Web.Http.Description;
 
-namespace SteveAPI.Controllers
+namespace ExperTech_Api.Controllers
 {
     public class SupplierController : ApiController
     {
@@ -58,17 +58,17 @@ namespace SteveAPI.Controllers
 
         [Route("api/Supplier/UpdateSupplier")]
         [HttpPut]
-        public dynamic UpdateSupplier(string sess, [FromBody] Supplier UpdateObject)
+        public dynamic UpdateSupplier(string SessionID, [FromBody] Supplier UpdateObject)
         {
             {
-                var admin = db.Users.Where(zz => zz.SessionID == sess).ToList();
+                var admin = db.Users.Where(zz => zz.SessionID == SessionID).ToList();
                 if (admin == null)
                 {
                     dynamic toReturn = new ExpandoObject();
                     toReturn.Error = "Session is no longer available";
                     return toReturn;
                 }
-                if (UpdateObject != null)
+                try
                 {
                     Supplier findSupplier = db.Suppliers.Where(zz => zz.SupplierID == UpdateObject.SupplierID).FirstOrDefault();
                     findSupplier.Name = UpdateObject.Name;
@@ -79,9 +79,9 @@ namespace SteveAPI.Controllers
                     return "success";
 
                 }
-                else
+                catch
                 {
-                    return null;
+                    return "Supplier details are invalid";
                 }
             }
         }
