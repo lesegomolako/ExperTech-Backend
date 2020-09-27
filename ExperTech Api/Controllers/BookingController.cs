@@ -337,10 +337,26 @@ namespace ExperTech_Api.Controllers
                 foreach (EmployeeSchedule schedule in bookings.EmployeeSchedules)
                 {
                     dynamic SchedgeObject = new ExpandoObject();
-                    SchedgeObject.Date = db.Dates.Where(zz => zz.DateID == schedule.DateID).Select(zz => zz.Date1).FirstOrDefault();
-                    SchedgeObject.StartTime = db.Timeslots.Where(zz => zz.TimeID == schedule.TimeID).Select(zz => zz.StartTime).FirstOrDefault();
-                    SchedgeObject.EndTime = db.Timeslots.Where(zz => zz.TimeID == schedule.TimeID).Select(zz => zz.EndTime).FirstOrDefault();
+
+                    DateTime getDate = db.Dates.Where(zz => zz.DateID == schedule.DateID).Select(zz => zz.Date1).FirstOrDefault();
+                    Timeslot getTimes = db.Timeslots.Where(zz => zz.TimeID == schedule.TimeID).FirstOrDefault();
+
+                    SchedgeObject.Date = getDate;
+                    SchedgeObject.StartTime = getTimes.StartTime;
+                    SchedgeObject.EndTime = getTimes.EndTime;
                     SchedgeObject.Employee = db.Employees.Where(zz => zz.EmployeeID == schedule.EmployeeID).Select(zz => zz.Name).FirstOrDefault();
+
+                    DateTime makeDT = (DateTime)getDate + (TimeSpan)getTimes.StartTime;
+                    DateTime DayBefore = makeDT.Subtract(new TimeSpan(24, 0, 0));
+                    DateTime today = DateTime.Now;
+
+                    bool canCancel = false;
+                    if(today < DayBefore)
+                    {
+                        canCancel = true;
+                    }
+
+                    SchedgeObject.canCancel = canCancel;
 
                     EmpSchedule.Add(SchedgeObject);
                 }
@@ -359,7 +375,7 @@ namespace ExperTech_Api.Controllers
                     DateRequested.Add(requestedDate);
                 }
                 if (DateRequested.Count != 0)
-                    obForBooking.DateRequested = DateRequested;
+                    obForBooking.DateRequesteds = DateRequested;
 
                 List<dynamic> BookingLine = new List<dynamic>();
                 foreach (BookingLine line in bookings.BookingLines)
@@ -549,27 +565,43 @@ namespace ExperTech_Api.Controllers
         //Request Booking
         [HttpPost]
         [Route("api/Bookings/RequestBooking")]
-        public dynamic RequestBooking([FromBody] Booking booking)
+        public dynamic RequestBooking([FromBody] Booking booking, string SessionID)
         {
-            try
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser != null)
             {
-                db.Configuration.ProxyCreationEnabled = false;
-                Booking newBooking = new Booking();
-                newBooking.ClientID = booking.ClientID;
-                newBooking.StatusID = 1;
-                newBooking.ReminderID = 1;
-                db.Bookings.Add(newBooking);
-                db.SaveChanges();
-                db.Entry(newBooking).GetDatabaseValues();
+                int ClientID = db.Clients.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.ClientID).FirstOrDefault();
+                if (ClientID != 0)
+                {
+                    try
+                    {
+                        db.Configuration.ProxyCreationEnabled = false;
+                        Booking newBooking = new Booking();
+                        newBooking.ClientID = ClientID;
+                        newBooking.StatusID = 1;
+                        newBooking.ReminderID = 1;
+                        db.Bookings.Add(newBooking);
+                        db.SaveChanges();
 
-                int BookingID = newBooking.BookingID;
 
-                return SaveBooking(booking, BookingID);
+                        int BookingID = newBooking.BookingID;
 
+                        return SaveBooking(booking, BookingID);
+
+                    }
+                    catch (Exception err)
+                    {
+                        return err.Message;
+                    }
+                }
+                else
+                {
+                    return "Client not found";
+                }
             }
-            catch (Exception err)
+            else
             {
-                return err.Message;
+                return "Session is no longer valid";
             }
         }
 
@@ -687,9 +719,14 @@ namespace ExperTech_Api.Controllers
 
                 foreach (BookingNote items in Modell.BookingNotes)
                 {
-                    BookingNote notes = new BookingNote();
-                    notes.Note = items.Note;
-                    notes.BookingID = BookingID;
+                    if (items.Note != null)
+                    {
+                        BookingNote notes = new BookingNote();
+                        notes.Note = items.Note;
+                        notes.BookingID = BookingID;
+                        db.BookingNotes.Add(notes);
+                        db.SaveChanges();
+                    }
                 }
 
                 return "success";

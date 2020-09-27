@@ -57,50 +57,69 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/StockItem/UpdateStockItem")]
         [HttpPut]
-        public List<dynamic> UpdateStockItem( [FromBody] StockItem UpdateObject)
+        public dynamic UpdateStockItem([FromBody] StockItem UpdateObject, string SessionID)
         {
-                if (UpdateObject != null)
-                {
-                    StockItem findStockItem = db.StockItems.Where(zz => zz.ItemID == UpdateObject.ItemID).FirstOrDefault();
-                    findStockItem.Name = UpdateObject.Name;
-                    findStockItem.Description = UpdateObject.Description;
-                    findStockItem.Price = UpdateObject.Price;
-                    findStockItem.QuantityInStock = UpdateObject.QuantityInStock;
-                    db.SaveChanges();
-                    return GetStockItemList();
-
-                }
-                else
-                {
-                    return null;
-                }
+            var admin = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if(admin == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "Session is not valid";
+                return toReturn;
             }
+
+            if (UpdateObject != null)
+            {
+                StockItem findStockItem = db.StockItems.Where(zz => zz.ItemID == UpdateObject.ItemID).FirstOrDefault();
+                findStockItem.Name = UpdateObject.Name;
+                findStockItem.Description = UpdateObject.Description;
+                findStockItem.Price = UpdateObject.Price;
+                findStockItem.QuantityInStock = UpdateObject.QuantityInStock;
+                db.SaveChanges();
+                return "success";
+
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         
 
         [Route("api/StockItem/DeleteStockItem")]
         [HttpDelete]
-        public object DeleteStockItem(string sess, int ItemID)
+        public object DeleteStockItem(string SessionID, int ItemID)
         {
+
+            var admin = db.Users.Where(zz => zz.SessionID == SessionID).ToList();
+            if (admin == null)
             {
-                var admin = db.Users.Where(zz => zz.SessionID == sess).ToList();
-                if (admin == null)
-                {
-                    dynamic toReturn = new ExpandoObject();
-                    toReturn.Error = "Session is no longer available";
-                    return toReturn;
-                }
-                db.Configuration.ProxyCreationEnabled = false;
-                StockItem findStockItem = db.StockItems.Find(ItemID);
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "Session is not valid";
+                return toReturn;
+            }
+            db.Configuration.ProxyCreationEnabled = false;
+            StockItem findStockItem = db.StockItems.Find(ItemID);
+            List<StockTakeLine> findTakeLine = db.StockTakeLines.Where(zz => zz.ItemID == ItemID).ToList();
+            List<WriteOffLine> findWriteOffLine = db.WriteOffLines.Where(zz => zz.ItemID == ItemID).ToList();
+            List<StockItemLine> findItemLine = db.StockItemLines.Where(zz => zz.ItemID == ItemID).ToList();
+
+            if (findTakeLine.Count == 0 && findWriteOffLine.Count == 0 && findItemLine.Count == 0)
+            {
                 db.StockItems.Remove(findStockItem);
                 db.SaveChanges();
                 return "sucess";
             }
+            else
+            {
+                return null;  //HEY LOOK HERE
+            }
+
         }
 
         [Route("api/StockItem/AddStockItem")]
         [HttpPost]
-        public dynamic AddStockitem(string SessionID, [FromBody] StockItem AddObject)
+        public dynamic AddStockItem(string SessionID, [FromBody] StockItem AddObject)
         {
             {
                 var admin = db.Users.Where(zz => zz.SessionID == SessionID).ToList();

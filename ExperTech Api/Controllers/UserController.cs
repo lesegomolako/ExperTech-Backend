@@ -119,7 +119,7 @@ namespace ExperTech_Api.Controllers
         public dynamic updateProfile([FromBody] User forUser)
         {
             db.Configuration.ProxyCreationEnabled = false;
-            var us = forUser;
+           
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

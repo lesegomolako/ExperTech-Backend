@@ -33,7 +33,7 @@ namespace ExperTech_Api.Controllers
             //}
 
             db.Configuration.ProxyCreationEnabled = false;
-            return SupplierList(db.Suppliers.ToList());
+            return SupplierList(db.Suppliers.Where(zz => zz.Deleted == false).ToList());
 
 
         }
@@ -89,36 +89,51 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Supplier/DeleteSupplier")]
         [HttpDelete]
-        public List<dynamic> DeleteSupplier(int SupplierID)
+        public dynamic DeleteSupplier(int SupplierID, string SessionID)
         {
-            //{
-            //    var admin = db.Users.Where(zz => zz.SessionID == sess).ToList();
-            //    if (admin == null)
-            //    {
-            //        dynamic toReturn = new ExpandoObject();
-            //        toReturn.Error = "Session is no longer available";
-            //        return GetSupplierList();
-            //    }
-            //}
+            
+             var admin = db.Users.Where(zz => zz.SessionID == SessionID).ToList();
+             if (admin == null)
+             {
+                  dynamic toReturn = new ExpandoObject();
+                  toReturn.Error = "Session is no longer available";
+                  return GetSupplierList();
+             }
+            
 
             db.Configuration.ProxyCreationEnabled = false;
             List<Product> findProds = db.Products.Where(zz => zz.SupplierID == SupplierID).ToList();
             List<SupplierOrder> findSuppOrder = db.SupplierOrders.Where(zz => zz.SupplierID == SupplierID).ToList();
 
-            foreach (Product item in findProds)
+            if (findProds.Count == 0)
             {
-                item.SupplierID = null;
-                db.SaveChanges();
+                Supplier findSupplier = db.Suppliers.Find(SupplierID);
+                if (findSuppOrder.Count == 0 )
+                {
+                    db.Suppliers.Remove(findSupplier);
+                    db.SaveChanges();
+                    dynamic toReturn = new ExpandoObject();
+                    toReturn.Message = "success";
+                    return toReturn;
+                }
+                else
+                {
+                    findSupplier.Deleted = true;
+                    db.SaveChanges();
+                    dynamic toReturn = new ExpandoObject();
+                    toReturn.Message = "success";
+                    return toReturn;
+                }
+               
             }
-            foreach (SupplierOrder item in findSuppOrder)
+            else
             {
-                item.SupplierID = null;
-                db.SaveChanges();
+                dynamic toReturn = new ExpandoObject();
+                int countProd = findProds.Count;
+                toReturn.Error = "dependencies";
+                toReturn.Message = "There are " + countProd.ToString() + " Products that depend this Supplier. \nDelete those products first.";
+                return toReturn;
             }
-            Supplier findSupplier = db.Suppliers.Find(SupplierID);
-            db.Suppliers.Remove(findSupplier);
-            db.SaveChanges();
-            return GetSupplierList();
         }
 
 
@@ -165,7 +180,7 @@ namespace ExperTech_Api.Controllers
                     LineObject.Items = findItem;
                     stockItem.Add(LineObject);
                 }
-                OrderObject.StockItemLine = stockItem;
+                OrderObject.StockItemLines = stockItem;
                 newObject.Add(OrderObject);
 
             }
@@ -176,18 +191,18 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Supplier/AddSupplierOrder")]
         [HttpPost]
-        public dynamic AddSupplierOrder([FromBody] SupplierOrder Items)
+        public dynamic AddSupplierOrder([FromBody] SupplierOrder Items, string SessionID)
         {
-            //{
-            //    var admin = db.Users.Where(zz => zz.SessionID == sess).ToList();
-            //    if (admin == null)
-            //    {
-            //        dynamic toReturn = new ExpandoObject();
-            //        toReturn.Error = "Session is no longer available";
-            //        return toReturn;
-            //    }
+
+            var admin = db.Users.Where(zz => zz.SessionID == SessionID).ToList();
+            if (admin == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "Session is not valid";
+                return toReturn;
+            }
+
             SupplierOrder newObject = new SupplierOrder();
-            newObject.OrderID = Items.OrderID;
             newObject.SupplierID = Items.SupplierID;
             newObject.Description = Items.Description;
             decimal total = 0;
@@ -201,7 +216,7 @@ namespace ExperTech_Api.Controllers
 
             db.SupplierOrders.Add(newObject);
             db.SaveChanges();
-            db.Entry(newObject).GetDatabaseValues();
+           
 
             int OrderID = newObject.OrderID;
 
@@ -254,16 +269,17 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Supplier/AddSupplier")]
         [HttpPost]
-        public dynamic AddSupplier([FromBody] Supplier AddObject)
+        public dynamic AddSupplier([FromBody] Supplier AddObject, string SessionID)
         {
-            //{
-            //    var admin = db.Users.Where(zz => zz.SessionID == sess).ToList();
-            //    if (admin == null)
-            //    {
-            //        dynamic toReturn = new ExpandoObject();
-            //        toReturn.Error = "Session is no longer available";
-            //        return toReturn;
-            //    }
+
+            var admin = db.Users.Where(zz => zz.SessionID == SessionID).ToList();
+            if (admin == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "Session is no longer available";
+                return toReturn;
+            }
+
             if (AddObject != null)
             {
                 Supplier findSupplier = db.Suppliers.Where(zz => zz.Name == AddObject.Name).FirstOrDefault();

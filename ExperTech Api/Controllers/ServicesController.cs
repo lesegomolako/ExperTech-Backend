@@ -117,6 +117,41 @@ namespace ExperTech_Api.Controllers
                 return err.Message;
             }
         }
+
+        [Route("api/Services/ViewServices")]
+        [HttpGet]
+        public dynamic ViewServices()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            List<ServiceType> getServices = db.ServiceTypes.Include(zz => zz.Services).ToList();
+            return formatServices(getServices);
+        }
+
+        private dynamic formatServices(List<ServiceType> Types)
+        {
+            List<dynamic> toReturn = new List<dynamic>();
+           foreach(ServiceType items in Types)
+            {
+                dynamic TypeObject = new ExpandoObject();
+                TypeObject.Name = items.Name;
+
+                List<dynamic> Services = new List<dynamic>();
+                foreach(Service service in items.Services)
+                {
+                    dynamic ServObject = new ExpandoObject();
+                    List<Service> findService = db.Services.Include(zz => zz.ServicePrices).Include(zz => zz.ServiceType)
+                                    .Include(zz => zz.ServicePhotoes).Include(zz => zz.ServiceTypeOptions).Where(zz => zz.ServiceID == service.ServiceID).ToList();
+                    ServObject = getServices(findService)[0];
+                    Services.Add(ServObject);
+                }
+                if(Services.Count >0)
+                TypeObject.Services = Services;
+
+                toReturn.Add(TypeObject);
+            }
+
+            return toReturn;
+        }
         //************************************Service************************************************
         [Route("api/Services/AddService")]
         [HttpPost]

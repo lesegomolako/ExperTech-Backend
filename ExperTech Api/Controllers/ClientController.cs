@@ -683,30 +683,60 @@ namespace ExperTech_Api.Controllers
             return Ok(id);
         }
 
-        [System.Web.Mvc.HttpDelete]
-        [System.Web.Http.Route("CancelClientBooking")]
-        public IHttpActionResult CancelClientBooking(int id)
+        [HttpDelete]
+        [Route("CancelClientBooking")]
+        public dynamic CancelClientBooking(int bookingID, string SessionID)
         {
-
-            db.Configuration.ProxyCreationEnabled = false;
-            Booking bookings = db.Bookings.Where(zz => zz.BookingID == id).FirstOrDefault();
-
-            bookings.StatusID = 5;
-            db.SaveChanges();
-
-            foreach (EmployeeSchedule emschedule in bookings.EmployeeSchedules)
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser != null)
             {
-                EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.EmployeeID == emschedule.EmployeeID
-                && zz.DateID == emschedule.DateID && zz.TimeID == emschedule.TimeID).FirstOrDefault();
-                if (bookinglist != null)
+                db.Configuration.ProxyCreationEnabled = false;
+                Booking bookings = db.Bookings.Include(zz => zz.EmployeeSchedules).Include(zz => zz.DateRequesteds).Include(zz => zz.BookingLines).Include(zz => zz.BookingNotes).Where(zz => zz.BookingID == bookingID).FirstOrDefault();
+
+                foreach (EmployeeSchedule emschedule in bookings.EmployeeSchedules)
                 {
-                    bookinglist.StatusID = 1;
-                    bookinglist.BookingID = null;
+                    EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.EmployeeID == emschedule.EmployeeID
+                    && zz.DateID == emschedule.DateID && zz.TimeID == emschedule.TimeID).FirstOrDefault();
+                    if (bookinglist != null)
+                    {
+                        bookinglist.StatusID = 1;
+                        bookinglist.BookingID = null;
+                        db.SaveChanges();
+                    }
+
+                }
+
+                foreach(DateRequested items in bookings.DateRequesteds)
+                {
+                   
+                    db.DateRequesteds.Remove(items);
+                    db.SaveChanges();
+
+                }
+
+                foreach (BookingNote items in bookings.BookingNotes)
+                {
+                    BookingNote findNote = db.BookingNotes.Find(items.NotesID);
+                    db.BookingNotes.Remove(findNote);
                     db.SaveChanges();
                 }
 
+                foreach (BookingLine items in bookings.BookingLines)
+                {
+                    BookingLine findLine = db.BookingLines.Find(items.LineID);
+                    db.BookingLines.Remove(findLine);
+                    db.SaveChanges();
+                }
+
+                db.Bookings.Remove(bookings);
+                db.SaveChanges();
+
+                return "success";
             }
-            return Ok(id);
+            else
+            {
+                return "Session is no longer valid";
+            }
         }
 
 
