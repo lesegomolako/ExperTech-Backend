@@ -152,40 +152,50 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/StockTake/AddStockTake")]
         [HttpPost]
-        public dynamic AddStocktake(string sess, [FromBody] StockTake AddObject)
+        public dynamic AddStocktake(string SessionID, [FromBody] StockTake AddObject)
         {
             {
-                var admin = db.Users.Where(zz => zz.SessionID == sess).ToList();
-                if (admin == null)
+                User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+                if (findUser == null)
                 {
                     dynamic toReturn = new ExpandoObject();
                     toReturn.Error = "Session is no longer available";
                     return toReturn;
                 }
+
                 if (AddObject != null)
                 {
-
-                    StockTake Takes = new StockTake();
-                    Takes.AdminID = AddObject.AdminID;
-                    Takes.Description = AddObject.Description;
-                    Takes.Date = DateTime.Now;
-                    db.StockTakes.Add(Takes);
-
-                    db.SaveChanges();
-                    int StockTakeID = db.StockTakes.Where(zz => zz.Description == AddObject.Description).Select(zz => zz.StockTakeID).FirstOrDefault();
-
-                    foreach (StockTakeLine lines in AddObject.StockTakeLines)
+                    Admin findAdmin = db.Admins.Where(zz => zz.UserID == findUser.UserID).FirstOrDefault();
+                    if (findAdmin != null)
                     {
-                        StockTakeLine newObject = new StockTakeLine();
-                        newObject.ItemID = lines.ItemID;
-                        newObject.StockTakeID = StockTakeID;
-                        newObject.Quantity = lines.Quantity;
-                        StockItem updateStock = db.StockItems.Where(zz => zz.ItemID == lines.ItemID).FirstOrDefault();
-                        updateStock.QuantityInStock = lines.Quantity;
-                        db.StockTakeLines.Add(newObject);
+                        StockTake Takes = new StockTake();
+                        Takes.AdminID = findAdmin.AdminID;
+                        Takes.Description = AddObject.Description;
+                        Takes.Date = DateTime.Now;
+                        db.StockTakes.Add(Takes);
                         db.SaveChanges();
+
+                        int StockTakeID = Takes.StockTakeID;
+
+                        foreach (StockTakeLine lines in AddObject.StockTakeLines)
+                        {
+                            StockTakeLine newObject = new StockTakeLine();
+                            newObject.ItemID = lines.ItemID;
+                            newObject.StockTakeID = StockTakeID;
+                            newObject.Quantity = lines.Quantity;
+                            db.StockTakeLines.Add(newObject);
+                            db.SaveChanges();
+
+                            StockItem updateStock = db.StockItems.Where(zz => zz.ItemID == lines.ItemID).FirstOrDefault();
+                            updateStock.QuantityInStock = lines.Quantity;
+                            db.SaveChanges();
+                        }
+                        return "success";
                     }
-                    return "success";
+                    else
+                    {
+                        return "User not found";
+                    }
 
                 }
                 else
@@ -196,54 +206,54 @@ namespace ExperTech_Api.Controllers
             }
         }
 
-        [Route("api/StockWriteOff/AddStockWriteOff")]
+        [Route("api/StockTake/AddStockWriteOff")]
         [HttpPost]
-        public dynamic AddStockWriteOff(string sess, [FromBody] StockWriteOff AddObject)
+        public dynamic AddStockWriteOff(string SessionID, [FromBody] StockWriteOff AddObject)
         {
+
+            User admin = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (admin == null)
             {
-                var admin = db.Users.Where(zz => zz.SessionID == sess).ToList();
-                if (admin == null)
-                {
-                    dynamic toReturn = new ExpandoObject();
-                    toReturn.Error = "Session is no longer available";
-                    return toReturn;
-                }
-                if (AddObject != null)
-                {
-
-                    StockWriteOff Writes = new StockWriteOff();
-
-                    Writes.Description = AddObject.Description;
-                    Writes.Date = DateTime.Now;
-                    db.StockWriteOffs.Add(Writes);
-
-                    db.SaveChanges();
-                    db.Entry(Writes).GetDatabaseValues();
-                    int WriteOffID = Writes.WriteOffID;
-
-                    foreach (WriteOffLine lines in AddObject.WriteOffLines)
-                    {
-                        WriteOffLine newObject = new WriteOffLine();
-                        newObject.ItemID = lines.ItemID;
-                        newObject.WriteOffID = WriteOffID;
-                        newObject.Reason = lines.Reason;
-                        newObject.Quantity = lines.Quantity;
-                        db.WriteOffLines.Add(newObject);
-                        db.SaveChanges();
-
-                        StockItem updateStock = db.StockItems.Where(zz => zz.ItemID == lines.ItemID).FirstOrDefault();
-                        updateStock.QuantityInStock -= lines.Quantity;
-                        db.SaveChanges();
-                    }
-                    return "success";
-
-                }
-                else
-                {
-
-                    return null;
-                }
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "Session is not valid";
+                return toReturn;
             }
+
+            if (AddObject != null)
+            {
+
+                StockWriteOff Writes = new StockWriteOff();
+
+                Writes.Description = AddObject.Description;
+                Writes.Date = DateTime.Now;
+                db.StockWriteOffs.Add(Writes);
+                db.SaveChanges();
+               
+                int WriteOffID = Writes.WriteOffID;
+
+                foreach (WriteOffLine lines in AddObject.WriteOffLines)
+                {
+                    WriteOffLine newObject = new WriteOffLine();
+                    newObject.ItemID = lines.ItemID;
+                    newObject.WriteOffID = WriteOffID;
+                    newObject.Reason = lines.Reason;
+                    newObject.Quantity = lines.Quantity;
+                    db.WriteOffLines.Add(newObject);
+                    db.SaveChanges();
+
+                    StockItem updateStock = db.StockItems.Where(zz => zz.ItemID == lines.ItemID).FirstOrDefault();
+                    updateStock.QuantityInStock -= lines.Quantity;
+                    db.SaveChanges();
+                }
+                return "success";
+
+            }
+            else
+            {
+
+                return null;
+            }
+
         }
         public IQueryable<StockItem> GetStockItems()
         {

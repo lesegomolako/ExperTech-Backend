@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="ExperTechModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="ExperTechModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Admin">
           <Key>
             <PropertyRef Name="AdminID" />
@@ -383,6 +383,7 @@
             <PropertyRef Name="WriteOffID" />
           </Key>
           <Property Name="WriteOffID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AdminID" Type="int" Nullable="false" />
           <Property Name="Description" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="Date" Type="date" Nullable="false" />
         </EntityType>
@@ -1063,6 +1064,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_StockWriteOff_Admin">
+          <End Role="Admin" Type="Self.Admin" Multiplicity="1" />
+          <End Role="StockWriteOff" Type="Self.StockWriteOff" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Admin">
+              <PropertyRef Name="AdminID" />
+            </Principal>
+            <Dependent Role="StockWriteOff">
+              <PropertyRef Name="AdminID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_SupplierOrder_Supplier">
           <End Role="Supplier" Type="Self.Supplier" Multiplicity="0..1" />
           <End Role="SupplierOrder" Type="Self.SupplierOrder" Multiplicity="*" />
@@ -1364,6 +1377,10 @@
             <End Role="StockTake" EntitySet="StockTake" />
             <End Role="StockTakeLine" EntitySet="StockTakeLine" />
           </AssociationSet>
+          <AssociationSet Name="FK_StockWriteOff_Admin" Association="Self.FK_StockWriteOff_Admin">
+            <End Role="Admin" EntitySet="Admin" />
+            <End Role="StockWriteOff" EntitySet="StockWriteOff" />
+          </AssociationSet>
           <AssociationSet Name="FK_SupplierOrder_Supplier" Association="Self.FK_SupplierOrder_Supplier">
             <End Role="Supplier" EntitySet="Supplier" />
             <End Role="SupplierOrder" EntitySet="SupplierOrder" />
@@ -1381,8 +1398,7 @@
             <End Role="WriteOffLine" EntitySet="WriteOffLine" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="ExperTechModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -1399,6 +1415,7 @@
           <Property Name="Deleted" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="User" Relationship="Self.FK_Admin_User" FromRole="Admin" ToRole="User" />
           <NavigationProperty Name="StockTakes" Relationship="Self.FK_StockTake_Admin" FromRole="Admin" ToRole="StockTake" />
+          <NavigationProperty Name="StockWriteOffs" Relationship="Self.FK_StockWriteOff_Admin" FromRole="Admin" ToRole="StockWriteOff" />
         </EntityType>
         <EntityType Name="Basket">
           <Key>
@@ -1861,8 +1878,10 @@
             <PropertyRef Name="WriteOffID" />
           </Key>
           <Property Name="WriteOffID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AdminID" Type="Int32" Nullable="false" />
           <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Date" Type="DateTime" Nullable="false" Precision="0" />
+          <NavigationProperty Name="Admin" Relationship="Self.FK_StockWriteOff_Admin" FromRole="StockWriteOff" ToRole="Admin" />
           <NavigationProperty Name="WriteOffLines" Relationship="Self.FK_WriteOffLine_StockWriteOff" FromRole="StockWriteOff" ToRole="WriteOffLine" />
         </EntityType>
         <EntityType Name="Supplier">
@@ -1954,6 +1973,18 @@
               <PropertyRef Name="AdminID" />
             </Principal>
             <Dependent Role="StockTake">
+              <PropertyRef Name="AdminID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_StockWriteOff_Admin">
+          <End Role="Admin" Type="Self.Admin" Multiplicity="1" />
+          <End Role="StockWriteOff" Type="Self.StockWriteOff" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Admin">
+              <PropertyRef Name="AdminID" />
+            </Principal>
+            <Dependent Role="StockWriteOff">
               <PropertyRef Name="AdminID" />
             </Dependent>
           </ReferentialConstraint>
@@ -2659,6 +2690,10 @@
             <End Role="Admin" EntitySet="Admins" />
             <End Role="StockTake" EntitySet="StockTakes" />
           </AssociationSet>
+          <AssociationSet Name="FK_StockWriteOff_Admin" Association="Self.FK_StockWriteOff_Admin">
+            <End Role="Admin" EntitySet="Admins" />
+            <End Role="StockWriteOff" EntitySet="StockWriteOffs" />
+          </AssociationSet>
           <AssociationSet Name="FK_Basket_Client" Association="Self.FK_Basket_Client">
             <End Role="Client" EntitySet="Clients" />
             <End Role="Basket" EntitySet="Baskets" />
@@ -3291,6 +3326,7 @@
             <EntityTypeMapping TypeName="ExperTechModel.StockWriteOff">
               <MappingFragment StoreEntitySet="StockWriteOff">
                 <ScalarProperty Name="WriteOffID" ColumnName="WriteOffID" />
+                <ScalarProperty Name="AdminID" ColumnName="AdminID" />
                 <ScalarProperty Name="Description" ColumnName="Description" />
                 <ScalarProperty Name="Date" ColumnName="Date" />
               </MappingFragment>

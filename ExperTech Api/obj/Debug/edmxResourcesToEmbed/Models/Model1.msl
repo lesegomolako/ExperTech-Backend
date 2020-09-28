@@ -414,6 +414,7 @@
       <EntityTypeMapping TypeName="ExperTechModel.StockWriteOff">
         <MappingFragment StoreEntitySet="StockWriteOff">
           <ScalarProperty Name="WriteOffID" ColumnName="WriteOffID" />
+          <ScalarProperty Name="AdminID" ColumnName="AdminID" />
           <ScalarProperty Name="Description" ColumnName="Description" />
           <ScalarProperty Name="Date" ColumnName="Date" />
         </MappingFragment>

@@ -13,6 +13,7 @@
     <Property Name="Deleted" Type="Boolean" Nullable="false" />
     <NavigationProperty Name="User" Relationship="Self.FK_Admin_User" FromRole="Admin" ToRole="User" />
     <NavigationProperty Name="StockTakes" Relationship="Self.FK_StockTake_Admin" FromRole="Admin" ToRole="StockTake" />
+    <NavigationProperty Name="StockWriteOffs" Relationship="Self.FK_StockWriteOff_Admin" FromRole="Admin" ToRole="StockWriteOff" />
   </EntityType>
   <EntityType Name="Basket">
     <Key>
@@ -475,8 +476,10 @@
       <PropertyRef Name="WriteOffID" />
     </Key>
     <Property Name="WriteOffID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="AdminID" Type="Int32" Nullable="false" />
     <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Date" Type="DateTime" Nullable="false" Precision="0" />
+    <NavigationProperty Name="Admin" Relationship="Self.FK_StockWriteOff_Admin" FromRole="StockWriteOff" ToRole="Admin" />
     <NavigationProperty Name="WriteOffLines" Relationship="Self.FK_WriteOffLine_StockWriteOff" FromRole="StockWriteOff" ToRole="WriteOffLine" />
   </EntityType>
   <EntityType Name="Supplier">
@@ -568,6 +571,18 @@
         <PropertyRef Name="AdminID" />
       </Principal>
       <Dependent Role="StockTake">
+        <PropertyRef Name="AdminID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_StockWriteOff_Admin">
+    <End Role="Admin" Type="Self.Admin" Multiplicity="1" />
+    <End Role="StockWriteOff" Type="Self.StockWriteOff" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Admin">
+        <PropertyRef Name="AdminID" />
+      </Principal>
+      <Dependent Role="StockWriteOff">
         <PropertyRef Name="AdminID" />
       </Dependent>
     </ReferentialConstraint>
@@ -1272,6 +1287,10 @@
     <AssociationSet Name="FK_StockTake_Admin" Association="Self.FK_StockTake_Admin">
       <End Role="Admin" EntitySet="Admins" />
       <End Role="StockTake" EntitySet="StockTakes" />
+    </AssociationSet>
+    <AssociationSet Name="FK_StockWriteOff_Admin" Association="Self.FK_StockWriteOff_Admin">
+      <End Role="Admin" EntitySet="Admins" />
+      <End Role="StockWriteOff" EntitySet="StockWriteOffs" />
     </AssociationSet>
     <AssociationSet Name="FK_Basket_Client" Association="Self.FK_Basket_Client">
       <End Role="Client" EntitySet="Clients" />

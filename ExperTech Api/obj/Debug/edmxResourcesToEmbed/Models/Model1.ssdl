@@ -378,6 +378,7 @@
       <PropertyRef Name="WriteOffID" />
     </Key>
     <Property Name="WriteOffID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="AdminID" Type="int" Nullable="false" />
     <Property Name="Description" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="Date" Type="date" Nullable="false" />
   </EntityType>
@@ -1058,6 +1059,18 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_StockWriteOff_Admin">
+    <End Role="Admin" Type="Self.Admin" Multiplicity="1" />
+    <End Role="StockWriteOff" Type="Self.StockWriteOff" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Admin">
+        <PropertyRef Name="AdminID" />
+      </Principal>
+      <Dependent Role="StockWriteOff">
+        <PropertyRef Name="AdminID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_SupplierOrder_Supplier">
     <End Role="Supplier" Type="Self.Supplier" Multiplicity="0..1" />
     <End Role="SupplierOrder" Type="Self.SupplierOrder" Multiplicity="*" />
@@ -1358,6 +1371,10 @@
     <AssociationSet Name="FK_StockTakeLine_StockTake" Association="Self.FK_StockTakeLine_StockTake">
       <End Role="StockTake" EntitySet="StockTake" />
       <End Role="StockTakeLine" EntitySet="StockTakeLine" />
+    </AssociationSet>
+    <AssociationSet Name="FK_StockWriteOff_Admin" Association="Self.FK_StockWriteOff_Admin">
+      <End Role="Admin" EntitySet="Admin" />
+      <End Role="StockWriteOff" EntitySet="StockWriteOff" />
     </AssociationSet>
     <AssociationSet Name="FK_SupplierOrder_Supplier" Association="Self.FK_SupplierOrder_Supplier">
       <End Role="Supplier" EntitySet="Supplier" />

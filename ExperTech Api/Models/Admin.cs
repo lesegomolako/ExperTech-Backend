@@ -18,6 +18,7 @@ namespace ExperTech_Api.Models
         public Admin()
         {
             this.StockTakes = new HashSet<StockTake>();
+            this.StockWriteOffs = new HashSet<StockWriteOff>();
         }
     
         public int AdminID { get; set; }
@@ -31,5 +32,7 @@ namespace ExperTech_Api.Models
         public virtual User User { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<StockTake> StockTakes { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<StockWriteOff> StockWriteOffs { get; set; }
     }
 }
