@@ -14,6 +14,18 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <EntitySetMapping Name="AdminAuditTrails">
+      <EntityTypeMapping TypeName="ExperTechModel.AdminAuditTrail">
+        <MappingFragment StoreEntitySet="AdminAuditTrail">
+          <ScalarProperty Name="AuditID" ColumnName="AuditID" />
+          <ScalarProperty Name="AdminID" ColumnName="AdminID" />
+          <ScalarProperty Name="CriticalData" ColumnName="CriticalData" />
+          <ScalarProperty Name="TablesAffected" ColumnName="TablesAffected" />
+          <ScalarProperty Name="TransactionType" ColumnName="TransactionType" />
+          <ScalarProperty Name="Date" ColumnName="Date" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
     <EntitySetMapping Name="Baskets">
       <EntityTypeMapping TypeName="ExperTechModel.Basket">
         <MappingFragment StoreEntitySet="Basket">
@@ -83,6 +95,18 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <EntitySetMapping Name="ClientAuditTrails">
+      <EntityTypeMapping TypeName="ExperTechModel.ClientAuditTrail">
+        <MappingFragment StoreEntitySet="ClientAuditTrail">
+          <ScalarProperty Name="AuditID" ColumnName="AuditID" />
+          <ScalarProperty Name="ClientID" ColumnName="ClientID" />
+          <ScalarProperty Name="CriticalData" ColumnName="CriticalData" />
+          <ScalarProperty Name="TablesAffected" ColumnName="TablesAffected" />
+          <ScalarProperty Name="TransactionType" ColumnName="TransactionType" />
+          <ScalarProperty Name="Date" ColumnName="Date" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
     <EntitySetMapping Name="ClientPackages">
       <EntityTypeMapping TypeName="ExperTechModel.ClientPackage">
         <MappingFragment StoreEntitySet="ClientPackage">
@@ -131,6 +155,18 @@
           <ScalarProperty Name="Email" ColumnName="Email" />
           <ScalarProperty Name="UserID" ColumnName="UserID" />
           <ScalarProperty Name="Deleted" ColumnName="Deleted" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="EmployeeAuditTrails">
+      <EntityTypeMapping TypeName="ExperTechModel.EmployeeAuditTrail">
+        <MappingFragment StoreEntitySet="EmployeeAuditTrail">
+          <ScalarProperty Name="AuditID" ColumnName="AuditID" />
+          <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
+          <ScalarProperty Name="CriticalData" ColumnName="CriticalData" />
+          <ScalarProperty Name="TablesAffected" ColumnName="TablesAffected" />
+          <ScalarProperty Name="TransactionType" ColumnName="TransactionType" />
+          <ScalarProperty Name="Date" ColumnName="Date" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

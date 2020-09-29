@@ -4,56 +4,60 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="aaebc15d7b3f404ebe31c34d1846045c" Name="Diagram1">
-        <EntityTypeShape EntityType="ExperTechModel.Admin" Width="1.5" PointX="5.25" PointY="14.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.Basket" Width="1.5" PointX="7.5" PointY="19.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.BasketLine" Width="1.5" PointX="9.75" PointY="20.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.Booking" Width="1.5" PointX="7.5" PointY="22.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.BookingLine" Width="1.5" PointX="12.75" PointY="24.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.BookingNote" Width="1.5" PointX="9.75" PointY="27.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.BookingStatu" Width="1.5" PointX="5.25" PointY="32.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.Client" Width="1.5" PointX="5.25" PointY="19.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.ClientPackage" Width="1.5" PointX="14.75" PointY="19.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.CompanyInfo" Width="1.5" PointX="0.75" PointY="2.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.Date" Width="1.5" PointX="8.25" PointY="42.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.DateRequested" Width="1.5" PointX="9.75" PointY="30.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.Employee" Width="1.5" PointX="5.25" PointY="23" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.EmployeeSchedule" Width="1.5" PointX="12.75" PointY="28.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.EmployeeServiceType" Width="1.5" PointX="10.5" PointY="24.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.InstanceStatu" Width="1.5" PointX="14.75" PointY="13.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.PackageInstance" Width="1.5" PointX="17" PointY="21.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.PaymentType" Width="1.5" PointX="10.25" PointY="10" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.Product" Width="1.5" PointX="7.5" PointY="27.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.ProductCategory" Width="1.5" PointX="5.25" PointY="27.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.ProductPhoto" Width="1.5" PointX="9.75" PointY="48.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.Reminder" Width="1.5" PointX="10.25" PointY="5.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.ReminderType" Width="1.5" PointX="8" PointY="5.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.Sale" Width="1.5" PointX="12.5" PointY="18.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.SaleLine" Width="1.5" PointX="14.75" PointY="16.625" IsExpanded="true" />
+      <Diagram DiagramId="5e91e3926fd442ac896728b3aeb5394a" Name="Diagram1">
+        <EntityTypeShape EntityType="ExperTechModel.Admin" Width="1.5" PointX="5.25" PointY="15.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.AdminAuditTrail" Width="1.5" PointX="7.5" PointY="13.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.Basket" Width="1.5" PointX="7.5" PointY="22.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.BasketLine" Width="1.5" PointX="9.75" PointY="24" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.Booking" Width="1.5" PointX="7.5" PointY="24.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.BookingLine" Width="1.5" PointX="12.75" PointY="28.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.BookingNote" Width="1.5" PointX="9.75" PointY="27.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.BookingStatu" Width="1.5" PointX="5.25" PointY="27.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.Client" Width="1.5" PointX="5.25" PointY="22.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.ClientAuditTrail" Width="1.5" PointX="7.5" PointY="30" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.ClientPackage" Width="1.5" PointX="14.75" PointY="23.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.CompanyInfo" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.Date" Width="1.5" PointX="8.25" PointY="49.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.DateRequested" Width="1.5" PointX="9.75" PointY="30.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.Employee" Width="1.5" PointX="5.25" PointY="33.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.EmployeeAuditTrail" Width="1.5" PointX="7.5" PointY="34.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.EmployeeSchedule" Width="1.5" PointX="12.75" PointY="32.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.EmployeeServiceType" Width="1.5" PointX="7.5" PointY="37.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.InstanceStatu" Width="1.5" PointX="14.75" PointY="17.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.PackageInstance" Width="1.5" PointX="17" PointY="25.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.PaymentType" Width="1.5" PointX="10.25" PointY="13.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.Product" Width="1.5" PointX="7.5" PointY="41.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.ProductCategory" Width="1.5" PointX="5.25" PointY="40.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.ProductPhoto" Width="1.5" PointX="9.75" PointY="42.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.Reminder" Width="1.5" PointX="10.25" PointY="5.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.ReminderType" Width="1.5" PointX="8" PointY="5.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.Sale" Width="1.5" PointX="12.5" PointY="22.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.SaleLine" Width="1.5" PointX="14.75" PointY="20.5" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.SaleStatu" Width="1.5" PointX="10.25" PointY="33.375" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.SaleType" Width="1.5" PointX="10.25" PointY="35.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.Schedule" Width="1.5" PointX="10.5" PointY="43.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.ScheduleStatu" Width="1.5" PointX="10.5" PointY="46.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.Service" Width="1.5" PointX="10.25" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.ServiceOption" Width="1.5" PointX="8.25" PointY="38.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.Schedule" Width="1.5" PointX="10.5" PointY="50.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.ScheduleStatu" Width="1.5" PointX="10.5" PointY="38.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.Service" Width="1.5" PointX="10.25" PointY="0.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.ServiceOption" Width="1.5" PointX="8.25" PointY="46.625" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.ServicePackage" Width="1.5" PointX="12.5" PointY="1.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.ServicePhoto" Width="1.5" PointX="12.5" PointY="5.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.ServicePrice" Width="1.5" PointX="17.75" PointY="18.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.ServiceType" Width="1.5" PointX="8" PointY="2.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.ServiceTypeOption" Width="1.5" PointX="10.5" PointY="38.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.SocialMedia" Width="1.5" PointX="2.75" PointY="2.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.ServicePhoto" Width="1.5" PointX="12.5" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.ServicePrice" Width="1.5" PointX="17.75" PointY="22.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.ServiceType" Width="1.5" PointX="8" PointY="1.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.ServiceTypeOption" Width="1.5" PointX="10.5" PointY="46.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.SocialMedia" Width="1.5" PointX="2.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.StockItem" Width="1.5" PointX="7.5" PointY="9" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.StockItemLine" Width="1.5" PointX="15.75" PointY="25.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.StockTake" Width="1.5" PointX="7.5" PointY="13.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.StockTakeLine" Width="1.5" PointX="9.75" PointY="13.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.StockWriteOff" Width="1.5" PointX="7.5" PointY="16.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.Supplier" Width="1.5" PointX="5.25" PointY="29.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.SupplierOrder" Width="1.5" PointX="7.5" PointY="32.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.Timeslot" Width="1.5" PointX="8.25" PointY="44.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.User" Width="1.5" PointX="3" PointY="18.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.UserRole" Width="1.5" PointX="0.75" PointY="18.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.WriteOffLine" Width="1.5" PointX="9.75" PointY="17.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.StockItemLine" Width="1.5" PointX="12.75" PointY="36.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.StockTake" Width="1.5" PointX="7.5" PointY="16.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.StockTakeLine" Width="1.5" PointX="9.75" PointY="16.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.StockWriteOff" Width="1.5" PointX="7.5" PointY="19.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.Supplier" Width="1.5" PointX="5.25" PointY="42.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.SupplierOrder" Width="1.5" PointX="7.5" PointY="55" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.Timeslot" Width="1.5" PointX="8.25" PointY="51.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.User" Width="1.5" PointX="3" PointY="20.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.UserRole" Width="1.5" PointX="0.75" PointY="21.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.WriteOffLine" Width="1.5" PointX="9.75" PointY="20.125" IsExpanded="true" />
         <AssociationConnector Association="ExperTechModel.FK_Admin_User" ManuallyRouted="false" />
+        <AssociationConnector Association="ExperTechModel.FK_AdminAuditTrail_Admin" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_StockTake_Admin" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_StockWriteOff_Admin" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_Basket_Client" ManuallyRouted="false" />
@@ -71,12 +75,14 @@
         <AssociationConnector Association="ExperTechModel.FK_BookingLine_ServiceTypeOption" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_PackageInstance_BookingLine" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_Client_User" ManuallyRouted="false" />
+        <AssociationConnector Association="ExperTechModel.FK_ClientAuditTrail_Client" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_Sale_Client" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_ClientPackage_Sale" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_ClientPackage_ServicePackage" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_PackageInstance_ClientPackage" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_Schedule_Date" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_Employee_User" ManuallyRouted="false" />
+        <AssociationConnector Association="ExperTechModel.FK_EmployeeAuditTrail_Employee" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_EmployeeSchedule_Employee" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_EmployeeServiceType_Employee" ManuallyRouted="false" />
         <AssociationConnector Association="ExperTechModel.FK_EmployeeSchedule_Schedule" ManuallyRouted="false" />

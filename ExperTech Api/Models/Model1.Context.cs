@@ -26,6 +26,7 @@ namespace ExperTech_Api.Models
         }
     
         public virtual DbSet<Admin> Admins { get; set; }
+        public virtual DbSet<AdminAuditTrail> AdminAuditTrails { get; set; }
         public virtual DbSet<Basket> Baskets { get; set; }
         public virtual DbSet<BasketLine> BasketLines { get; set; }
         public virtual DbSet<Booking> Bookings { get; set; }
@@ -33,11 +34,13 @@ namespace ExperTech_Api.Models
         public virtual DbSet<BookingNote> BookingNotes { get; set; }
         public virtual DbSet<BookingStatu> BookingStatus { get; set; }
         public virtual DbSet<Client> Clients { get; set; }
+        public virtual DbSet<ClientAuditTrail> ClientAuditTrails { get; set; }
         public virtual DbSet<ClientPackage> ClientPackages { get; set; }
         public virtual DbSet<CompanyInfo> CompanyInfoes { get; set; }
         public virtual DbSet<Date> Dates { get; set; }
         public virtual DbSet<DateRequested> DateRequesteds { get; set; }
         public virtual DbSet<Employee> Employees { get; set; }
+        public virtual DbSet<EmployeeAuditTrail> EmployeeAuditTrails { get; set; }
         public virtual DbSet<EmployeeSchedule> EmployeeSchedules { get; set; }
         public virtual DbSet<EmployeeServiceType> EmployeeServiceTypes { get; set; }
         public virtual DbSet<InstanceStatu> InstanceStatus { get; set; }

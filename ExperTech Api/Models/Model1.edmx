@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="ExperTechModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="ExperTechModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Admin">
           <Key>
             <PropertyRef Name="AdminID" />
@@ -16,6 +16,17 @@
           <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="UserID" Type="int" />
           <Property Name="Deleted" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="AdminAuditTrail">
+          <Key>
+            <PropertyRef Name="AuditID" />
+          </Key>
+          <Property Name="AuditID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AdminID" Type="int" Nullable="false" />
+          <Property Name="CriticalData" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="TablesAffected" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="TransactionType" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Date" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="Basket">
           <Key>
@@ -79,6 +90,17 @@
           <Property Name="UserID" Type="int" />
           <Property Name="Deleted" Type="bit" Nullable="false" />
         </EntityType>
+        <EntityType Name="ClientAuditTrail">
+          <Key>
+            <PropertyRef Name="AuditID" />
+          </Key>
+          <Property Name="AuditID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ClientID" Type="int" Nullable="false" />
+          <Property Name="CriticalData" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="TablesAffected" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="TransactionType" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Date" Type="datetime" Nullable="false" />
+        </EntityType>
         <EntityType Name="ClientPackage">
           <Key>
             <PropertyRef Name="SaleID" />
@@ -125,6 +147,17 @@
           <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="UserID" Type="int" />
           <Property Name="Deleted" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EmployeeAuditTrail">
+          <Key>
+            <PropertyRef Name="AuditID" />
+          </Key>
+          <Property Name="AuditID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="EmployeeID" Type="int" Nullable="false" />
+          <Property Name="CriticalData" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="TablesAffected" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="TransactionType" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Date" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="EmployeeSchedule">
           <Key>
@@ -456,6 +489,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_AdminAuditTrail_Admin">
+          <End Role="Admin" Type="Self.Admin" Multiplicity="1" />
+          <End Role="AdminAuditTrail" Type="Self.AdminAuditTrail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Admin">
+              <PropertyRef Name="AdminID" />
+            </Principal>
+            <Dependent Role="AdminAuditTrail">
+              <PropertyRef Name="AdminID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Basket_Client">
           <End Role="Client" Type="Self.Client" Multiplicity="1" />
           <End Role="Basket" Type="Self.Basket" Multiplicity="*" />
@@ -602,6 +647,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_ClientAuditTrail_Client">
+          <End Role="Client" Type="Self.Client" Multiplicity="1" />
+          <End Role="ClientAuditTrail" Type="Self.ClientAuditTrail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Client">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="ClientAuditTrail">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_ClientPackage_Sale">
           <End Role="Sale" Type="Self.Sale" Multiplicity="1" />
           <End Role="ClientPackage" Type="Self.ClientPackage" Multiplicity="*" />
@@ -647,6 +704,18 @@
             </Principal>
             <Dependent Role="Employee">
               <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_EmployeeAuditTrail_Employee">
+          <End Role="Employee" Type="Self.Employee" Multiplicity="1" />
+          <End Role="EmployeeAuditTrail" Type="Self.EmployeeAuditTrail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmployeeID" />
+            </Principal>
+            <Dependent Role="EmployeeAuditTrail">
+              <PropertyRef Name="EmployeeID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1126,6 +1195,7 @@
         </Association>
         <EntityContainer Name="ExperTechModelStoreContainer">
           <EntitySet Name="Admin" EntityType="Self.Admin" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="AdminAuditTrail" EntityType="Self.AdminAuditTrail" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Basket" EntityType="Self.Basket" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BasketLine" EntityType="Self.BasketLine" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Booking" EntityType="Self.Booking" Schema="dbo" store:Type="Tables" />
@@ -1133,11 +1203,13 @@
           <EntitySet Name="BookingNotes" EntityType="Self.BookingNotes" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BookingStatus" EntityType="Self.BookingStatus" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Client" EntityType="Self.Client" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ClientAuditTrail" EntityType="Self.ClientAuditTrail" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ClientPackage" EntityType="Self.ClientPackage" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CompanyInfo" EntityType="Self.CompanyInfo" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Date" EntityType="Self.Date" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DateRequested" EntityType="Self.DateRequested" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Employee" EntityType="Self.Employee" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EmployeeAuditTrail" EntityType="Self.EmployeeAuditTrail" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="EmployeeSchedule" EntityType="Self.EmployeeSchedule" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="EmployeeServiceType" EntityType="Self.EmployeeServiceType" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="InstanceStatus" EntityType="Self.InstanceStatus" Schema="dbo" store:Type="Tables" />
@@ -1176,6 +1248,10 @@
           <AssociationSet Name="FK_Admin_User" Association="Self.FK_Admin_User">
             <End Role="User" EntitySet="User" />
             <End Role="Admin" EntitySet="Admin" />
+          </AssociationSet>
+          <AssociationSet Name="FK_AdminAuditTrail_Admin" Association="Self.FK_AdminAuditTrail_Admin">
+            <End Role="Admin" EntitySet="Admin" />
+            <End Role="AdminAuditTrail" EntitySet="AdminAuditTrail" />
           </AssociationSet>
           <AssociationSet Name="FK_Basket_Client" Association="Self.FK_Basket_Client">
             <End Role="Client" EntitySet="Client" />
@@ -1225,6 +1301,10 @@
             <End Role="User" EntitySet="User" />
             <End Role="Client" EntitySet="Client" />
           </AssociationSet>
+          <AssociationSet Name="FK_ClientAuditTrail_Client" Association="Self.FK_ClientAuditTrail_Client">
+            <End Role="Client" EntitySet="Client" />
+            <End Role="ClientAuditTrail" EntitySet="ClientAuditTrail" />
+          </AssociationSet>
           <AssociationSet Name="FK_ClientPackage_Sale" Association="Self.FK_ClientPackage_Sale">
             <End Role="Sale" EntitySet="Sale" />
             <End Role="ClientPackage" EntitySet="ClientPackage" />
@@ -1240,6 +1320,10 @@
           <AssociationSet Name="FK_Employee_User" Association="Self.FK_Employee_User">
             <End Role="User" EntitySet="User" />
             <End Role="Employee" EntitySet="Employee" />
+          </AssociationSet>
+          <AssociationSet Name="FK_EmployeeAuditTrail_Employee" Association="Self.FK_EmployeeAuditTrail_Employee">
+            <End Role="Employee" EntitySet="Employee" />
+            <End Role="EmployeeAuditTrail" EntitySet="EmployeeAuditTrail" />
           </AssociationSet>
           <AssociationSet Name="FK_EmployeeSchedule_Booking" Association="Self.FK_EmployeeSchedule_Booking">
             <End Role="Booking" EntitySet="Booking" />
@@ -1398,7 +1482,8 @@
             <End Role="WriteOffLine" EntitySet="WriteOffLine" />
           </AssociationSet>
         </EntityContainer>
-      </Schema></edmx:StorageModels>
+      </Schema>
+    </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="ExperTechModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -1414,8 +1499,21 @@
           <Property Name="UserID" Type="Int32" />
           <Property Name="Deleted" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="User" Relationship="Self.FK_Admin_User" FromRole="Admin" ToRole="User" />
+          <NavigationProperty Name="AdminAuditTrails" Relationship="Self.FK_AdminAuditTrail_Admin" FromRole="Admin" ToRole="AdminAuditTrail" />
           <NavigationProperty Name="StockTakes" Relationship="Self.FK_StockTake_Admin" FromRole="Admin" ToRole="StockTake" />
           <NavigationProperty Name="StockWriteOffs" Relationship="Self.FK_StockWriteOff_Admin" FromRole="Admin" ToRole="StockWriteOff" />
+        </EntityType>
+        <EntityType Name="AdminAuditTrail">
+          <Key>
+            <PropertyRef Name="AuditID" />
+          </Key>
+          <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AdminID" Type="Int32" Nullable="false" />
+          <Property Name="CriticalData" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Admin" Relationship="Self.FK_AdminAuditTrail_Admin" FromRole="AdminAuditTrail" ToRole="Admin" />
         </EntityType>
         <EntityType Name="Basket">
           <Key>
@@ -1499,7 +1597,20 @@
           <NavigationProperty Name="Baskets" Relationship="Self.FK_Basket_Client" FromRole="Client" ToRole="Basket" />
           <NavigationProperty Name="Bookings" Relationship="Self.FK_Booking_Client" FromRole="Client" ToRole="Booking" />
           <NavigationProperty Name="User" Relationship="Self.FK_Client_User" FromRole="Client" ToRole="User" />
+          <NavigationProperty Name="ClientAuditTrails" Relationship="Self.FK_ClientAuditTrail_Client" FromRole="Client" ToRole="ClientAuditTrail" />
           <NavigationProperty Name="Sales" Relationship="Self.FK_Sale_Client" FromRole="Client" ToRole="Sale" />
+        </EntityType>
+        <EntityType Name="ClientAuditTrail">
+          <Key>
+            <PropertyRef Name="AuditID" />
+          </Key>
+          <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ClientID" Type="Int32" Nullable="false" />
+          <Property Name="CriticalData" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Client" Relationship="Self.FK_ClientAuditTrail_Client" FromRole="ClientAuditTrail" ToRole="Client" />
         </EntityType>
         <EntityType Name="ClientPackage">
           <Key>
@@ -1553,8 +1664,21 @@
           <Property Name="UserID" Type="Int32" />
           <Property Name="Deleted" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="User" Relationship="Self.FK_Employee_User" FromRole="Employee" ToRole="User" />
+          <NavigationProperty Name="EmployeeAuditTrails" Relationship="Self.FK_EmployeeAuditTrail_Employee" FromRole="Employee" ToRole="EmployeeAuditTrail" />
           <NavigationProperty Name="EmployeeSchedules" Relationship="Self.FK_EmployeeSchedule_Employee" FromRole="Employee" ToRole="EmployeeSchedule" />
           <NavigationProperty Name="EmployeeServiceTypes" Relationship="Self.FK_EmployeeServiceType_Employee" FromRole="Employee" ToRole="EmployeeServiceType" />
+        </EntityType>
+        <EntityType Name="EmployeeAuditTrail">
+          <Key>
+            <PropertyRef Name="AuditID" />
+          </Key>
+          <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EmployeeID" Type="Int32" Nullable="false" />
+          <Property Name="CriticalData" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Employee" Relationship="Self.FK_EmployeeAuditTrail_Employee" FromRole="EmployeeAuditTrail" ToRole="Employee" />
         </EntityType>
         <EntityType Name="EmployeeSchedule">
           <Key>
@@ -1965,6 +2089,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_AdminAuditTrail_Admin">
+          <End Role="Admin" Type="Self.Admin" Multiplicity="1" />
+          <End Role="AdminAuditTrail" Type="Self.AdminAuditTrail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Admin">
+              <PropertyRef Name="AdminID" />
+            </Principal>
+            <Dependent Role="AdminAuditTrail">
+              <PropertyRef Name="AdminID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_StockTake_Admin">
           <End Role="Admin" Type="Self.Admin" Multiplicity="1" />
           <End Role="StockTake" Type="Self.StockTake" Multiplicity="*" />
@@ -2171,6 +2307,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_ClientAuditTrail_Client">
+          <End Role="Client" Type="Self.Client" Multiplicity="1" />
+          <End Role="ClientAuditTrail" Type="Self.ClientAuditTrail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Client">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="ClientAuditTrail">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Sale_Client">
           <End Role="Client" Type="Self.Client" Multiplicity="1" />
           <End Role="Sale" Type="Self.Sale" Multiplicity="*" />
@@ -2242,6 +2390,18 @@
             </Principal>
             <Dependent Role="Employee">
               <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_EmployeeAuditTrail_Employee">
+          <End Role="Employee" Type="Self.Employee" Multiplicity="1" />
+          <End Role="EmployeeAuditTrail" Type="Self.EmployeeAuditTrail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmployeeID" />
+            </Principal>
+            <Dependent Role="EmployeeAuditTrail">
+              <PropertyRef Name="EmployeeID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -2635,6 +2795,7 @@
         </Association>
         <EntityContainer Name="ExperTechEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Admins" EntityType="Self.Admin" />
+          <EntitySet Name="AdminAuditTrails" EntityType="Self.AdminAuditTrail" />
           <EntitySet Name="Baskets" EntityType="Self.Basket" />
           <EntitySet Name="BasketLines" EntityType="Self.BasketLine" />
           <EntitySet Name="Bookings" EntityType="Self.Booking" />
@@ -2642,11 +2803,13 @@
           <EntitySet Name="BookingNotes" EntityType="Self.BookingNote" />
           <EntitySet Name="BookingStatus" EntityType="Self.BookingStatu" />
           <EntitySet Name="Clients" EntityType="Self.Client" />
+          <EntitySet Name="ClientAuditTrails" EntityType="Self.ClientAuditTrail" />
           <EntitySet Name="ClientPackages" EntityType="Self.ClientPackage" />
           <EntitySet Name="CompanyInfoes" EntityType="Self.CompanyInfo" />
           <EntitySet Name="Dates" EntityType="Self.Date" />
           <EntitySet Name="DateRequesteds" EntityType="Self.DateRequested" />
           <EntitySet Name="Employees" EntityType="Self.Employee" />
+          <EntitySet Name="EmployeeAuditTrails" EntityType="Self.EmployeeAuditTrail" />
           <EntitySet Name="EmployeeSchedules" EntityType="Self.EmployeeSchedule" />
           <EntitySet Name="EmployeeServiceTypes" EntityType="Self.EmployeeServiceType" />
           <EntitySet Name="InstanceStatus" EntityType="Self.InstanceStatu" />
@@ -2685,6 +2848,10 @@
           <AssociationSet Name="FK_Admin_User" Association="Self.FK_Admin_User">
             <End Role="User" EntitySet="Users" />
             <End Role="Admin" EntitySet="Admins" />
+          </AssociationSet>
+          <AssociationSet Name="FK_AdminAuditTrail_Admin" Association="Self.FK_AdminAuditTrail_Admin">
+            <End Role="Admin" EntitySet="Admins" />
+            <End Role="AdminAuditTrail" EntitySet="AdminAuditTrails" />
           </AssociationSet>
           <AssociationSet Name="FK_StockTake_Admin" Association="Self.FK_StockTake_Admin">
             <End Role="Admin" EntitySet="Admins" />
@@ -2754,6 +2921,10 @@
             <End Role="User" EntitySet="Users" />
             <End Role="Client" EntitySet="Clients" />
           </AssociationSet>
+          <AssociationSet Name="FK_ClientAuditTrail_Client" Association="Self.FK_ClientAuditTrail_Client">
+            <End Role="Client" EntitySet="Clients" />
+            <End Role="ClientAuditTrail" EntitySet="ClientAuditTrails" />
+          </AssociationSet>
           <AssociationSet Name="FK_Sale_Client" Association="Self.FK_Sale_Client">
             <End Role="Client" EntitySet="Clients" />
             <End Role="Sale" EntitySet="Sales" />
@@ -2777,6 +2948,10 @@
           <AssociationSet Name="FK_Employee_User" Association="Self.FK_Employee_User">
             <End Role="User" EntitySet="Users" />
             <End Role="Employee" EntitySet="Employees" />
+          </AssociationSet>
+          <AssociationSet Name="FK_EmployeeAuditTrail_Employee" Association="Self.FK_EmployeeAuditTrail_Employee">
+            <End Role="Employee" EntitySet="Employees" />
+            <End Role="EmployeeAuditTrail" EntitySet="EmployeeAuditTrails" />
           </AssociationSet>
           <AssociationSet Name="FK_EmployeeSchedule_Employee" Association="Self.FK_EmployeeSchedule_Employee">
             <End Role="Employee" EntitySet="Employees" />
@@ -2926,6 +3101,18 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="AdminAuditTrails">
+            <EntityTypeMapping TypeName="ExperTechModel.AdminAuditTrail">
+              <MappingFragment StoreEntitySet="AdminAuditTrail">
+                <ScalarProperty Name="AuditID" ColumnName="AuditID" />
+                <ScalarProperty Name="AdminID" ColumnName="AdminID" />
+                <ScalarProperty Name="CriticalData" ColumnName="CriticalData" />
+                <ScalarProperty Name="TablesAffected" ColumnName="TablesAffected" />
+                <ScalarProperty Name="TransactionType" ColumnName="TransactionType" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="Baskets">
             <EntityTypeMapping TypeName="ExperTechModel.Basket">
               <MappingFragment StoreEntitySet="Basket">
@@ -2995,6 +3182,18 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="ClientAuditTrails">
+            <EntityTypeMapping TypeName="ExperTechModel.ClientAuditTrail">
+              <MappingFragment StoreEntitySet="ClientAuditTrail">
+                <ScalarProperty Name="AuditID" ColumnName="AuditID" />
+                <ScalarProperty Name="ClientID" ColumnName="ClientID" />
+                <ScalarProperty Name="CriticalData" ColumnName="CriticalData" />
+                <ScalarProperty Name="TablesAffected" ColumnName="TablesAffected" />
+                <ScalarProperty Name="TransactionType" ColumnName="TransactionType" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="ClientPackages">
             <EntityTypeMapping TypeName="ExperTechModel.ClientPackage">
               <MappingFragment StoreEntitySet="ClientPackage">
@@ -3043,6 +3242,18 @@
                 <ScalarProperty Name="Email" ColumnName="Email" />
                 <ScalarProperty Name="UserID" ColumnName="UserID" />
                 <ScalarProperty Name="Deleted" ColumnName="Deleted" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EmployeeAuditTrails">
+            <EntityTypeMapping TypeName="ExperTechModel.EmployeeAuditTrail">
+              <MappingFragment StoreEntitySet="EmployeeAuditTrail">
+                <ScalarProperty Name="AuditID" ColumnName="AuditID" />
+                <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
+                <ScalarProperty Name="CriticalData" ColumnName="CriticalData" />
+                <ScalarProperty Name="TablesAffected" ColumnName="TablesAffected" />
+                <ScalarProperty Name="TransactionType" ColumnName="TransactionType" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

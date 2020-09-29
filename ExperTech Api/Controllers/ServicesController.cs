@@ -520,48 +520,7 @@ namespace ExperTech_Api.Controllers
             }
         }
 
-        //*********************************Refiloe's stuff****************************
-
-        [Route("api/Services/DisplaySchedule")]
-        [HttpGet]
-        public dynamic DisplaySchedule()
-        {
-            db.Configuration.ProxyCreationEnabled = false;
-            List<Schedule> findSchedule = db.Schedules.Include(zz => zz.Date).Include(zz => zz.Timeslot).ToList();
-            return GetSchedule(findSchedule);
-        }
-
-        private dynamic GetSchedule(List<Schedule> Modell)
-        {
-            List<Date> Dates = db.Dates.ToList();
-            List<dynamic> getList = new List<dynamic>();
-            dynamic result = new ExpandoObject();
-
-            for (int j = 0; j < Dates.Count; j++)
-            {
-                dynamic newObject = new ExpandoObject();
-                newObject.DateID = Dates[j].DateID;
-                newObject.Dates = Dates[j].Date1;
-                List<dynamic> getTimes = new List<dynamic>();
-
-                foreach (Schedule Items in Modell)
-                {
-                    if (Items.DateID == Dates[j].DateID)
-                    {
-                        dynamic TimeObject = new ExpandoObject();
-                        TimeObject.TimeID = Items.TimeID;
-                        TimeObject.StartTime = Items.Timeslot.StartTime;
-                        TimeObject.EndTime = Items.Timeslot.EndTime;
-                        getTimes.Add(TimeObject);
-                    }
-                }
-                newObject.Times = getTimes;
-                getList.Add(newObject);
-            }
-
-            return getList;
-        }
-
+      
         
         //****************************************************testing*******************************************************
         [Route("api/Services/AddServicePhoto")]

@@ -44,6 +44,72 @@ namespace ExperTech_Api.Controllers
             }
             return dynamicEmployees;
         }
+
+        //*********************************Refiloe's stuff****************************
+
+        [Route("api/Employees/DisplaySchedule")]
+        [HttpGet]
+        public dynamic DisplaySchedule(string SessionID)
+        {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser != null)
+            {
+                if (findUser.RoleID == 3)
+                {
+                    int findEmpID = db.Employees.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.EmployeeID).FirstOrDefault();
+                    db.Configuration.ProxyCreationEnabled = false;
+                    List<EmployeeSchedule> findSchedule = db.EmployeeSchedules.Where(zz => zz.EmployeeID == findEmpID).ToList();
+                    return GetSchedule(findSchedule);
+                }
+                else
+                {
+                    dynamic toReturn = new ExpandoObject();
+                    toReturn.Error = "User is not authorized";
+                    return toReturn;
+                }
+            }
+            else
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "Session is not valid";
+                return toReturn;
+            }
+        }
+
+        private dynamic GetSchedule(List<EmployeeSchedule> Modell)
+        {
+            List<Date> Dates = db.Dates.ToList();
+            List<dynamic> getList = new List<dynamic>();
+            dynamic result = new ExpandoObject();
+
+            for (int j = 0; j < Dates.Count; j++)
+            {
+                dynamic newObject = new ExpandoObject();
+                newObject.DateID = Dates[j].DateID;
+                newObject.Dates = Dates[j].Date1;
+                List<dynamic> getTimes = new List<dynamic>();
+
+                foreach (EmployeeSchedule Items in Modell)
+                {
+                    if (Items.DateID == Dates[j].DateID)
+                    {
+                        dynamic ScheduleObject = new ExpandoObject();
+                        ScheduleObject.TimeID = Items.TimeID;
+                        Timeslot findTime = db.Timeslots.Where(zz => zz.TimeID == Items.TimeID).FirstOrDefault();
+                        ScheduleObject.StartTime = findTime.StartTime;
+                        ScheduleObject.EndTime = findTime.EndTime;
+                        ScheduleObject.StatusID = Items.StatusID;
+                        getTimes.Add(ScheduleObject);
+
+                    }
+                }
+                newObject.Times = getTimes;
+                getList.Add(newObject);
+            }
+
+            return getList;
+        }
+
         //*************************read employee availability details*********************
         [Route("api/Employees/getTime")]
         [HttpGet]

@@ -17,6 +17,7 @@ namespace ExperTech_Api.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Admin()
         {
+            this.AdminAuditTrails = new HashSet<AdminAuditTrail>();
             this.StockTakes = new HashSet<StockTake>();
             this.StockWriteOffs = new HashSet<StockWriteOff>();
         }
@@ -30,6 +31,8 @@ namespace ExperTech_Api.Models
         public bool Deleted { get; set; }
     
         public virtual User User { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<AdminAuditTrail> AdminAuditTrails { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<StockTake> StockTakes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

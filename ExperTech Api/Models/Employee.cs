@@ -17,6 +17,7 @@ namespace ExperTech_Api.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Employee()
         {
+            this.EmployeeAuditTrails = new HashSet<EmployeeAuditTrail>();
             this.EmployeeSchedules = new HashSet<EmployeeSchedule>();
             this.EmployeeServiceTypes = new HashSet<EmployeeServiceType>();
         }
@@ -30,6 +31,8 @@ namespace ExperTech_Api.Models
         public bool Deleted { get; set; }
     
         public virtual User User { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EmployeeAuditTrail> EmployeeAuditTrails { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EmployeeSchedule> EmployeeSchedules { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
