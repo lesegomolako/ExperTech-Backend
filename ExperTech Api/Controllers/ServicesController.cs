@@ -96,26 +96,50 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Services/DeleteServiceType")]
         [HttpDelete]
-        public dynamic DeleteServiceType(int TypeID)
+        public dynamic DeleteServiceType(int TypeID, string SessionID)
         {
+            var admin = db.Users.Where(zz => zz.SessionID == SessionID).ToList();
+            if (admin == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "Session is no longer available";
+                return GetServiceType();
+            }
+            db.Configuration.ProxyCreationEnabled = false;
+            List<EmployeeServiceType> findEmpType = db.EmployeeServiceTypes.Where(zz => zz.TypeID == TypeID).ToList();
+            List<Service> findService = db.Services.Where(zz => zz.ServiceID == TypeID).ToList();
+
             try
             {
-                db.Configuration.ProxyCreationEnabled = false;
-                List<Service> findService = db.Services.Where(zz => zz.TypeID == TypeID).ToList();
-                foreach(Service items in findService)
+                if (findService.Count == 0)
                 {
-                    items.TypeID = null;
+
+                    ServiceType findServiceType = db.ServiceTypes.Find(TypeID);
+
+                    db.EmployeeServiceTypes.RemoveRange(findEmpType);
+
+                    db.ServiceTypes.Remove(findServiceType);
+
                     db.SaveChanges();
+                    dynamic toReturn = new ExpandoObject();
+                    toReturn.Message = "success";
+                    return toReturn;
+
                 }
-                ServiceType find = db.ServiceTypes.Where(zz => zz.TypeID == TypeID).FirstOrDefault();
-                db.ServiceTypes.Remove(find);
-                db.SaveChanges();
-                return "success";
+                else
+                {
+                    dynamic toReturn = new ExpandoObject();
+                    int countServ = findService.Count;
+                    toReturn.Error = "dependencies";
+                    toReturn.Message = "There are " + countServ.ToString() + " Services that depend this ServiceType \nDelete those services first.";
+                    return toReturn;
+                }
             }
             catch (Exception err)
             {
                 return err.Message;
             }
+          
         }
 
         [Route("api/Services/ViewServices")]
@@ -269,6 +293,8 @@ namespace ExperTech_Api.Controllers
                 return err.Message;
             }
         }
+
+       
 
 
         [Route("api/Services/GetService")]

@@ -108,6 +108,7 @@ namespace ExperTech_Api.Controllers
                 dynobject.Status = db.SaleStatus.Where(zz => zz.StatusID == loop.StatusID).Select(zz => zz.Status).FirstOrDefault();
                 dynobject.PaymentType = db.PaymentTypes.Where(zz => zz.PaymentTypeID == loop.PaymentTypeID).Select(zz => zz.Type).FirstOrDefault();
                 dynobject.ClientName = db.Clients.Where(zz => zz.ClientID == loop.ClientID).Select(zz => zz.Name).FirstOrDefault();
+                dynobject.ClientSurname = db.Clients.Where(zz => zz.ClientID == loop.ClientID).Select(zz => zz.Surname).FirstOrDefault();
                 dynobject.ClientEmail = db.Clients.Where(zz => zz.ClientID == loop.ClientID).Select(zz => zz.Email).FirstOrDefault();
                 dynobject.ClientContact = db.Clients.Where(zz => zz.ClientID == loop.ClientID).Select(zz => zz.ContactNo).FirstOrDefault();
                 dynobject.Date = loop.Date;
@@ -132,7 +133,7 @@ namespace ExperTech_Api.Controllers
                     dynamic newObject = new ExpandoObject();
                     newObject.ProductID = items.ProductID;
                     Product findProds = db.Products.Where(zz => zz.ProductID == items.ProductID).FirstOrDefault();
-                    newObject.ProductName = findProds.Name;
+                    newObject.Name = findProds.Name;
                     newObject.Price = findProds.Price;
                     newObject.Quantity = items.Quantity;
                     saleThings.Add(newObject);

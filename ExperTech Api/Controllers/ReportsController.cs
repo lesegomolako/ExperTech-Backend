@@ -200,17 +200,44 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Reports/GetSaleReportData")]
         [HttpPost]
-        public dynamic GetSaleReportData([FromBody] Criteria Criteria)
+        public dynamic GetSaleReportData([FromBody] Criteria Criteria, string SessionID)
         {
-
+            
             db.Configuration.ProxyCreationEnabled = false;
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if(findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is no longer valid";
+            }
+
             try
             {
                 DateTime StartDate = Convert.ToDateTime(Criteria.StartDate);
                 DateTime EndDate = Convert.ToDateTime(Criteria.EndDate);
-                List<Sale> getSales = db.Sales.Where(zz => zz.Date >= StartDate && zz.Date <= EndDate).ToList();
+                List<Sale> getSales = db.Sales.Include(zz => zz.SaleLines).Where(zz => zz.Date >= StartDate && zz.Date <= EndDate).ToList();
 
-                return getReport(getSales);
+                int Option = Criteria.Option;
+
+                switch(Option)
+                {
+                    case 1:
+                        List<SaleLine> getSaleLines = db.SaleLines.Include(zz => zz.Product).Where(zz => zz.Sale.Date >= StartDate && zz.Sale.Date <= EndDate).ToList();
+                        return getReport(getSaleLines, Option);
+                    case 2:
+                        List<Booking> getBookingSale = db.Bookings.Where(zz => zz.SaleID != null).Where(zz => zz.Sale.Date >= StartDate && zz.Sale.Date <= EndDate).ToList();
+                        return getBookingSaleReport(getBookingSale);
+                    case 3:
+                        List<ClientPackage> getPackageSales = db.ClientPackages.Where(zz => zz.Sale.Date >= StartDate && zz.Sale.Date <= EndDate).ToList();
+                        return getPackageSalesReport(getPackageSales);
+                    case 4:
+                        return getAllSalesReport(getSales, Option);
+                    default:
+                        return getAllSalesReport(getSales, Option);
+                }
+
+               
             }
             catch (Exception err)
             {
@@ -219,8 +246,38 @@ namespace ExperTech_Api.Controllers
 
         }
 
-        private dynamic getReport(List<Sale> ReportList)
-        { 
+        private dynamic getPackageSalesReport(List<ClientPackage> ReportList)
+        {
+            dynamic Output = new ExpandoObject();
+            //var categoryList = ReportList.GroupBy(zz => zz.SaleTypeID);
+            //List<dynamic> catList = new List<dynamic>();
+            //foreach (var count in categoryList)
+            //{
+            //    string findCat = db.SaleTypes.Where(zz => zz.SaleTypeID == count.Key).Select(zz => zz.Type).FirstOrDefault();
+            //    dynamic object1 = new ExpandoObject();
+            //    object1.Name = findCat;
+            //    object1.Total = count.Sum(zz => zz.Payment);
+            //    catList.Add(object1);
+            //}
+            //Output.Category = catList;
+            return Output;
+        }
+
+        private dynamic getBookingSaleReport(List<Booking> ReportList) 
+        {
+            dynamic Output = new ExpandoObject();
+            var groupList = ReportList.GroupBy(zz => zz.BookingLines.GroupBy(ff => ff.ServiceID).Select(tt => tt.Key));
+            List<dynamic> bookList = new List<dynamic>();
+            foreach(var items in groupList)
+            {
+                var j = items.Key;
+                //string ServiceName = db.Services.Where(zz => zz.ServiceID == items.Key).
+            }
+            return "";
+        }
+
+        private dynamic getAllSalesReport(List<Sale> ReportList, int Criteria)
+        {
 
             dynamic Output = new ExpandoObject();
             var categoryList = ReportList.GroupBy(zz => zz.SaleTypeID);
@@ -234,9 +291,9 @@ namespace ExperTech_Api.Controllers
                 catList.Add(object1);
             }
             Output.Category = catList;
-
-
             return Output;
+
+
         }
 
         [Route("api/Reports/GetSupplierData")]
@@ -299,6 +356,7 @@ namespace ExperTech_Api.Controllers
     {
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public int Option { get; set; }
     }
 }
 

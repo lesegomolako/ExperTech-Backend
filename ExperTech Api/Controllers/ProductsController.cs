@@ -24,60 +24,90 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Products/AddProduct")]
         [HttpPost]
-        public HttpResponseMessage AddProduct()
+        public dynamic AddProduct()
         {
             var httpRequest = HttpContext.Current.Request;
             string imageName = "";
+            string SessionID = httpRequest["SessionID"];
+            int findUser = db.Users.Where(zz => zz.SessionID == SessionID).Select(zz => zz.UserID).FirstOrDefault();
 
-            try
+            if (findUser != 0)
             {
-                var postedFile = httpRequest.Files["Image"];
-                imageName = new String(Path.GetFileNameWithoutExtension(postedFile.FileName).Take(postedFile.FileName.Length).ToArray()).Replace(" ", "-");
-                imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(postedFile.FileName);
-                var FilePath = HttpContext.Current.Server.MapPath("~/Images/" + imageName);
-                postedFile.SaveAs(FilePath);
-            }
-            catch (Exception err)
-            {
-                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Image was not saved (" + err.Message + ")");
-            }
-
-            try
-            {
-                string name = httpRequest["Name"];
-                Product verify = db.Products.Where(zz => zz.Name == name).FirstOrDefault();
-                if (verify == null)
+                try
                 {
-                    Product newProd = new Product();
+                    var postedFile = httpRequest.Files["Image"];
+                    imageName = new String(Path.GetFileNameWithoutExtension(postedFile.FileName).Take(postedFile.FileName.Length).ToArray()).Replace(" ", "-");
+                    imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(postedFile.FileName);
+                    var FilePath = HttpContext.Current.Server.MapPath("~/Images/" + imageName);
+                    postedFile.SaveAs(FilePath);
+                }
+                catch (Exception err)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Image was not saved (" + err.Message + ")");
+                }
 
-                    newProd.Name = httpRequest["Name"];
-                    newProd.Description = httpRequest["Description"];
-                    newProd.CategoryID = Convert.ToInt32(httpRequest["CategoryID"]);
-                    newProd.Price = Convert.ToDecimal(httpRequest["Price"]);
-                    newProd.SupplierID = Convert.ToInt32(httpRequest["SupplierID"]);
-                    newProd.QuantityOnHand = Convert.ToInt32(httpRequest["QuantityOnHand"]);
+                try
+                {
+                    string name = httpRequest["Name"];
+                    Product verify = db.Products.Where(zz => zz.Name == name).FirstOrDefault();
+                    if (verify == null)
+                    {
+                        Product newProd = new Product();
 
-                    db.Products.Add(newProd);
-                    db.SaveChanges();
-                    db.Entry(newProd).GetDatabaseValues();
-                    int ProdID = newProd.ProductID;
+                        newProd.Name = httpRequest["Name"];
+                        newProd.Description = httpRequest["Description"];
+                        newProd.CategoryID = Convert.ToInt32(httpRequest["CategoryID"]);
+                        newProd.Price = Convert.ToDecimal(httpRequest["Price"]);
+                        newProd.SupplierID = Convert.ToInt32(httpRequest["SupplierID"]);
+                        newProd.QuantityOnHand = Convert.ToInt32(httpRequest["QuantityOnHand"]);
 
-                    ProductPhoto photo = new ProductPhoto();
-                    photo.ProductID = ProdID;
-                    photo.Photo = imageName;
+                        db.Products.Add(newProd);
+                        db.SaveChanges();
+                        db.Entry(newProd).GetDatabaseValues();
+                        int ProdID = newProd.ProductID;
 
-                    db.ProductPhotoes.Add(photo);
-                    db.SaveChanges();
+                        ProductPhoto photo = db.ProductPhotoes.Where(zz => zz.ProductID == ProdID).FirstOrDefault();
+                        if (photo == null)
+                        {
+                            ProductPhoto addPhoto = new ProductPhoto();
+                            addPhoto.ProductID = ProdID;
+                            addPhoto.Photo = imageName;
 
-                    
-                }      
+                            db.ProductPhotoes.Add(addPhoto);
+                            db.SaveChanges();
+                        }
+                        else
+                        {
+                            photo.ProductID = ProdID;
+                            photo.Photo = imageName;
+
+                            db.SaveChanges();
+                        }
+
+
+                        return "success";
+                    }
+                    else
+                    {
+                        dynamic toReturn = new ExpandoObject();
+                        toReturn.Error = "duplicate";
+                        toReturn.Data = verify;
+                        return "duplicate";
+                    }
+                }
+                catch
+                {
+                    return "Product details are invalid";
+                }
+
             }
-            catch
+            else
             {
-               return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Product details are invalid");
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return "Session is not valid";
             }
-
-            return Request.CreateResponse(HttpStatusCode.Created);
 
         }
 
@@ -146,7 +176,6 @@ namespace ExperTech_Api.Controllers
         [HttpPost]
         public dynamic UpdateProduct([FromBody] Product Modell)
         {
-
             Product findProduct = db.Products.Where(zz => zz.ProductID == Modell.ProductID).FirstOrDefault();
             findProduct.Name = Modell.Name;
             findProduct.Price = Modell.Price;

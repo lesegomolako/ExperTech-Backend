@@ -62,6 +62,7 @@ namespace ExperTech_Api.Controllers
             {
                 dynamic newObject = new ExpandoObject();
                 newObject.UserID = Modell.UserID;
+                newObject.RoleID = Modell.RoleID;
                 List<dynamic> newList = new List<dynamic>();
                 foreach(Client items in Modell.Clients)
                 {
@@ -79,6 +80,7 @@ namespace ExperTech_Api.Controllers
             {
                 dynamic newObject = new ExpandoObject();
                 newObject.UserID = Modell.UserID;
+                newObject.RoleID = Modell.RoleID;
                 List<dynamic> newList = new List<dynamic>();
                 foreach (Admin items in Modell.Admins)
                 {
@@ -96,6 +98,7 @@ namespace ExperTech_Api.Controllers
             {
                 dynamic newObject = new ExpandoObject();
                 newObject.UserID = Modell.UserID;
+                newObject.RoleID = Modell.RoleID;
                 List<dynamic> newList = new List<dynamic>();
                 foreach (Employee items in Modell.Employees)
                 {
@@ -188,51 +191,44 @@ namespace ExperTech_Api.Controllers
         }
 
         [Route("ForgotPassword")]
-        [HttpPost]
-        public dynamic ForgotPassword(string Email)
+        [HttpGet]
+        public dynamic ForgotPassword(string Username)
         {
             db.Configuration.ProxyCreationEnabled = false;
-            Client findClient = db.Clients.Where(zz => zz.Email == Email && zz.UserID != null).FirstOrDefault();
-            Admin findAdmin = db.Admins.Where(zz => zz.Email == Email && zz.UserID != null).FirstOrDefault();
-            Employee findEmployee = db.Employees.Where(zz => zz.Email == Email && zz.UserID != null).FirstOrDefault();
-
-            if(findClient != null)
+            User findUser = db.Users.Where(zz => zz.Username == Username).FirstOrDefault();
+            
+            if(findUser != null)
             {
-                User findUser = db.Users.Where(zz => zz.UserID == findClient.UserID).FirstOrDefault();
-                Guid g = Guid.NewGuid();
-                findUser.SessionID = g.ToString();
-                db.SaveChanges();
-
-                ForgotEmail(findUser.SessionID, Email);
-
-                return "success";
-            }
-            else if (findAdmin != null)
-            {
-                User findUser = db.Users.Where(zz => zz.UserID == findAdmin.UserID).FirstOrDefault();
-                Guid g = Guid.NewGuid();
-                findUser.SessionID = g.ToString();
-                db.SaveChanges();
-
-                ForgotEmail(findUser.SessionID, Email);
-
-                return "success";
-            }
-            else if (findEmployee != null)
-            {
-                User findUser = db.Users.Where(zz => zz.UserID == findEmployee.UserID).FirstOrDefault();
-                Guid g = Guid.NewGuid();
-                findUser.SessionID = g.ToString();
-                db.SaveChanges();
-
-                ForgotEmail(findUser.SessionID, Email);
-
-                return "success";
+                switch(findUser.RoleID)
+                {
+                    case 1:
+                        Guid g = Guid.NewGuid();
+                        findUser.SessionID = g.ToString();
+                        db.SaveChanges();
+                        string findEmail = db.Clients.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.Email).FirstOrDefault();
+                        return ForgotEmail(findUser.SessionID, findEmail);
+                    case 2:
+                        Guid f = Guid.NewGuid();
+                        findUser.SessionID = f.ToString();
+                        db.SaveChanges();
+                        string findAEmail = db.Admins.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.Email).FirstOrDefault();
+                        return ForgotEmail(findUser.SessionID, findAEmail);
+                    case 3:
+                        Guid h = Guid.NewGuid();
+                        findUser.SessionID = h.ToString();
+                        db.SaveChanges();
+                        string findEmpEmail = db.Employees.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.Email).FirstOrDefault();
+                        return ForgotEmail(findUser.SessionID, findEmpEmail);
+                    default:
+                        return "User not found";
+                }
             }
             else
             {
-                return "not found";
+                return "User not found";
             }
+
+          
         }
 
         [Route("Logout")]
@@ -246,7 +242,7 @@ namespace ExperTech_Api.Controllers
             return "success";
         }
 
-        private void ForgotEmail(string SessionID, string Email )
+        private dynamic ForgotEmail(string SessionID, string Email )
         {
             try
             {
@@ -265,10 +261,12 @@ namespace ExperTech_Api.Controllers
                 smtp.Credentials = new NetworkCredential("hairexhilartion@gmail.com", "@Exhilaration1");
                 smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
                 smtp.Send(message);
+
+                return "success";
             }
-            catch
+            catch (Exception err)
             {
-                throw;
+                return err.Message;
             }
         }
 
@@ -758,49 +756,63 @@ namespace ExperTech_Api.Controllers
         //*************************ACTIVATE SERVICE PACKAGE*****************************
         [Route("activeSP")]
         [HttpPost]
-        public void activeSP([FromBody] ClientPackage forSP) //remember
+        public dynamic activeSP([FromBody]Sale Modell, string SessionID) //remember
         {
             db.Configuration.ProxyCreationEnabled = false;
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "Session is not valid";
+                return toReturn;
+            }
+            else
+            {
+               
 
             // string sp = "Activate Service Package";
-            DateTime Now = DateTime.Now;
-            Sale sales = new Sale();
-          
-            //this is where it reaks when activating service package
-            sales.ClientID = forSP.Sale.ClientID;
-            //sales.Decription = activeSP;     // this is where the sale type is specific            
-            sales.Payment = forSP.Sale.Payment;
+                DateTime Now = DateTime.Now;
+                Sale sales = new Sale();
 
-            //sales.SaleType = type id of activate
-
-            sales.PaymentTypeID = forSP.Sale.PaymentTypeID;
-            sales.StatusID = 2;
-            sales.Date = Now;
-            //sales.Description = sp;
-            db.Sales.Add(sales);
-            db.SaveChanges();
-
-            int SaleID = db.Sales.Where(zz => zz.ClientID == forSP.Sale.ClientID && zz.SaleTypeID == forSP.Sale.SaleTypeID).Select(zz => zz.SaleID).LastOrDefault();
-
-            //ading to client sdjfnjvn thingy
-            ClientPackage CP = new ClientPackage();
-            CP.SaleID = SaleID;
-            CP.PackageID = forSP.ServicePackage.PackageID;
-            CP.Date = Now;
-            CP.ExpiryDate = Now.AddMonths(forSP.ServicePackage.Duration);
-            db.ClientPackages.Add(CP);
-            db.SaveChanges();
-
-            //**********instance for the service package*****************
-            int loop = forSP.ServicePackage.Quantity;
-            for (int j = 0; j <= loop; j++)
-            {
-                PackageInstance addInstance = new PackageInstance();
-                addInstance.PackageID = CP.PackageID;
-                addInstance.SaleID = SaleID;
-                addInstance.StatusID = 1;
-                db.PackageInstances.Add(addInstance);
+                sales.ClientID = Modell.ClientID;      
+                sales.Payment = Modell.Payment;
+                sales.SaleTypeID = 3;
+                sales.PaymentTypeID = Modell.PaymentTypeID;
+                sales.StatusID = 2;
+                sales.Date = Now;
+                
+                db.Sales.Add(sales);
                 db.SaveChanges();
+
+                int SaleID = sales.SaleID;
+
+                //ading to client sdjfnjvn thingy
+                foreach (ClientPackage items in Modell.ClientPackages)
+                {
+                    ClientPackage CP = new ClientPackage();
+                    CP.SaleID = SaleID;
+                    CP.PackageID = items.PackageID;
+                    CP.Date = Now;
+                    int Duration = db.ServicePackages.Where(zz => zz.PackageID == items.PackageID).Select(zz => zz.Duration).FirstOrDefault();
+                    CP.ExpiryDate = Now.AddMonths(Duration);
+                    db.ClientPackages.Add(CP);
+                    db.SaveChanges();
+
+                    //**********instance for the service package*****************
+                    int loop = db.ServicePackages.Where(zz => zz.PackageID == items.PackageID).Select(zz => zz.Quantity).FirstOrDefault(); ;
+                    for (int j = 0; j <= loop; j++)
+                    {
+                        PackageInstance addInstance = new PackageInstance();
+                        addInstance.PackageID = items.PackageID;
+                        addInstance.SaleID = SaleID;
+                        addInstance.StatusID = 1;
+                        db.PackageInstances.Add(addInstance);
+                        db.SaveChanges();
+                    }
+                }
+
+                return "success";
+               
             }
         }
         //****************************user details******************************

@@ -72,30 +72,65 @@ namespace ExperTech_Api.Controllers
             }
             return Ok(forAdmin);
         }
-        //**********************************delete admin**************************************
-        [Route("api/Admin/deleteAdmin")]
-        [HttpDelete]
-        public dynamic deleteAdmin(int UserID)
-        {
-            try
-            {
-                db.Configuration.ProxyCreationEnabled = false;
-                User userThings = db.Users.Where(rr => rr.UserID == UserID).FirstOrDefault();
-                
-                db.Users.Remove(userThings);
-                db.SaveChanges();
-                
-                // db.Admins.Remove(adminThings);
-                db.Users.Remove(userThings);
-                db.SaveChanges();
-                return "success";
-            }
-            catch (Exception err)
-            {
-                return err.Message;
-            }
-        }
+        //*******************************final delete client*****************************
+        //[Route("api/Client/clientDelete")]
+        //[HttpPut]
+        //public object clientDelete(int clients)
+        //{
+        //    try
+        //    {
+        //        User usrOBJ = db.Users.Where(rr => rr.UserID == clients).FirstOrDefault();
+        //        db.Users.Remove(usrOBJ);
+        //        db.SaveChanges();
 
+        //        Client findclient = db.Clients.Where(zz => zz.ClientID == clients).FirstOrDefault();
+        //        findclient.Deleted = true;
+        //        db.SaveChanges();
+        //        return "success";
+        //    }
+        //    catch (Exception err)
+        //    {
+        //        return"failed";
+        //    }
+        //}
+        //****************************final admin delete******************************
+        //[Route("api/Admin/adminDelete")]
+        //[HttpPut]
+        //public object employeeDelete(int admins)
+        //{
+        //    try
+        //    {
+        //        User usrOBJ = db.Users.Where(rr => rr.UserID == admins).FirstOrDefault();
+        //        db.Users.Remove(usrOBJ);
+        //        db.SaveChanges();
+
+        //        Admin findemployee = db.Admins.Where(zz => zz.AdminID == admins).FirstOrDefault();
+        //        findemployee.Deleted = true;
+        //        db.SaveChanges();
+        //        return "success";
+        //    }
+        //    catch (Exception err)
+        //    {
+        //        return "failed";
+        //    }
+        //}
+        //******************************delete service package*****************************
+        //[Route("api/ServicePackage/DeleteServicePackage")]
+        //[HttpDelete]
+        //public dynamic DeleteServicePackage(int PackageID)
+        //{
+        //    try
+        //    {
+        //        ServicePackage spobject = db.ServicePackages.Where(rr => rr.PackageID == PackageID).FirstOrDefault();
+        //        db.ServicePackages.Remove(spobject);
+        //        db.SaveChanges();
+        //        return "success";
+        //    }
+        //    catch
+        //    {
+        //        return "failed";
+        //    }
+        //}
         //**************************Read Company information*****************************
         [Route("api/Admin/getCompany")]
         [HttpGet]
