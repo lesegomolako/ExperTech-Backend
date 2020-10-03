@@ -59,6 +59,7 @@ namespace ExperTech_Api.Controllers
 
                 DateRequested findRequest = db.DateRequesteds.Where(zz => zz.RequestedID == RequestedID).FirstOrDefault();
                 db.DateRequesteds.Remove(findRequest);
+                db.SaveChanges();
 
                 return "success";
 
@@ -351,7 +352,7 @@ namespace ExperTech_Api.Controllers
                     DateTime today = DateTime.Now;
 
                     bool canCancel = false;
-                    if(today < DayBefore)
+                    if(today < DayBefore )
                     {
                         canCancel = true;
                     }
@@ -638,13 +639,14 @@ namespace ExperTech_Api.Controllers
                 try
                 {
 
-                    int getDateID = db.Dates.Where(zz => zz.Date1 == Bookings.StartDate).Select(zz => zz.DateID).FirstOrDefault();
+                    int getDateID = db.Dates.Where(zz => zz.Date1 == Bookings.StartDate.Date).Select(zz => zz.DateID).FirstOrDefault();
                     if (getDateID != 0)
                     {
                         Booking saveBooking = new Booking();
                         saveBooking.ClientID = Bookings.ClientID;
                         saveBooking.StatusID = 4;
                         saveBooking.ReminderID = 1;
+                        db.Bookings.Add(saveBooking);
                         db.SaveChanges();
                         int BookingID = saveBooking.BookingID;
 

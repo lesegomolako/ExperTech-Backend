@@ -102,7 +102,8 @@ namespace ExperTech_Api.Controllers
             if (admin == null)
             {
                 dynamic toReturn = new ExpandoObject();
-                toReturn.Error = "Session is no longer available";
+                toReturn.Error = "session";
+                toReturn.Message = "Session is no longer available";
                 return GetServiceType();
             }
             db.Configuration.ProxyCreationEnabled = false;
@@ -128,11 +129,36 @@ namespace ExperTech_Api.Controllers
                 }
                 else
                 {
-                    dynamic toReturn = new ExpandoObject();
-                    int countServ = findService.Count;
-                    toReturn.Error = "dependencies";
-                    toReturn.Message = "There are " + countServ.ToString() + " Services that depend this ServiceType \nDelete those services first.";
-                    return toReturn;
+                    bool isServicesDeleted = true;
+                    int count = 0;
+                    while(isServicesDeleted = true && count<findService.Count)
+                    {
+                        count++;
+                        if(findService[count-1].Deleted == false)
+                        {
+                            isServicesDeleted = false;
+                        }
+                    }
+                    if (isServicesDeleted == false)
+                    {
+                        dynamic toReturn = new ExpandoObject();
+                        int countServ = findService.Count;
+                        toReturn.Error = "dependencies";
+                        toReturn.Message = "There are services that depend this Service Type \nDelete those services first.";
+                        return toReturn;
+                    }
+                    else
+                    {
+                        foreach(Service items in findService)
+                        {
+                            Service updateService = items;
+                            updateService.TypeID = null;
+                            db.SaveChanges();
+                        }
+                        dynamic toReturn = new ExpandoObject();
+                        toReturn.Message = "success";
+                        return toReturn;
+                    }
                 }
             }
             catch (Exception err)
@@ -278,9 +304,18 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Services/DeleteService")]
         [HttpDelete]
-        public dynamic DeleteService(int ServiceID)
+        public dynamic DeleteService(int ServiceID, string SessionID)
         {
             db.Configuration.ProxyCreationEnabled = false;
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if(findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return toReturn;
+            }
+
             try
             {
                 Service find = db.Services.Where(zz => zz.ServiceID == ServiceID).FirstOrDefault();
@@ -464,8 +499,18 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Services/DeleteServiceOption")]
         [HttpDelete]
-        public dynamic DeleteServiceOption(int OptionID)
+        public dynamic DeleteServiceOption(int OptionID, string SessionID)
         {
+            db.Configuration.ProxyCreationEnabled = false;
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return toReturn;
+            }
+
             db.Configuration.ProxyCreationEnabled = false;
             ServiceOption findOption = db.ServiceOptions.Find(OptionID);
             findOption.Deleted = true;

@@ -10,6 +10,8 @@ using ExperTech_Api.Models;
 using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Data.Entity;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
 
 
 namespace ExperTech_Api.Controllers
@@ -17,6 +19,32 @@ namespace ExperTech_Api.Controllers
     [RoutePrefix("api/User")]
     public class UserController : ApiController
     {
+        static void SMS()
+        {
+            // Find your Account Sid and Token at twilio.com/console
+            // DANGER! This is insecure. See http://twil.io/secure
+            const string accountSid = "ACa877daffacbbb1f20121558340d54b46";
+            const string authToken = "82580ac0a7147ae502301b95361ba785";
+
+            TwilioClient.Init(accountSid, authToken);
+
+            var message = MessageResource.Create(
+                body: "This is the ship that made the Kessel Run in fourteen parsecs?",
+                from: new Twilio.Types.PhoneNumber("+12057841821"),
+                to: new Twilio.Types.PhoneNumber("+27614446976")
+            );
+
+            Console.WriteLine(message.Sid);
+        }
+
+        [Route("SendSMS")]
+        [HttpGet]
+        public void SendSMS()
+        {
+           
+            SMS();
+        }
+
         public ExperTechEntities db = new ExperTechEntities();
 
         [System.Web.Http.Route("getProfile")]
@@ -679,24 +707,16 @@ namespace ExperTech_Api.Controllers
                     findBookings.SaleID = makeSale.SaleID;
 
 
-
-
-
-                    Sale sayle = new Sale();
-                    //booking, client array, sale
-
-                    //Client client = new Client();
-                    //client.Client = bkings.Client;
-                    //client.ClientID.ToString() = bkings.ClientID;
                     db.SaveChanges();
-                    dynamic toReturn = new ExpandoObject();
-                    toReturn.Message = "success";
-                    toReturn.SessionID = findUser.SessionID;
-                    return toReturn;
+           
+                    return "success";
                 }
                 else
                 {
-                    return "Session is not valid";
+                    dynamic toReturn = new ExpandoObject();
+                    toReturn.Error = "session";
+                    toReturn.Message = "Session is not valid";
+                    return toReturn;
                 }
             }
             catch (Exception err)

@@ -18,40 +18,40 @@ namespace ExperTech_Api.Controllers
     {
         ExperTechEntities db = new ExperTechEntities();
 
-        [Route("api/Reports/GetProductReportData")]
-        [HttpPost]
-        public dynamic GetProductReportData([FromBody]Criteria Criteria)
-        {
+        //[Route("api/Reports/GetProductReportData")]
+        //[HttpPost]
+        //public dynamic GetProductReportData([FromBody]Criteria Criteria)
+        //{
           
-            db.Configuration.ProxyCreationEnabled = false;
-            try
-            {
-                DateTime StartDate = Convert.ToDateTime(Criteria.StartDate);
-                DateTime EndDate = Convert.ToDateTime(Criteria.EndDate);
-                List<SaleLine> getSales = db.SaleLines.Include(zz => zz.Product).Where(zz => zz.Sale.Date >= StartDate && zz.Sale.Date <= EndDate).ToList();
+        //    db.Configuration.ProxyCreationEnabled = false;
+        //    try
+        //    {
+        //        DateTime StartDate = Convert.ToDateTime(Criteria.StartDate);
+        //        DateTime EndDate = Convert.ToDateTime(Criteria.EndDate);
+        //        List<SaleLine> getSales = db.SaleLines.Include(zz => zz.Product).Where(zz => zz.Sale.Date >= StartDate && zz.Sale.Date <= EndDate).ToList();
 
 
 
-                return getReport(getSales, Criteria);
-            }
-            catch (Exception err)
-            {
-                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Sale report details are invalid");
-            }
+        //        return getReport(getSales, Criteria);
+        //    }
+        //    catch (Exception err)
+        //    {
+        //        return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Sale report details are invalid");
+        //    }
 
-        }
+        //}
 
         private dynamic getReport(List<SaleLine> ReportList, dynamic Criteria)
         {
 
             dynamic Output = new ExpandoObject();
-            var categoryList = ReportList.GroupBy(zz => zz.Product.CategoryID);
+            var categoryList = ReportList.GroupBy(zz => zz.ProductID);
             List<dynamic> catList = new List<dynamic>();
             foreach (var count in categoryList)
             {
-                string findCat = db.ProductCategories.Where(zz => zz.CategoryID == count.Key).Select(zz => zz.Category).FirstOrDefault();
+                string findProd = db.Products.Where(zz => zz.ProductID == count.Key).Select(zz => zz.Name).FirstOrDefault();
                 dynamic object1 = new ExpandoObject();
-                object1.Name = findCat;
+                object1.Name = findProd;
                 object1.Total = count.Sum(zz => zz.Quantity);
                 catList.Add(object1);
             }

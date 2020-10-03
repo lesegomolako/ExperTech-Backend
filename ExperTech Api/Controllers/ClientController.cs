@@ -659,28 +659,61 @@ namespace ExperTech_Api.Controllers
 
         [System.Web.Mvc.HttpDelete]
         [System.Web.Http.Route("DeleteClientBooking")]
-        public IHttpActionResult DeleteClientBooking(int id)
+        public dynamic DeleteClientBooking(int bookingID, string SessionID)
         {
-
-            db.Configuration.ProxyCreationEnabled = false;
-            Booking bookings = db.Bookings.Where(zz => zz.BookingID == id).FirstOrDefault();
-
-            bookings.StatusID = 3;
-            db.SaveChanges();
-
-            foreach (EmployeeSchedule emschedule in bookings.EmployeeSchedules)
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser == null)
             {
-                EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.EmployeeID == emschedule.EmployeeID
-                && zz.DateID == emschedule.DateID && zz.TimeID == emschedule.TimeID).FirstOrDefault();
-                if (bookinglist != null)
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return toReturn;
+            }
+
+            try
+            {
+                db.Configuration.ProxyCreationEnabled = false;
+                Booking bookings = db.Bookings.Where(zz => zz.BookingID == bookingID).FirstOrDefault();
+                List<BookingLine> findLine = db.BookingLines.Where(zz => zz.BookingID == bookingID).ToList();
+                List<BookingNote> findNotes = db.BookingNotes.Where(zz => zz.BookingID == bookingID).ToList();
+                List<EmployeeSchedule> findSchedge = db.EmployeeSchedules.Where(zz => zz.BookingID == bookingID).ToList();
+
+                foreach (EmployeeSchedule emschedule in findSchedge)
                 {
-                    bookinglist.StatusID = 1;
-                    bookinglist.BookingID = null;
+                    EmployeeSchedule bookinglist = db.EmployeeSchedules.Where(zz => zz.EmployeeID == emschedule.EmployeeID
+                    && zz.DateID == emschedule.DateID && zz.TimeID == emschedule.TimeID).FirstOrDefault();
+                    if (bookinglist != null)
+                    {
+                        bookinglist.StatusID = 1;
+                        bookinglist.BookingID = null;
+                        db.SaveChanges();
+                    }
+
+                }
+
+                if(findLine.Count != 0)
+                {
+                    db.BookingLines.RemoveRange(findLine);
                     db.SaveChanges();
                 }
 
+                if(findNotes.Count != 0)
+                {
+                    db.BookingNotes.RemoveRange(findNotes);
+                    db.SaveChanges();
+                }
+
+                db.Bookings.Remove(bookings);
+                db.SaveChanges();
+
+
+                
+                return "success";
             }
-            return Ok(id);
+            catch(Exception err)
+            {
+                return err.Message;
+            }
         }
 
         [HttpDelete]
@@ -743,11 +776,20 @@ namespace ExperTech_Api.Controllers
 
 
 
-        //the one the client does
-        [HttpPost]
+        //the one the client does    
         [Route("AcceptClientsBooking")]
-        public dynamic AcceptClientsBooking(int bookingID)
+        [HttpGet]
+        public dynamic AcceptClientsBooking(int bookingID, string SessionID)
         {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return toReturn;
+            }
+
             try
             {
                 Booking bookings = db.Bookings.Where(zz => zz.BookingID == bookingID).FirstOrDefault();

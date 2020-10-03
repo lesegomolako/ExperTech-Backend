@@ -80,6 +80,14 @@ namespace ExperTech_Api.Controllers
 
             return dynamicBasketline;
         }
+        [Route("api/Sale/GetProductSales")]
+        [HttpGet]
+        public dynamic GetProductSales()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            List<Sale> getSales = db.Sales.Include(zz => zz.SaleLines).Where(zz => zz.SaleTypeID == 1).ToList();
+            return SaleList(getSales);
+        }
 
         [Route("api/Sale/GetSaleList")]
         [HttpGet]
@@ -146,7 +154,7 @@ namespace ExperTech_Api.Controllers
             return newlist;
         }
 
-
+       
 
         [Route("api/Sale/AddMakeSale")]
         [HttpGet]
