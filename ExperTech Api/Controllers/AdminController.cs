@@ -332,6 +332,66 @@ namespace ExperTech_Api.Controllers
             return db.CompanyInfoes.Where(zz => zz.InfoID == 1).FirstOrDefault();
         }
 
+        [Route("api/Admin/GetSocials")]
+        [HttpGet]
+        public dynamic GetSocials()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            return db.SocialMedias.ToList();
+        }
+
+        [Route("api/Admin/updateTimes")]
+        [HttpPost]
+        public dynamic updateTimes([FromBody]List<Timeslot>Modell)
+        {
+            if(Modell.Count != 0)
+            {
+                try
+                {
+                    for (int j = 0; j < Modell.Count; j++)
+                    {
+                        Timeslot findSlot = db.Timeslots.Where(zz => zz.TimeID == Modell[j].TimeID).FirstOrDefault();
+                        if (findSlot != null)
+                        {
+                            findSlot.Available = Modell[j].Available;
+                            db.SaveChanges();
+                        }
+
+                        List<EmployeeSchedule> findSchedule = db.EmployeeSchedules.Where(zz => zz.TimeID == Modell[j].TimeID).ToList();
+                        for(int k=0; k <findSchedule.Count; k++)
+                        {
+                            EmployeeSchedule getSchedge = findSchedule[k];
+                            if (Modell[j].Available == false)
+                            {
+                                if (getSchedge.StatusID == 1)
+                                {
+                                    getSchedge.StatusID = 2;
+                                    db.SaveChanges();
+                                }
+
+                            }
+               
+                        }
+
+                    }
+
+                    return "success";
+                }
+                catch(Exception err)
+                {
+                    return err.Message;
+                }
+               
+
+
+            }
+            else
+            {
+                return "Timeslot not found";
+            }
+           
+        }
+
 
         //      BookingID: null,
         //  Client : null,
