@@ -443,7 +443,7 @@
     <Property Name="TimeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="StartTime" Type="time" Precision="7" Nullable="false" />
     <Property Name="EndTime" Type="time" Precision="7" Nullable="false" />
-    <Property Name="Deleted" Type="bit" Nullable="false" />
+    <Property Name="Available" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="User">
     <Key>

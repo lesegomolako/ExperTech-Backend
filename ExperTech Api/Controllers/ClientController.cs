@@ -735,6 +735,7 @@ namespace ExperTech_Api.Controllers
                         bookinglist.StatusID = 1;
                         bookinglist.BookingID = null;
                         db.SaveChanges();
+                        break;
                     }
 
                 }

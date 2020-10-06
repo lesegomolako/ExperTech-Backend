@@ -8,6 +8,7 @@ using System.Text;
 using System.Dynamic;
 using ExperTech_Api.Models;
 using System.Web.Http.Cors;
+using System.Data.Entity;
 
 namespace ExperTech_Api.Controllers
 {
@@ -245,22 +246,28 @@ namespace ExperTech_Api.Controllers
 
         }
 
+       
+       
+
         private dynamic getBookingsList(List<Booking> Modell)
         {
             List<dynamic> getList = new List<dynamic>();
             foreach (Booking items in Modell)
             {
                 string name = db.Clients.Where(zz => zz.ClientID == items.ClientID).Select(zz => zz.Name).FirstOrDefault();
+                string surname = db.Clients.Where(zz => zz.ClientID == items.ClientID).Select(zz => zz.Surname).FirstOrDefault();
                 string status = db.BookingStatus.Where(zz => zz.StatusID == items.StatusID).Select(zz => zz.Status).FirstOrDefault();
                 int DateID = db.EmployeeSchedules.Where(zz => zz.BookingID == items.BookingID).Select(zz => zz.DateID).FirstOrDefault();
                 int ServiceID = db.BookingLines.Where(zz => zz.BookingID == items.BookingID).Select(zz => zz.ServiceID).FirstOrDefault();
                 int? OptionID = db.BookingLines.Where(zz => zz.BookingID == items.BookingID).Select(zz => zz.OptionID).FirstOrDefault();
 
                 dynamic listObject = new ExpandoObject();
-                listObject.BookingID = items.BookingID;            
-                listObject.Client = name;              
+                listObject.BookingID = items.BookingID;
+                listObject.ClientID = items.ClientID;
+                listObject.Client = name + " " + surname;              
                 listObject.Status = status;              
                 listObject.Date = db.Dates.Where(zz => zz.DateID == DateID).Select(zz => zz.Date1).FirstOrDefault();
+                listObject.ServiceID = ServiceID;
                 
                 if(OptionID != null)
                 {
@@ -277,42 +284,87 @@ namespace ExperTech_Api.Controllers
                     listObject.Price = db.ServicePrices.Where(zz => zz.ServiceID == ServiceID).Select(zz => zz.Price).FirstOrDefault();
                 }
                 getList.Add(listObject);
+
+                List<Sale> findSales = db.Sales.Where(zz => zz.ClientID == items.ClientID && zz.SaleTypeID == 3).ToList();
+                int PackageID = db.ServicePackages.Where(zz => zz.ServiceID == ServiceID).Select(zz => zz.PackageID).FirstOrDefault();
+
+                bool hasPackage = false;
+                foreach (Sale saleitems in findSales)
+                {
+                    DateTime today = DateTime.Now;
+                    ClientPackage findPackage = db.ClientPackages.Include(zz => zz.ServicePackage).Include(zz => zz.PackageInstances).Where(zz => zz.SaleID == saleitems.SaleID &&
+                    zz.PackageID == PackageID && zz.ExpiryDate > today.Date).FirstOrDefault();
+
+                   
+                    if (findPackage != null)
+                    {
+                        hasPackage = true;
+                        dynamic PackageDetails = new ExpandoObject();
+                        PackageDetails.PackageID = findPackage.PackageID;
+                        string PName = findPackage.ServicePackage.Description;
+                        int InstancesLeft = findPackage.PackageInstances.Where(zz => zz.StatusID == 1).Count();
+                        PackageDetails.Name = PName + "(" + InstancesLeft.ToString() + " uses left)";
+                        listObject.PackageDetails = PackageDetails;
+                        break;
+                    }
+                  
+                }
+
+                listObject.HasPackage = hasPackage;
+
             }
             return getList;
         }
 
-  //      BookingID: null,
-  //  Client : null,
-  //  Status: null,
-  //  BookingLines:
-  //    [{
-  //      ServiceID: null,
-  //      OptionID: null,
-  //      Service:null,
-  //      Option:null,
-  //    }],
-  //    EmployeeSchedule: [
-  //      {
-  //          Date: null,
-  //          StartTime: null,
-  //          EndTime: null,
-  //          Employee: null,
-  //      }
-  //  ],
-  //  DateRequesteds:
-  //    [{
-  //      Date: null,
-  //      StartTime: null,
-  //    }],
-    
-  
-  //  BookingNotes:  
-  //    [{
-  //      Notes: null,
-  //    }]
-   
-  //}
-  
+        [Route("api/Admin/GetAllTimes")]
+        [HttpGet]
+        public dynamic GetAllTimes()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            return db.Timeslots.ToList();
+        }
+
+        [Route("api/Admin/GetCompanyInfo")]
+        [HttpGet]
+        public dynamic GetCompanyInfo()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            return db.CompanyInfoes.Where(zz => zz.InfoID == 1).FirstOrDefault();
+        }
+
+
+        //      BookingID: null,
+        //  Client : null,
+        //  Status: null,
+        //  BookingLines:
+        //    [{
+        //      ServiceID: null,
+        //      OptionID: null,
+        //      Service:null,
+        //      Option:null,
+        //    }],
+        //    EmployeeSchedule: [
+        //      {
+        //          Date: null,
+        //          StartTime: null,
+        //          EndTime: null,
+        //          Employee: null,
+        //      }
+        //  ],
+        //  DateRequesteds:
+        //    [{
+        //      Date: null,
+        //      StartTime: null,
+        //    }],
+
+
+        //  BookingNotes:  
+        //    [{
+        //      Notes: null,
+        //    }]
+
+        //}
+
         //**************************************read socials*************************************
         //[Route("api/CompanyInfo/getSocials")]
         //[HttpGet]

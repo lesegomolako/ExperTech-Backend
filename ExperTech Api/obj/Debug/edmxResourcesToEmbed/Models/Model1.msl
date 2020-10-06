@@ -485,7 +485,7 @@
           <ScalarProperty Name="TimeID" ColumnName="TimeID" />
           <ScalarProperty Name="StartTime" ColumnName="StartTime" />
           <ScalarProperty Name="EndTime" ColumnName="EndTime" />
-          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
+          <ScalarProperty Name="Available" ColumnName="Available" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

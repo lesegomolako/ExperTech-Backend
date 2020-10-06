@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="5e91e3926fd442ac896728b3aeb5394a" Name="Diagram1">
+      <Diagram DiagramId="f7129b4451c942d1abcd1f942f3dbae6" Name="Diagram1">
         <EntityTypeShape EntityType="ExperTechModel.Admin" Width="1.5" PointX="5.25" PointY="15.75" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.AdminAuditTrail" Width="1.5" PointX="7.5" PointY="13.125" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.Basket" Width="1.5" PointX="7.5" PointY="22.125" IsExpanded="true" />

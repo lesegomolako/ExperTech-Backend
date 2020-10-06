@@ -8,6 +8,7 @@ using ExperTech_Api.Models;
 using System.Dynamic;
 using System.Web.Http.Cors;
 using System.Data.Entity;
+using System.Web;
 using System.Security.Cryptography;
 using System.Text;
 using System.Diagnostics;
@@ -253,7 +254,7 @@ namespace ExperTech_Api.Controllers
         public List<Timeslot> getTimes()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            return db.Timeslots.ToList();
+            return db.Timeslots.Where(zz => zz.Available == true).ToList();
         }
 
 
@@ -311,6 +312,7 @@ namespace ExperTech_Api.Controllers
             }
 
         }
+
 
 
         private List<dynamic> getClientBooking(List<Booking> forBooking)
@@ -663,13 +665,18 @@ namespace ExperTech_Api.Controllers
                         {
                             saveLine.OptionID = Bookings.OptionID;
                         }
+                        db.BookingLines.Add(saveLine);
+                        db.SaveChanges();
 
                         BookingNote saveNotes = new BookingNote();
                         if (Bookings.Notes != null)
                         {
                             saveNotes.Note = Bookings.Notes;
                             saveNotes.BookingID = BookingID;
+                            db.BookingNotes.Add(saveNotes);
+                            db.SaveChanges();
                         }
+                       
                     }
                     else
                     {

@@ -553,7 +553,7 @@
     <Property Name="TimeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="StartTime" Type="Time" Nullable="false" Precision="7" />
     <Property Name="EndTime" Type="Time" Nullable="false" Precision="7" />
-    <Property Name="Deleted" Type="Boolean" Nullable="false" />
+    <Property Name="Available" Type="Boolean" Nullable="false" />
     <NavigationProperty Name="Schedules" Relationship="Self.FK_Schedule_Timeslot" FromRole="Timeslot" ToRole="Schedule" />
   </EntityType>
   <EntityType Name="User">

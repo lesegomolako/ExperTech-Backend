@@ -84,58 +84,21 @@ namespace ExperTech_Api.Controllers
             List<dynamic> getList = new List<dynamic>();
             dynamic result = new ExpandoObject();
 
-            for (int j = 0; j < Dates.Count; j++)
+            foreach (EmployeeSchedule items in Modell)
             {
                 dynamic newObject = new ExpandoObject();
-                newObject.DateID = Dates[j].DateID;
-                newObject.Dates = Dates[j].Date1;
-                List<dynamic> getTimes = new List<dynamic>();
+                newObject.DateID = items.DateID;
+                newObject.Dates = db.Dates.Where(zz => zz.DateID == items.DateID).Select(zz => zz.Date1).FirstOrDefault();
+                newObject.TimeID = items.TimeID;
+                newObject.StartTime = db.Timeslots.Where(zz => zz.TimeID == items.TimeID).Select(zz => zz.StartTime).FirstOrDefault();
+                newObject.EndTime = db.Timeslots.Where(zz => zz.TimeID == items.TimeID).Select(zz => zz.EndTime).FirstOrDefault();
+                newObject.StatusID = items.StatusID;
 
-                foreach (EmployeeSchedule Items in Modell)
-                {
-                    if (Items.DateID == Dates[j].DateID)
-                    {
-                        if (Items.StatusID == 1)
-                        {
-                            dynamic ScheduleObject = new ExpandoObject();
-                            ScheduleObject.BookingID = Items.BookingID;
-                            ScheduleObject.TimeID = Items.TimeID;
-                            Timeslot findTime = db.Timeslots.Where(zz => zz.TimeID == Items.TimeID).FirstOrDefault();
-                            ScheduleObject.StartTime = findTime.StartTime;
-                            ScheduleObject.EndTime = findTime.EndTime;
-                            ScheduleObject.StatusID = Items.StatusID;
-                            getTimes.Add(ScheduleObject);
-                        }
-                        else if(Items.StatusID == 2)
-                        {
-                            dynamic ScheduleObject = new ExpandoObject();
-                            ScheduleObject.BookingID = Items.BookingID;
-                            ScheduleObject.TimeID = Items.TimeID;
-                            Timeslot findTime = db.Timeslots.Where(zz => zz.TimeID == Items.TimeID).FirstOrDefault();
-                            ScheduleObject.StartTime = findTime.StartTime;
-                            ScheduleObject.EndTime = findTime.EndTime;
-                            ScheduleObject.StatusID = Items.StatusID;
-                            getTimes.Add(ScheduleObject);
-                        }
-                        else
-                        {
-                            dynamic ScheduleObject = new ExpandoObject();
-                            ScheduleObject.BookingID = Items.BookingID;
-                            ScheduleObject.TimeID = Items.TimeID;
-                            Timeslot findTime = db.Timeslots.Where(zz => zz.TimeID == Items.TimeID).FirstOrDefault();
-                            ScheduleObject.StartTime = findTime.StartTime;
-                            ScheduleObject.EndTime = findTime.EndTime;
-                            ScheduleObject.StatusID = Items.StatusID;
-                            getTimes.Add(ScheduleObject);
-                        }
-
-                    }
-                }
-                newObject.Times = getTimes;
                 getList.Add(newObject);
             }
 
-            return getList;
+
+                return getList;
         }
 
         //*************************read employee availability details*********************
