@@ -132,57 +132,45 @@ namespace ExperTech_Api.Controllers
         //        return "failed";
         //    }
         //}
-        //**************************Read Company information*****************************
-        [Route("api/Admin/getCompany")]
-        [HttpGet]
-
-        public List<dynamic> getCompany()
-        {
-            db.Configuration.ProxyCreationEnabled = false;
-
-            return getCompanyID(db.CompanyInfoes.ToList());
-        }
-        private List<dynamic> getCompanyID(List<CompanyInfo> forCompany)
-        {
-            List<dynamic> dynamicCompanies = new List<dynamic>();
-            foreach (CompanyInfo cname in forCompany)
-            {
-                dynamic dynamicCompany = new ExpandoObject();
-                dynamicCompany.InfoID = cname.InfoID;
-                dynamicCompany.Name = cname.Name;
-                dynamicCompany.Address = cname.Address;
-                dynamicCompany.ContactNo = cname.ContactNo;
-
-                dynamicCompanies.Add(dynamicCompany);
-            }
-            return dynamicCompanies;
-        }
+       
         //******************************update company info**************************
         [Route("api/Admin/updateCompany")]
         [HttpPut]
-        public dynamic updateCompany([FromBody] CompanyInfo forCompany)
+        public dynamic updateCompany([FromBody] CompanyInfo forCompany, string SessionID)
         {
             db.Configuration.ProxyCreationEnabled = false;
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            try
+
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if(findUser != null)
             {
-                CompanyInfo information = db.CompanyInfoes.Find(forCompany.InfoID);
-                if (information != null)
+                try
                 {
+                    CompanyInfo information = db.CompanyInfoes.Where(zz => zz.InfoID == forCompany.InfoID).FirstOrDefault();
+
                     information.Name = forCompany.Name;
                     information.Address = forCompany.Address;
                     information.ContactNo = forCompany.ContactNo;
                     db.SaveChanges();
+                    return "success";
                 }
+                catch
+                {
+                    return "Company info details invalid";
+                }
+                
             }
-            catch
+            else
             {
-                throw;
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return toReturn;
             }
-            return Ok(forCompany);
+           
         }
         //**********************delete company info*********************************
         [Route("api/Admin/deleteCompany")]
@@ -211,30 +199,7 @@ namespace ExperTech_Api.Controllers
             }
         }
         //*******************************add company********************************
-        [Route("api/Admin/addCompany")]
-        [HttpPost]
-        public List<dynamic> addCompany([FromBody] List<CompanyInfo> forCompany)
-        {
-            try
-            {
-                if (forCompany != null)
-                {
-                    db.Configuration.ProxyCreationEnabled = false;
-                    db.CompanyInfoes.AddRange(forCompany);
-                    db.SaveChanges();
-
-                    return getCompany();
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            catch
-            {
-                throw;
-            }
-        }
+      
 
         [Route("api/Admin/GetBookings")]
         [HttpGet]
@@ -332,6 +297,7 @@ namespace ExperTech_Api.Controllers
             return db.CompanyInfoes.Where(zz => zz.InfoID == 1).FirstOrDefault();
         }
 
+        //***********************Socials***********************************
         [Route("api/Admin/GetSocials")]
         [HttpGet]
         public dynamic GetSocials()
@@ -340,37 +306,131 @@ namespace ExperTech_Api.Controllers
             return db.SocialMedias.ToList();
         }
 
+        [Route("api/Admin/AddSocials")]
+        [HttpPost]
+        public dynamic AddSocials([FromBody]SocialMedia Modell, string SessionID)
+        {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if(findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return toReturn;
+            }
+
+            try
+            {
+                SocialMedia saveSocials = new SocialMedia();
+                saveSocials.Name = Modell.Name;
+                saveSocials.Link = Modell.Link;
+                db.SocialMedias.Add(saveSocials);
+                db.SaveChanges();
+                return "success";
+            }
+            catch(Exception err)
+            {
+                return err.Message;
+            }
+        }
+
+        [Route("api/Admin/UpdateSocials")]
+        [HttpPut]
+        public dynamic UpdateSocials([FromBody] SocialMedia Modell, string SessionID)
+        {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return toReturn;
+            }
+
+            try
+            {
+                SocialMedia saveSocials = db.SocialMedias.Where(zz => zz.SocialID == Modell.SocialID).FirstOrDefault();
+                saveSocials.Name = Modell.Name;
+                saveSocials.Link = Modell.Link;
+                db.SocialMedias.Add(saveSocials);
+                db.SaveChanges();
+                return "success";
+            }
+            catch (Exception err)
+            {
+                return err.Message;
+            }
+        }
+
+        [Route("api/Admin/DeleteSocials")]
+        [HttpDelete]
+        public dynamic DeleteSocials(int SocialID, string SessionID)
+        {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return toReturn;
+            }
+
+            try
+            {
+                SocialMedia saveSocials = db.SocialMedias.Where(zz => zz.SocialID == SocialID).FirstOrDefault();
+                db.SocialMedias.Remove(saveSocials);
+                db.SaveChanges();
+                return "success";
+            }
+            catch (Exception err)
+            {
+                return err.Message;
+            }
+        }
+
         [Route("api/Admin/updateTimes")]
         [HttpPost]
-        public dynamic updateTimes([FromBody]List<Timeslot>Modell)
+        public dynamic updateTimes([FromBody]List<Timeslot>Modell, string SessionID)
         {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if(findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return toReturn;
+            }
+
             if(Modell.Count != 0)
             {
                 try
                 {
                     for (int j = 0; j < Modell.Count; j++)
                     {
-                        Timeslot findSlot = db.Timeslots.Where(zz => zz.TimeID == Modell[j].TimeID).FirstOrDefault();
+                        int TimeID = Modell[j].TimeID;
+                        Timeslot findSlot = db.Timeslots.Where(zz => zz.TimeID == TimeID).FirstOrDefault();
                         if (findSlot != null)
                         {
                             findSlot.Available = Modell[j].Available;
                             db.SaveChanges();
-                        }
 
-                        List<EmployeeSchedule> findSchedule = db.EmployeeSchedules.Where(zz => zz.TimeID == Modell[j].TimeID).ToList();
-                        for(int k=0; k <findSchedule.Count; k++)
-                        {
-                            EmployeeSchedule getSchedge = findSchedule[k];
-                            if (Modell[j].Available == false)
+
+                            List<EmployeeSchedule> findSchedule = db.EmployeeSchedules.Where(zz => zz.TimeID == TimeID).ToList();
+                            for (int k = 0; k < findSchedule.Count; k++)
                             {
-                                if (getSchedge.StatusID == 1)
+                                EmployeeSchedule getSchedge = findSchedule[k];
+                                if (Modell[j].Available == false)
                                 {
-                                    getSchedge.StatusID = 2;
-                                    db.SaveChanges();
+                                    if (getSchedge.StatusID == 1)
+                                    {
+                                        getSchedge.StatusID = 2;
+                                        db.SaveChanges();
+                                    }
+
                                 }
 
                             }
-               
+
                         }
 
                     }

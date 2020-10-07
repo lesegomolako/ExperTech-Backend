@@ -45,6 +45,8 @@ namespace ExperTech_Api.Controllers
             SMS();
         }
 
+        
+
         public ExperTechEntities db = new ExperTechEntities();
 
         [System.Web.Http.Route("getProfile")]
@@ -295,6 +297,40 @@ namespace ExperTech_Api.Controllers
             catch (Exception err)
             {
                 return err.Message;
+            }
+        }
+
+        [Route("ResetPassword")]
+        [HttpPost]
+        public dynamic ResetPassword([FromBody]User Modell)
+        {
+            if (Modell.SessionID != null)
+            {
+                User findUser = db.Users.Where(zz => zz.SessionID == Modell.SessionID).FirstOrDefault();
+                if (findUser == null)
+                {
+                    dynamic toReturn = new ExpandoObject();
+                    toReturn.Error = "session";
+                    toReturn.Message = "Session is not valid";
+                    return toReturn;
+                }
+
+                try
+                {
+                    findUser.Password = GenerateHash(ApplySomeSalt(Modell.Password));
+                    findUser.SessionID = null;
+                    db.SaveChanges();
+
+                    return "success";
+                }
+                catch (Exception err)
+                {
+                    return err.Message;
+                }
+            }
+            else
+            {
+                return "invalid details";
             }
         }
 
