@@ -37,6 +37,7 @@ namespace ExperTech_Api.Controllers
                 dynamicAdmin.Surname = adminname.Surname;
                 dynamicAdmin.ContactNo = adminname.ContactNo;
                 dynamicAdmin.Email = adminname.Email;
+                dynamicAdmin.Owner = adminname.Owner;
 
                 dynamicAdmins.Add(dynamicAdmin);
             }
@@ -72,6 +73,13 @@ namespace ExperTech_Api.Controllers
                 throw;
             }
             return Ok(forAdmin);
+        }
+
+        [Route("api/Admin/SetOwner")]
+        [HttpPost]
+        public dynamic SetOwner()
+        {
+            return "";
         }
         //*******************************final delete client*****************************
         //[Route("api/Client/clientDelete")]

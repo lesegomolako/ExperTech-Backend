@@ -15,6 +15,7 @@
           <Property Name="ContactNo" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="UserID" Type="int" />
+          <Property Name="Owner" Type="bit" Nullable="false" />
           <Property Name="Deleted" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="AdminAuditTrail">
@@ -23,7 +24,8 @@
           </Key>
           <Property Name="AuditID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="AdminID" Type="int" Nullable="false" />
-          <Property Name="CriticalData" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="OldData" Type="varchar" MaxLength="250" />
+          <Property Name="NewData" Type="varchar" MaxLength="250" />
           <Property Name="TablesAffected" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="TransactionType" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Date" Type="datetime" Nullable="false" />
@@ -53,6 +55,7 @@
           <Property Name="ClientID" Type="int" Nullable="false" />
           <Property Name="ReminderID" Type="int" Nullable="false" />
           <Property Name="SaleID" Type="int" />
+          <Property Name="AdviseExpiry" Type="datetime" />
         </EntityType>
         <EntityType Name="BookingLine">
           <Key>
@@ -96,7 +99,8 @@
           </Key>
           <Property Name="AuditID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="ClientID" Type="int" Nullable="false" />
-          <Property Name="CriticalData" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="OldData" Type="varchar" MaxLength="250" />
+          <Property Name="NewData" Type="varchar" MaxLength="250" />
           <Property Name="TablesAffected" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="TransactionType" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Date" Type="datetime" Nullable="false" />
@@ -154,7 +158,8 @@
           </Key>
           <Property Name="AuditID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="EmployeeID" Type="int" Nullable="false" />
-          <Property Name="CriticalData" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="OldData" Type="varchar" MaxLength="250" />
+          <Property Name="NewData" Type="varchar" MaxLength="250" />
           <Property Name="TablesAffected" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="TransactionType" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Date" Type="datetime" Nullable="false" />
@@ -355,7 +360,6 @@
           </Key>
           <Property Name="TypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="Description" Type="varchar" MaxLength="240" Nullable="false" />
         </EntityType>
         <EntityType Name="ServiceTypeOption">
           <Key>
@@ -392,13 +396,14 @@
           <Property Name="ItemID" Type="int" Nullable="false" />
           <Property Name="OrderID" Type="int" Nullable="false" />
           <Property Name="Quantity" Type="int" />
+          <Property Name="Received" Type="bit" Nullable="false" />
+          <Property Name="QuantityReceived" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="StockTake">
           <Key>
             <PropertyRef Name="StockTakeID" />
           </Key>
           <Property Name="StockTakeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="AdminID" Type="int" Nullable="false" />
           <Property Name="Description" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="Date" Type="datetime" Nullable="false" />
         </EntityType>
@@ -416,7 +421,6 @@
             <PropertyRef Name="WriteOffID" />
           </Key>
           <Property Name="WriteOffID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="AdminID" Type="int" Nullable="false" />
           <Property Name="Description" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="Date" Type="date" Nullable="false" />
         </EntityType>
@@ -459,6 +463,7 @@
           <Property Name="Username" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="Password" Type="varchar" MaxLength="300" Nullable="false" />
           <Property Name="SessionID" Type="varchar" MaxLength="100" />
+          <Property Name="SessionExpiry" Type="datetime" />
         </EntityType>
         <EntityType Name="UserRole">
           <Key>
@@ -1097,18 +1102,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_StockTake_Admin">
-          <End Role="Admin" Type="Self.Admin" Multiplicity="1" />
-          <End Role="StockTake" Type="Self.StockTake" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Admin">
-              <PropertyRef Name="AdminID" />
-            </Principal>
-            <Dependent Role="StockTake">
-              <PropertyRef Name="AdminID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_StockTakeLine_StockItem">
           <End Role="StockItem" Type="Self.StockItem" Multiplicity="1" />
           <End Role="StockTakeLine" Type="Self.StockTakeLine" Multiplicity="*" />
@@ -1130,18 +1123,6 @@
             </Principal>
             <Dependent Role="StockTakeLine">
               <PropertyRef Name="StockTakeID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_StockWriteOff_Admin">
-          <End Role="Admin" Type="Self.Admin" Multiplicity="1" />
-          <End Role="StockWriteOff" Type="Self.StockWriteOff" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Admin">
-              <PropertyRef Name="AdminID" />
-            </Principal>
-            <Dependent Role="StockWriteOff">
-              <PropertyRef Name="AdminID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1449,10 +1430,6 @@
             <End Role="SupplierOrder" EntitySet="SupplierOrder" />
             <End Role="StockItemLine" EntitySet="StockItemLine" />
           </AssociationSet>
-          <AssociationSet Name="FK_StockTake_Admin" Association="Self.FK_StockTake_Admin">
-            <End Role="Admin" EntitySet="Admin" />
-            <End Role="StockTake" EntitySet="StockTake" />
-          </AssociationSet>
           <AssociationSet Name="FK_StockTakeLine_StockItem" Association="Self.FK_StockTakeLine_StockItem">
             <End Role="StockItem" EntitySet="StockItem" />
             <End Role="StockTakeLine" EntitySet="StockTakeLine" />
@@ -1460,10 +1437,6 @@
           <AssociationSet Name="FK_StockTakeLine_StockTake" Association="Self.FK_StockTakeLine_StockTake">
             <End Role="StockTake" EntitySet="StockTake" />
             <End Role="StockTakeLine" EntitySet="StockTakeLine" />
-          </AssociationSet>
-          <AssociationSet Name="FK_StockWriteOff_Admin" Association="Self.FK_StockWriteOff_Admin">
-            <End Role="Admin" EntitySet="Admin" />
-            <End Role="StockWriteOff" EntitySet="StockWriteOff" />
           </AssociationSet>
           <AssociationSet Name="FK_SupplierOrder_Supplier" Association="Self.FK_SupplierOrder_Supplier">
             <End Role="Supplier" EntitySet="Supplier" />
@@ -1497,11 +1470,10 @@
           <Property Name="ContactNo" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="UserID" Type="Int32" />
+          <Property Name="Owner" Type="Boolean" Nullable="false" />
           <Property Name="Deleted" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="User" Relationship="Self.FK_Admin_User" FromRole="Admin" ToRole="User" />
           <NavigationProperty Name="AdminAuditTrails" Relationship="Self.FK_AdminAuditTrail_Admin" FromRole="Admin" ToRole="AdminAuditTrail" />
-          <NavigationProperty Name="StockTakes" Relationship="Self.FK_StockTake_Admin" FromRole="Admin" ToRole="StockTake" />
-          <NavigationProperty Name="StockWriteOffs" Relationship="Self.FK_StockWriteOff_Admin" FromRole="Admin" ToRole="StockWriteOff" />
         </EntityType>
         <EntityType Name="AdminAuditTrail">
           <Key>
@@ -1509,7 +1481,8 @@
           </Key>
           <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="AdminID" Type="Int32" Nullable="false" />
-          <Property Name="CriticalData" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="OldData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="NewData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
           <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
@@ -1544,6 +1517,7 @@
           <Property Name="ClientID" Type="Int32" Nullable="false" />
           <Property Name="ReminderID" Type="Int32" Nullable="false" />
           <Property Name="SaleID" Type="Int32" />
+          <Property Name="AdviseExpiry" Type="DateTime" Precision="3" />
           <NavigationProperty Name="BookingStatu" Relationship="Self.FK_Booking_BookingStatus" FromRole="Booking" ToRole="BookingStatus" />
           <NavigationProperty Name="Client" Relationship="Self.FK_Booking_Client" FromRole="Booking" ToRole="Client" />
           <NavigationProperty Name="Reminder" Relationship="Self.FK_Booking_Reminder" FromRole="Booking" ToRole="Reminder" />
@@ -1606,7 +1580,8 @@
           </Key>
           <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="ClientID" Type="Int32" Nullable="false" />
-          <Property Name="CriticalData" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="OldData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="NewData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
           <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
@@ -1674,7 +1649,8 @@
           </Key>
           <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="EmployeeID" Type="Int32" Nullable="false" />
-          <Property Name="CriticalData" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="OldData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="NewData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
           <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
@@ -1926,7 +1902,6 @@
           </Key>
           <Property Name="TypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Description" Type="String" MaxLength="240" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="EmployeeServiceTypes" Relationship="Self.FK_EmployeeServiceType_ServiceType" FromRole="ServiceType" ToRole="EmployeeServiceType" />
           <NavigationProperty Name="Services" Relationship="Self.FK_Service_ServiceType" FromRole="ServiceType" ToRole="Service" />
         </EntityType>
@@ -1972,6 +1947,8 @@
           <Property Name="ItemID" Type="Int32" Nullable="false" />
           <Property Name="OrderID" Type="Int32" Nullable="false" />
           <Property Name="Quantity" Type="Int32" />
+          <Property Name="Received" Type="Boolean" Nullable="false" />
+          <Property Name="QuantityReceived" Type="Int32" Nullable="false" />
           <NavigationProperty Name="StockItem" Relationship="Self.FK_StockItemLine_StockItem" FromRole="StockItemLine" ToRole="StockItem" />
           <NavigationProperty Name="SupplierOrder" Relationship="Self.FK_StockItemLine_SupplierOrder" FromRole="StockItemLine" ToRole="SupplierOrder" />
         </EntityType>
@@ -1980,10 +1957,8 @@
             <PropertyRef Name="StockTakeID" />
           </Key>
           <Property Name="StockTakeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="AdminID" Type="Int32" Nullable="false" />
           <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="Admin" Relationship="Self.FK_StockTake_Admin" FromRole="StockTake" ToRole="Admin" />
           <NavigationProperty Name="StockTakeLines" Relationship="Self.FK_StockTakeLine_StockTake" FromRole="StockTake" ToRole="StockTakeLine" />
         </EntityType>
         <EntityType Name="StockTakeLine">
@@ -2002,10 +1977,8 @@
             <PropertyRef Name="WriteOffID" />
           </Key>
           <Property Name="WriteOffID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="AdminID" Type="Int32" Nullable="false" />
           <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Date" Type="DateTime" Nullable="false" Precision="0" />
-          <NavigationProperty Name="Admin" Relationship="Self.FK_StockWriteOff_Admin" FromRole="StockWriteOff" ToRole="Admin" />
           <NavigationProperty Name="WriteOffLines" Relationship="Self.FK_WriteOffLine_StockWriteOff" FromRole="StockWriteOff" ToRole="WriteOffLine" />
         </EntityType>
         <EntityType Name="Supplier">
@@ -2052,6 +2025,7 @@
           <Property Name="Username" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Password" Type="String" MaxLength="300" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="SessionID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="SessionExpiry" Type="DateTime" Precision="3" />
           <NavigationProperty Name="Admins" Relationship="Self.FK_Admin_User" FromRole="User" ToRole="Admin" />
           <NavigationProperty Name="Clients" Relationship="Self.FK_Client_User" FromRole="User" ToRole="Client" />
           <NavigationProperty Name="Employees" Relationship="Self.FK_Employee_User" FromRole="User" ToRole="Employee" />
@@ -2097,30 +2071,6 @@
               <PropertyRef Name="AdminID" />
             </Principal>
             <Dependent Role="AdminAuditTrail">
-              <PropertyRef Name="AdminID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_StockTake_Admin">
-          <End Role="Admin" Type="Self.Admin" Multiplicity="1" />
-          <End Role="StockTake" Type="Self.StockTake" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Admin">
-              <PropertyRef Name="AdminID" />
-            </Principal>
-            <Dependent Role="StockTake">
-              <PropertyRef Name="AdminID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_StockWriteOff_Admin">
-          <End Role="Admin" Type="Self.Admin" Multiplicity="1" />
-          <End Role="StockWriteOff" Type="Self.StockWriteOff" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Admin">
-              <PropertyRef Name="AdminID" />
-            </Principal>
-            <Dependent Role="StockWriteOff">
               <PropertyRef Name="AdminID" />
             </Dependent>
           </ReferentialConstraint>
@@ -2853,14 +2803,6 @@
             <End Role="Admin" EntitySet="Admins" />
             <End Role="AdminAuditTrail" EntitySet="AdminAuditTrails" />
           </AssociationSet>
-          <AssociationSet Name="FK_StockTake_Admin" Association="Self.FK_StockTake_Admin">
-            <End Role="Admin" EntitySet="Admins" />
-            <End Role="StockTake" EntitySet="StockTakes" />
-          </AssociationSet>
-          <AssociationSet Name="FK_StockWriteOff_Admin" Association="Self.FK_StockWriteOff_Admin">
-            <End Role="Admin" EntitySet="Admins" />
-            <End Role="StockWriteOff" EntitySet="StockWriteOffs" />
-          </AssociationSet>
           <AssociationSet Name="FK_Basket_Client" Association="Self.FK_Basket_Client">
             <End Role="Client" EntitySet="Clients" />
             <End Role="Basket" EntitySet="Baskets" />
@@ -3097,6 +3039,7 @@
                 <ScalarProperty Name="ContactNo" ColumnName="ContactNo" />
                 <ScalarProperty Name="Email" ColumnName="Email" />
                 <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="Owner" ColumnName="Owner" />
                 <ScalarProperty Name="Deleted" ColumnName="Deleted" />
               </MappingFragment>
             </EntityTypeMapping>
@@ -3106,7 +3049,8 @@
               <MappingFragment StoreEntitySet="AdminAuditTrail">
                 <ScalarProperty Name="AuditID" ColumnName="AuditID" />
                 <ScalarProperty Name="AdminID" ColumnName="AdminID" />
-                <ScalarProperty Name="CriticalData" ColumnName="CriticalData" />
+                <ScalarProperty Name="OldData" ColumnName="OldData" />
+                <ScalarProperty Name="NewData" ColumnName="NewData" />
                 <ScalarProperty Name="TablesAffected" ColumnName="TablesAffected" />
                 <ScalarProperty Name="TransactionType" ColumnName="TransactionType" />
                 <ScalarProperty Name="Date" ColumnName="Date" />
@@ -3139,6 +3083,7 @@
                 <ScalarProperty Name="ClientID" ColumnName="ClientID" />
                 <ScalarProperty Name="ReminderID" ColumnName="ReminderID" />
                 <ScalarProperty Name="SaleID" ColumnName="SaleID" />
+                <ScalarProperty Name="AdviseExpiry" ColumnName="AdviseExpiry" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -3187,7 +3132,8 @@
               <MappingFragment StoreEntitySet="ClientAuditTrail">
                 <ScalarProperty Name="AuditID" ColumnName="AuditID" />
                 <ScalarProperty Name="ClientID" ColumnName="ClientID" />
-                <ScalarProperty Name="CriticalData" ColumnName="CriticalData" />
+                <ScalarProperty Name="OldData" ColumnName="OldData" />
+                <ScalarProperty Name="NewData" ColumnName="NewData" />
                 <ScalarProperty Name="TablesAffected" ColumnName="TablesAffected" />
                 <ScalarProperty Name="TransactionType" ColumnName="TransactionType" />
                 <ScalarProperty Name="Date" ColumnName="Date" />
@@ -3250,7 +3196,8 @@
               <MappingFragment StoreEntitySet="EmployeeAuditTrail">
                 <ScalarProperty Name="AuditID" ColumnName="AuditID" />
                 <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
-                <ScalarProperty Name="CriticalData" ColumnName="CriticalData" />
+                <ScalarProperty Name="OldData" ColumnName="OldData" />
+                <ScalarProperty Name="NewData" ColumnName="NewData" />
                 <ScalarProperty Name="TablesAffected" ColumnName="TablesAffected" />
                 <ScalarProperty Name="TransactionType" ColumnName="TransactionType" />
                 <ScalarProperty Name="Date" ColumnName="Date" />
@@ -3470,7 +3417,6 @@
               <MappingFragment StoreEntitySet="ServiceType">
                 <ScalarProperty Name="TypeID" ColumnName="TypeID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="Description" ColumnName="Description" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -3510,6 +3456,8 @@
                 <ScalarProperty Name="ItemID" ColumnName="ItemID" />
                 <ScalarProperty Name="OrderID" ColumnName="OrderID" />
                 <ScalarProperty Name="Quantity" ColumnName="Quantity" />
+                <ScalarProperty Name="Received" ColumnName="Received" />
+                <ScalarProperty Name="QuantityReceived" ColumnName="QuantityReceived" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -3517,7 +3465,6 @@
             <EntityTypeMapping TypeName="ExperTechModel.StockTake">
               <MappingFragment StoreEntitySet="StockTake">
                 <ScalarProperty Name="StockTakeID" ColumnName="StockTakeID" />
-                <ScalarProperty Name="AdminID" ColumnName="AdminID" />
                 <ScalarProperty Name="Description" ColumnName="Description" />
                 <ScalarProperty Name="Date" ColumnName="Date" />
               </MappingFragment>
@@ -3537,7 +3484,6 @@
             <EntityTypeMapping TypeName="ExperTechModel.StockWriteOff">
               <MappingFragment StoreEntitySet="StockWriteOff">
                 <ScalarProperty Name="WriteOffID" ColumnName="WriteOffID" />
-                <ScalarProperty Name="AdminID" ColumnName="AdminID" />
                 <ScalarProperty Name="Description" ColumnName="Description" />
                 <ScalarProperty Name="Date" ColumnName="Date" />
               </MappingFragment>
@@ -3584,6 +3530,7 @@
                 <ScalarProperty Name="Username" ColumnName="Username" />
                 <ScalarProperty Name="Password" ColumnName="Password" />
                 <ScalarProperty Name="SessionID" ColumnName="SessionID" />
+                <ScalarProperty Name="SessionExpiry" ColumnName="SessionExpiry" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -21,11 +21,9 @@ namespace ExperTech_Api.Models
         }
     
         public int StockTakeID { get; set; }
-        public int AdminID { get; set; }
         public string Description { get; set; }
         public System.DateTime Date { get; set; }
     
-        public virtual Admin Admin { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<StockTakeLine> StockTakeLines { get; set; }
     }

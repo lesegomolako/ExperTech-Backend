@@ -27,6 +27,7 @@ namespace ExperTech_Api.Models
         public string Username { get; set; }
         public string Password { get; set; }
         public string SessionID { get; set; }
+        public Nullable<System.DateTime> SessionExpiry { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Admin> Admins { get; set; }

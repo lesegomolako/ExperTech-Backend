@@ -16,7 +16,8 @@ namespace ExperTech_Api.Models
     {
         public int AuditID { get; set; }
         public int AdminID { get; set; }
-        public string CriticalData { get; set; }
+        public string OldData { get; set; }
+        public string NewData { get; set; }
         public string TablesAffected { get; set; }
         public string TransactionType { get; set; }
         public System.DateTime Date { get; set; }

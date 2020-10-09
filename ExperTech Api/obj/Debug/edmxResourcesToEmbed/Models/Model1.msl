@@ -10,6 +10,7 @@
           <ScalarProperty Name="ContactNo" ColumnName="ContactNo" />
           <ScalarProperty Name="Email" ColumnName="Email" />
           <ScalarProperty Name="UserID" ColumnName="UserID" />
+          <ScalarProperty Name="Owner" ColumnName="Owner" />
           <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
@@ -19,7 +20,8 @@
         <MappingFragment StoreEntitySet="AdminAuditTrail">
           <ScalarProperty Name="AuditID" ColumnName="AuditID" />
           <ScalarProperty Name="AdminID" ColumnName="AdminID" />
-          <ScalarProperty Name="CriticalData" ColumnName="CriticalData" />
+          <ScalarProperty Name="OldData" ColumnName="OldData" />
+          <ScalarProperty Name="NewData" ColumnName="NewData" />
           <ScalarProperty Name="TablesAffected" ColumnName="TablesAffected" />
           <ScalarProperty Name="TransactionType" ColumnName="TransactionType" />
           <ScalarProperty Name="Date" ColumnName="Date" />
@@ -52,6 +54,7 @@
           <ScalarProperty Name="ClientID" ColumnName="ClientID" />
           <ScalarProperty Name="ReminderID" ColumnName="ReminderID" />
           <ScalarProperty Name="SaleID" ColumnName="SaleID" />
+          <ScalarProperty Name="AdviseExpiry" ColumnName="AdviseExpiry" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -100,7 +103,8 @@
         <MappingFragment StoreEntitySet="ClientAuditTrail">
           <ScalarProperty Name="AuditID" ColumnName="AuditID" />
           <ScalarProperty Name="ClientID" ColumnName="ClientID" />
-          <ScalarProperty Name="CriticalData" ColumnName="CriticalData" />
+          <ScalarProperty Name="OldData" ColumnName="OldData" />
+          <ScalarProperty Name="NewData" ColumnName="NewData" />
           <ScalarProperty Name="TablesAffected" ColumnName="TablesAffected" />
           <ScalarProperty Name="TransactionType" ColumnName="TransactionType" />
           <ScalarProperty Name="Date" ColumnName="Date" />
@@ -163,7 +167,8 @@
         <MappingFragment StoreEntitySet="EmployeeAuditTrail">
           <ScalarProperty Name="AuditID" ColumnName="AuditID" />
           <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
-          <ScalarProperty Name="CriticalData" ColumnName="CriticalData" />
+          <ScalarProperty Name="OldData" ColumnName="OldData" />
+          <ScalarProperty Name="NewData" ColumnName="NewData" />
           <ScalarProperty Name="TablesAffected" ColumnName="TablesAffected" />
           <ScalarProperty Name="TransactionType" ColumnName="TransactionType" />
           <ScalarProperty Name="Date" ColumnName="Date" />
@@ -383,7 +388,6 @@
         <MappingFragment StoreEntitySet="ServiceType">
           <ScalarProperty Name="TypeID" ColumnName="TypeID" />
           <ScalarProperty Name="Name" ColumnName="Name" />
-          <ScalarProperty Name="Description" ColumnName="Description" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -423,6 +427,8 @@
           <ScalarProperty Name="ItemID" ColumnName="ItemID" />
           <ScalarProperty Name="OrderID" ColumnName="OrderID" />
           <ScalarProperty Name="Quantity" ColumnName="Quantity" />
+          <ScalarProperty Name="Received" ColumnName="Received" />
+          <ScalarProperty Name="QuantityReceived" ColumnName="QuantityReceived" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -430,7 +436,6 @@
       <EntityTypeMapping TypeName="ExperTechModel.StockTake">
         <MappingFragment StoreEntitySet="StockTake">
           <ScalarProperty Name="StockTakeID" ColumnName="StockTakeID" />
-          <ScalarProperty Name="AdminID" ColumnName="AdminID" />
           <ScalarProperty Name="Description" ColumnName="Description" />
           <ScalarProperty Name="Date" ColumnName="Date" />
         </MappingFragment>
@@ -450,7 +455,6 @@
       <EntityTypeMapping TypeName="ExperTechModel.StockWriteOff">
         <MappingFragment StoreEntitySet="StockWriteOff">
           <ScalarProperty Name="WriteOffID" ColumnName="WriteOffID" />
-          <ScalarProperty Name="AdminID" ColumnName="AdminID" />
           <ScalarProperty Name="Description" ColumnName="Description" />
           <ScalarProperty Name="Date" ColumnName="Date" />
         </MappingFragment>
@@ -497,6 +501,7 @@
           <ScalarProperty Name="Username" ColumnName="Username" />
           <ScalarProperty Name="Password" ColumnName="Password" />
           <ScalarProperty Name="SessionID" ColumnName="SessionID" />
+          <ScalarProperty Name="SessionExpiry" ColumnName="SessionExpiry" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

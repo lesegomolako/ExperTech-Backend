@@ -18,6 +18,8 @@ namespace ExperTech_Api.Models
         public int ItemID { get; set; }
         public int OrderID { get; set; }
         public Nullable<int> Quantity { get; set; }
+        public bool Received { get; set; }
+        public int QuantityReceived { get; set; }
     
         public virtual StockItem StockItem { get; set; }
         public virtual SupplierOrder SupplierOrder { get; set; }

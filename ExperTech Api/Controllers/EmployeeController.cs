@@ -263,7 +263,6 @@ namespace ExperTech_Api.Controllers
                 {
                     serviceType.TypeID = forEST.TypeID;
                     serviceType.Name = forEST.Name;
-                    serviceType.Description = forEST.Description;
                     db.SaveChanges();
                 }
             }

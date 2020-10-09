@@ -165,37 +165,30 @@ namespace ExperTech_Api.Controllers
 
                 if (AddObject != null)
                 {
-                    Admin findAdmin = db.Admins.Where(zz => zz.UserID == findUser.UserID).FirstOrDefault();
-                    if (findAdmin != null)
+
+                    StockTake Takes = new StockTake();
+                    Takes.Description = AddObject.Description;
+                    Takes.Date = DateTime.Now;
+                    db.StockTakes.Add(Takes);
+                    db.SaveChanges();
+
+                    int StockTakeID = Takes.StockTakeID;
+
+                    foreach (StockTakeLine lines in AddObject.StockTakeLines)
                     {
-                        StockTake Takes = new StockTake();
-                        Takes.AdminID = findAdmin.AdminID;
-                        Takes.Description = AddObject.Description;
-                        Takes.Date = DateTime.Now;
-                        db.StockTakes.Add(Takes);
+                        StockTakeLine newObject = new StockTakeLine();
+                        newObject.ItemID = lines.ItemID;
+                        newObject.StockTakeID = StockTakeID;
+                        newObject.Quantity = lines.Quantity;
+                        db.StockTakeLines.Add(newObject);
                         db.SaveChanges();
 
-                        int StockTakeID = Takes.StockTakeID;
-
-                        foreach (StockTakeLine lines in AddObject.StockTakeLines)
-                        {
-                            StockTakeLine newObject = new StockTakeLine();
-                            newObject.ItemID = lines.ItemID;
-                            newObject.StockTakeID = StockTakeID;
-                            newObject.Quantity = lines.Quantity;
-                            db.StockTakeLines.Add(newObject);
-                            db.SaveChanges();
-
-                            StockItem updateStock = db.StockItems.Where(zz => zz.ItemID == lines.ItemID).FirstOrDefault();
-                            updateStock.QuantityInStock = lines.Quantity;
-                            db.SaveChanges();
-                        }
-                        return "success";
+                        StockItem updateStock = db.StockItems.Where(zz => zz.ItemID == lines.ItemID).FirstOrDefault();
+                        updateStock.QuantityInStock = lines.Quantity;
+                        db.SaveChanges();
                     }
-                    else
-                    {
-                        return "User not found";
-                    }
+                    return "success";
+
 
                 }
                 else

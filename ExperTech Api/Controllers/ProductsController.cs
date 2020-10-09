@@ -139,6 +139,7 @@ namespace ExperTech_Api.Controllers
                 foreach (ProductPhoto photo in items.ProductPhotoes)
                 {
                     dynamic newObject = new ExpandoObject();
+                    newObject.PhotoID = photo.PhotoID;
                     newObject.Photo = photo.Photo;
                     photoList.Add(newObject);
                     string filePath = HttpContext.Current.Server.MapPath("~/Images/" + photo.Photo);

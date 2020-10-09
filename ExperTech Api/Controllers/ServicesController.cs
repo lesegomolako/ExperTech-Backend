@@ -16,7 +16,7 @@ using System.Runtime.Serialization;
 using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ExperTech_Api.Controllers
 {
@@ -68,14 +68,13 @@ namespace ExperTech_Api.Controllers
                 dynamic newObject = new ExpandoObject();
                 newObject.TypeID = Item.TypeID;
                 newObject.Name = Item.Name;
-                newObject.Description = Item.Description;
                 makeList.Add(newObject);
             }
             return makeList;
         }
 
         [Route("api/Services/UpdateServiceType")]
-        [HttpPut]
+        [HttpPost]
         public dynamic UpdateServiceType(ServiceType Modell)
         {
             db.Configuration.ProxyCreationEnabled = false;
@@ -84,7 +83,6 @@ namespace ExperTech_Api.Controllers
             {
 
                 Update.Name = Modell.Name;
-                Update.Description = Modell.Description;
                 db.SaveChanges();
                 return "success";
             }
@@ -203,104 +201,238 @@ namespace ExperTech_Api.Controllers
             return toReturn;
         }
         //************************************Service************************************************
+        //review the duplicate return
         [Route("api/Services/AddService")]
         [HttpPost]
-        public dynamic AddService([FromBody] Service Modell)
+        public dynamic AddService()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            try
-            {   //checks for dupicate service
+            var httpRequest = HttpContext.Current.Request;
+            string imageName = null;
+            string SessionID = httpRequest["SessionID"];
+            int findUser = db.Users.Where(zz => zz.SessionID == SessionID).Select(zz => zz.UserID).FirstOrDefault();
 
-                Service Verify = db.Services.Where(zz => zz.Name == Modell.Name).FirstOrDefault();
-                if (Verify == null)
-                {
-                    //if not duplicate, execute SaveService()
-                    //Service ServiceObject = FormatServices(Modell);
-                    return SaveService(Modell);
-                }
-                else
-                {
-                    //if duplicate, return duplicate
-                    return "duplicate";
-                }
-            }
-            catch (Exception err)
+            if(findUser != 0 )
             {
-                return err.Message;
-            }
-        }
-
-       
-        private dynamic SaveService(Service Modell)
-        {
-            dynamic toReturn = new ExpandoObject();
-            try
-            {
-                db.Configuration.ProxyCreationEnabled = false;
-                //first Save the service information
-                Service myObject = new Service();
-                myObject.Name = Modell.Name;
-                myObject.Description = Modell.Description;
-                myObject.Duration = Modell.Duration;
-                myObject.TypeID = Modell.TypeID;
-                db.Services.Add(myObject);
-                db.SaveChanges();
-
-                //retrieve the service ID from the info that were just saved
-                int ServiceID = db.Services.Where(zz => zz.Name == Modell.Name).Select(zz => zz.ServiceID).FirstOrDefault();
-
-                if (Modell.ServicePrices != null)
+                var postedFile = httpRequest.Files["Image"];
+                if (postedFile != null)
                 {
-                    foreach (ServicePrice Items in Modell.ServicePrices)
+                    try
                     {
-                        //Save the Service price object
-                        ServicePrice PriceObject = new ServicePrice();
-                        PriceObject.ServiceID = ServiceID;
-                        //PriceObject.OptionID = Items.OptionID;
-                        PriceObject.Price = Items.Price;
-                        PriceObject.Date = DateTime.Now;
-                        db.ServicePrices.Add(PriceObject);
-
-                        db.SaveChanges();
+                        imageName = new String(Path.GetFileNameWithoutExtension(postedFile.FileName).Take(postedFile.FileName.Length).ToArray()).Replace(" ", "-");
+                        imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(postedFile.FileName);
+                        var FilePath = HttpContext.Current.Server.MapPath("~/Images/" + imageName);
+                        postedFile.SaveAs(FilePath);
+                    }
+                    catch (Exception err)
+                    {
+                        return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Image was not saved (" + err.Message + ")");
                     }
                 }
 
-                if (Modell.ServiceTypeOptions != null)
+                dynamic Modell = JObject.Parse(httpRequest["Service"]);
+                try
                 {
-                    foreach (ServiceTypeOption Items in Modell.ServiceTypeOptions)
+                    db.Configuration.ProxyCreationEnabled = false;
+                    string serviceName = Modell.Name;
+                    Service findService = db.Services.Where(zz => zz.Name == serviceName).FirstOrDefault();
+                    if(findService != null)
                     {
-                        //saves the OptionID and ServiceID into bride entity
-                        ServiceTypeOption newObject = new ServiceTypeOption();
-                        newObject.ServiceID = ServiceID;
-                        int OptionID = (int)Items.OptionID;
-                        newObject.OptionID = OptionID;
-                        db.ServiceTypeOptions.Add(newObject);
-                        db.SaveChanges();
+                        //if duplicate, return duplicate
+                        dynamic toReturns = new ExpandoObject();
+                        toReturns.Message = "duplicate";
+                        toReturns.Data = findService;
+                        return "duplicate";
+                    }
+                    //first Save the service information
+                    Service myObject = new Service();
+                    myObject.Name = Modell.Name;
+                    myObject.Description = Modell.Description;
+                    myObject.Duration = (int)Modell.Duration;
+                    myObject.TypeID = (int)Modell.TypeID;
+                    db.Services.Add(myObject);
+                    db.SaveChanges();
 
-                        foreach (ServicePrice PriceItem in Items.ServicePrices)
+                    //retrieve the service ID from the info that were just saved
+
+                    int ServiceID = myObject.ServiceID;
+
+                    if (Modell.ServicePrices != null)
+                    {
+                        foreach (var Items in Modell.ServicePrices)
                         {
+                            //Save the Service price object
                             ServicePrice PriceObject = new ServicePrice();
                             PriceObject.ServiceID = ServiceID;
-                            PriceObject.OptionID = OptionID;
-                            PriceObject.Price = PriceItem.Price;
+                            PriceObject.Price = (decimal)Items.Price;
                             PriceObject.Date = DateTime.Now;
                             db.ServicePrices.Add(PriceObject);
 
                             db.SaveChanges();
                         }
-
                     }
+
+                    if (Modell.ServiceTypeOptions != null)
+                    {
+                        foreach (var Items in Modell.ServiceTypeOptions)
+                        {
+                            //saves the OptionID and ServiceID into bride entity
+                            ServiceTypeOption newObject = new ServiceTypeOption();
+                            newObject.ServiceID = ServiceID;
+                            int OptionID = (int)Items.OptionID;
+                            newObject.OptionID = OptionID;
+                            db.ServiceTypeOptions.Add(newObject);
+                            db.SaveChanges();
+
+                            foreach (var PriceItem in Items.ServicePrices)
+                            {
+                                ServicePrice PriceObject = new ServicePrice();
+                                PriceObject.ServiceID = ServiceID;
+                                PriceObject.OptionID = OptionID;
+                                PriceObject.Price = PriceItem.Price;
+                                PriceObject.Date = DateTime.Now;
+                                db.ServicePrices.Add(PriceObject);
+
+                                db.SaveChanges();
+                            }
+                        }
+
+                  
+                    }
+
+                    if (Modell.ServicePhotoes != null)
+                    {
+                        foreach (var items in Modell.ServicePhotoes)
+                        {
+                            if (imageName != null)
+                            {
+                                ServicePhoto newPhoto = new ServicePhoto();
+                                newPhoto.ServiceID = ServiceID;
+                                newPhoto.Photo = imageName;
+                                db.ServicePhotoes.Add(newPhoto);
+                                db.SaveChanges();
+                            }
+                        }
+                    }
+                    dynamic toReturn = new ExpandoObject();
+                    toReturn.Message = "success";
+                    toReturn.ServiceID = ServiceID;
+                    return toReturn;
                 }
-              
-                toReturn.Message = "success";
-                toReturn.ServiceID = ServiceID;
-                return toReturn;
+                catch(Exception err)
+                {
+                    return err.Message;
+                }
             }
-            catch (Exception err)
+            else
             {
-                return err.Message;
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return "Session is not valid";
             }
+
+           
         }
+
+        //[Route("api/Services/AddService")]
+        //[HttpPost]
+        //public dynamic AddService([FromBody] Service Modell)
+        //{
+        //    db.Configuration.ProxyCreationEnabled = false;
+        //    try
+        //    {   //checks for dupicate service
+
+        //        Service Verify = db.Services.Where(zz => zz.Name == Modell.Name).FirstOrDefault();
+        //        if (Verify == null)
+        //        {
+        //            //if not duplicate, execute SaveService()
+        //            //Service ServiceObject = FormatServices(Modell);
+        //            return SaveService(Modell);
+        //        }
+        //        else
+        //        {
+        //            //if duplicate, return duplicate
+        //            return "duplicate";
+        //        }
+        //    }
+        //    catch (Exception err)
+        //    {
+        //        return err.Message;
+        //    }
+        //}
+
+       
+        //private dynamic SaveService(Service Modell)
+        //{
+        //    dynamic toReturn = new ExpandoObject();
+        //    try
+        //    {
+        //        db.Configuration.ProxyCreationEnabled = false;
+        //        //first Save the service information
+        //        Service myObject = new Service();
+        //        myObject.Name = Modell.Name;
+        //        myObject.Description = Modell.Description;
+        //        myObject.Duration = Modell.Duration;
+        //        myObject.TypeID = Modell.TypeID;
+        //        db.Services.Add(myObject);
+        //        db.SaveChanges();
+
+        //        //retrieve the service ID from the info that were just saved
+        //        int ServiceID = db.Services.Where(zz => zz.Name == Modell.Name).Select(zz => zz.ServiceID).FirstOrDefault();
+
+        //        if (Modell.ServicePrices != null)
+        //        {
+        //            foreach (ServicePrice Items in Modell.ServicePrices)
+        //            {
+        //                //Save the Service price object
+        //                ServicePrice PriceObject = new ServicePrice();
+        //                PriceObject.ServiceID = ServiceID;
+        //                //PriceObject.OptionID = Items.OptionID;
+        //                PriceObject.Price = Items.Price;
+        //                PriceObject.Date = DateTime.Now;
+        //                db.ServicePrices.Add(PriceObject);
+
+        //                db.SaveChanges();
+        //            }
+        //        }
+
+        //        if (Modell.ServiceTypeOptions != null)
+        //        {
+        //            foreach (ServiceTypeOption Items in Modell.ServiceTypeOptions)
+        //            {
+        //                //saves the OptionID and ServiceID into bride entity
+        //                ServiceTypeOption newObject = new ServiceTypeOption();
+        //                newObject.ServiceID = ServiceID;
+        //                int OptionID = (int)Items.OptionID;
+        //                newObject.OptionID = OptionID;
+        //                db.ServiceTypeOptions.Add(newObject);
+        //                db.SaveChanges();
+
+        //                foreach (ServicePrice PriceItem in Items.ServicePrices)
+        //                {
+        //                    ServicePrice PriceObject = new ServicePrice();
+        //                    PriceObject.ServiceID = ServiceID;
+        //                    PriceObject.OptionID = OptionID;
+        //                    PriceObject.Price = PriceItem.Price;
+        //                    PriceObject.Date = DateTime.Now;
+        //                    db.ServicePrices.Add(PriceObject);
+
+        //                    db.SaveChanges();
+        //                }
+
+        //            }
+        //        }
+              
+        //        toReturn.Message = "success";
+        //        toReturn.ServiceID = ServiceID;
+        //        return toReturn;
+        //    }
+        //    catch (Exception err)
+        //    {
+        //        return err.Message;
+        //    }
+        //}
 
         [Route("api/Services/DeleteService")]
         [HttpDelete]
@@ -327,9 +459,7 @@ namespace ExperTech_Api.Controllers
             {
                 return err.Message;
             }
-        }
-
-       
+        }      
 
 
         [Route("api/Services/GetService")]
@@ -359,6 +489,37 @@ namespace ExperTech_Api.Controllers
                 else
                     newObject.ServicePrices = getSPrice(Items);
 
+                List<dynamic> photoList = new List<dynamic>();
+                foreach(ServicePhoto photo in Items.ServicePhotoes)
+                {
+                    dynamic photoObject = new ExpandoObject();
+                    photoObject.PhotoID = photo.PhotoID;
+                    photoObject.Photo = photo.Photo;
+                    photoList.Add(photoObject);
+                    string filePath = HttpContext.Current.Server.MapPath("~/Images/" + photo.Photo);
+                    try
+                    {
+                        using(FileStream fileStream = new FileStream(filePath, FileMode.Open))
+                        {
+                            using (var memoryStream = new MemoryStream())
+                            {
+                                fileStream.CopyTo(memoryStream);
+                                Bitmap image = new Bitmap(1, 1);
+                                image.Save(memoryStream, ImageFormat.Png);
+
+                                byte[] byteImage = memoryStream.ToArray();
+                                string base64String = Convert.ToBase64String(byteImage);
+                                newObject.Image = "data:image/png;base64," + base64String;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        newObject.Image = "";
+                    }
+
+                }
+                newObject.ServicePhotoes = photoList;
                 ServiceList.Add(newObject);
             }
             return ServiceList;
@@ -410,41 +571,227 @@ namespace ExperTech_Api.Controllers
 
         }
 
+
         [Route("api/Services/UpdateService")]
         [HttpPost]
-        public dynamic UpdateService([FromBody] Service Modell)
+        public dynamic UpdateService()
         {
-            try
-            {
-                Service findService = db.Services.Where(zz => zz.ServiceID == Modell.ServiceID).FirstOrDefault();
-                findService.Name = Modell.Name;
-                findService.Description = Modell.Description;
-                findService.Duration = Modell.Duration;
-                findService.TypeID = Modell.TypeID;
-                db.SaveChanges();
+            db.Configuration.ProxyCreationEnabled = false;
+            var httpRequest = HttpContext.Current.Request;
+            string imageName = null;
+            string SessionID = httpRequest["SessionID"];
+            int findUser = db.Users.Where(zz => zz.SessionID == SessionID).Select(zz => zz.UserID).FirstOrDefault();
 
-                //it hits here
-                foreach (ServicePrice Items in Modell.ServicePrices)
+            if (findUser != 0)
+            {
+                var postedFile = httpRequest.Files["Image"];
+                if (postedFile != null)
                 {
-                    ServicePrice findPrice = db.ServicePrices.Where(zz => zz.PriceID == Items.PriceID && zz.Price == Items.Price).FirstOrDefault();
-                    if (findPrice == null)
+                    try
                     {
-                        ServicePrice PriceObject = new ServicePrice();
-                        PriceObject.ServiceID = findService.ServiceID;
-                        PriceObject.OptionID = Items.OptionID;
-                        PriceObject.Price = Items.Price;
-                        PriceObject.Date = DateTime.Now;
-                        db.ServicePrices.Add(PriceObject);
-                        db.SaveChanges();
+                        imageName = new String(Path.GetFileNameWithoutExtension(postedFile.FileName).Take(postedFile.FileName.Length).ToArray()).Replace(" ", "-");
+                        imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(postedFile.FileName);
+                        var FilePath = HttpContext.Current.Server.MapPath("~/Images/" + imageName);
+                        postedFile.SaveAs(FilePath);
+                    }
+                    catch (Exception err)
+                    {
+                        return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Image was not saved (" + err.Message + ")");
                     }
                 }
-                return "success";
+
+                dynamic Modell = JObject.Parse(httpRequest["Service"]);
+                try
+                {
+                    db.Configuration.ProxyCreationEnabled = false;
+                    //first Save the service information
+                    int ServiceID = (int)Modell.ServiceID;
+                    Service myObject = db.Services.Where(zz => zz.ServiceID == ServiceID).FirstOrDefault();
+                    myObject.Name = Modell.Name;
+                    myObject.Description = Modell.Description;
+                    myObject.Duration = (int)Modell.Duration;
+                    myObject.TypeID = (int)Modell.TypeID;
+                    db.SaveChanges();
+
+                    //remove all options from database first in case some were removed
+                    List<ServiceTypeOption> findTypeOption = db.ServiceTypeOptions.Where(zz => zz.ServiceID == ServiceID).ToList();
+                    List<dynamic> tempPrices = new List<dynamic>();
+                    List<dynamic> tempLines = new List<dynamic>();
+                    foreach (ServiceTypeOption items in findTypeOption)
+                    {
+                        List<ServicePrice> findPrices = db.ServicePrices.Where(zz => zz.ServiceID == ServiceID && zz.OptionID == items.OptionID).ToList();
+                        List<BookingLine> findLines = db.BookingLines.Where(zz => zz.ServiceID == ServiceID && zz.OptionID == items.OptionID).ToList();
+
+                        foreach(ServicePrice prices in findPrices)
+                        {
+                            dynamic tempPrice = new ExpandoObject();
+                            tempPrice.PriceID = prices.PriceID;
+                            tempPrice.ServiceID = ServiceID;
+                            tempPrice.OptionID = prices.OptionID;
+                            tempPrices.Add(tempPrice);
+
+                            ServicePrice findPrice = prices;
+                            findPrice.OptionID = null;
+                        }
+                        db.SaveChanges();
+
+                        foreach(BookingLine lines in findLines)
+                        {
+                            dynamic tempLine = new ExpandoObject();
+                            tempLine.LineID = lines.LineID;
+                            tempLine.ServiceID = ServiceID;
+                            tempLine.OptionID = lines.OptionID;
+                            tempLines.Add(tempLine);
+
+                            BookingLine findLine = lines;
+                            findLine.OptionID = null;
+
+                        }
+                        db.SaveChanges();
+
+                    }
+                    db.ServiceTypeOptions.RemoveRange(findTypeOption);
+                    db.SaveChanges();
+
+                    if (Modell.ServicePrices != null)
+                    {
+                        foreach (var Items in Modell.ServicePrices)
+                        {
+                            //Save the Service price object
+                            ServicePrice PriceObject = new ServicePrice();
+                            PriceObject.ServiceID = ServiceID;
+                            PriceObject.Price = (decimal)Items.Price;
+                            PriceObject.Date = DateTime.Now;
+                            db.ServicePrices.Add(PriceObject);
+
+                            db.SaveChanges();
+                        }
+                    }
+
+                    if (Modell.ServiceTypeOptions != null)
+                    {
+                        
+                        foreach (var Items in Modell.ServiceTypeOptions)
+                        {
+                            //saves the OptionID and ServiceID into bride entity
+                            int OptionID = (int)Items.OptionID;
+                            ServiceTypeOption newObject = db.ServiceTypeOptions.Where(zz => zz.ServiceID == ServiceID && zz.OptionID == OptionID).FirstOrDefault();
+                            newObject.ServiceID = ServiceID;
+                            newObject.OptionID = OptionID;
+                            db.ServiceTypeOptions.Add(newObject);
+                            db.SaveChanges();
+
+                            foreach (var PriceItem in Items.ServicePrices)
+                            {
+                                ServicePrice PriceObject = new ServicePrice();
+                                PriceObject.ServiceID = ServiceID;
+                                PriceObject.OptionID = OptionID;
+                                PriceObject.Price = PriceItem.Price;
+                                PriceObject.Date = DateTime.Now;
+                                db.ServicePrices.Add(PriceObject);
+
+                                
+                            }
+                            db.SaveChanges();
+
+                            foreach (var restorePrices in tempPrices)
+                            {
+                                int rServiceID = (int)restorePrices.ServiceID;
+                                int rOptionID = (int)restorePrices.OptionID;
+
+                                if (rServiceID == ServiceID && rOptionID == OptionID)
+                                {
+                                    int rPriceID = (int)restorePrices.PriceID;
+                                    ServicePrice findSP = db.ServicePrices.Where(zz => zz.PriceID == rPriceID).FirstOrDefault();
+                                    findSP.OptionID = rOptionID;
+                                    db.SaveChanges();
+                                }
+                            }
+
+                            foreach (var restoreLines in tempLines)
+                            {
+                                int rServiceID = (int)restoreLines.ServiceID;
+                                int rOptionID = (int)restoreLines.OptionID;
+
+                                if (rServiceID == ServiceID && rOptionID == OptionID)
+                                {
+                                    int rLineID = (int)restoreLines.LineID;
+                                    BookingLine findBL = db.BookingLines.Where(zz => zz.LineID == rLineID).FirstOrDefault();
+                                    findBL.OptionID = rOptionID;
+                                    db.SaveChanges();
+                                }
+                            }
+                        }
+
+
+                    }
+
+                    if (Modell.ServicePhotoes != null)
+                    {
+                        foreach (var items in Modell.ServicePhotoes)
+                        {
+                            if (imageName != null)
+                            {
+                                ServicePhoto newPhoto = db.ServicePhotoes.Where(zz => zz.ServiceID == ServiceID).FirstOrDefault();
+                                newPhoto.Photo = imageName;
+                                db.SaveChanges();
+                            }
+                        }
+                    }
+                    dynamic toReturn = new ExpandoObject();
+                    toReturn.Message = "success";
+                    return toReturn;
+                }
+                catch (Exception err)
+                {
+                    return err.Message;
+                }
             }
-            catch (Exception err)
+            else
             {
-                return err.Message;
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return "Session is not valid";
             }
         }
+
+
+        //[Route("api/Services/UpdateService")]
+        //[HttpPost]
+        //public dynamic UpdateService([FromBody] Service Modell)
+        //{
+        //    try
+        //    {
+        //        Service findService = db.Services.Where(zz => zz.ServiceID == Modell.ServiceID).FirstOrDefault();
+        //        findService.Name = Modell.Name;
+        //        findService.Description = Modell.Description;
+        //        findService.Duration = Modell.Duration;
+        //        findService.TypeID = Modell.TypeID;
+        //        db.SaveChanges();
+
+        //        //it hits here
+        //        foreach (ServicePrice Items in Modell.ServicePrices)
+        //        {
+        //            ServicePrice findPrice = db.ServicePrices.Where(zz => zz.PriceID == Items.PriceID && zz.Price == Items.Price).FirstOrDefault();
+        //            if (findPrice == null)
+        //            {
+        //                ServicePrice PriceObject = new ServicePrice();
+        //                PriceObject.ServiceID = findService.ServiceID;
+        //                PriceObject.OptionID = Items.OptionID;
+        //                PriceObject.Price = Items.Price;
+        //                PriceObject.Date = DateTime.Now;
+        //                db.ServicePrices.Add(PriceObject);
+        //                db.SaveChanges();
+        //            }
+        //        }
+        //        return "success";
+        //    }
+        //    catch (Exception err)
+        //    {
+        //        return err.Message;
+        //    }
+        //}
         //****************************************Service Option**************************************
 
         [Route("api/Services/AddServiceOption")]

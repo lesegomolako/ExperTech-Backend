@@ -150,7 +150,6 @@ namespace ExperTech_Api.Controllers
                 dynamic dynamicservicetype = new ExpandoObject();
                 dynamicservicetype.TypeID = SERVICESTYPE.TypeID;
                 dynamicservicetype.Name = SERVICESTYPE.Name;
-                dynamicservicetype.Description = SERVICESTYPE.Description;
 
                 dymanicServicestypes.Add(dynamicservicetype);
             }

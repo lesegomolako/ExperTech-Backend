@@ -10,11 +10,10 @@
     <Property Name="ContactNo" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="UserID" Type="Int32" />
+    <Property Name="Owner" Type="Boolean" Nullable="false" />
     <Property Name="Deleted" Type="Boolean" Nullable="false" />
     <NavigationProperty Name="User" Relationship="Self.FK_Admin_User" FromRole="Admin" ToRole="User" />
     <NavigationProperty Name="AdminAuditTrails" Relationship="Self.FK_AdminAuditTrail_Admin" FromRole="Admin" ToRole="AdminAuditTrail" />
-    <NavigationProperty Name="StockTakes" Relationship="Self.FK_StockTake_Admin" FromRole="Admin" ToRole="StockTake" />
-    <NavigationProperty Name="StockWriteOffs" Relationship="Self.FK_StockWriteOff_Admin" FromRole="Admin" ToRole="StockWriteOff" />
   </EntityType>
   <EntityType Name="AdminAuditTrail">
     <Key>
@@ -22,7 +21,8 @@
     </Key>
     <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="AdminID" Type="Int32" Nullable="false" />
-    <Property Name="CriticalData" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="OldData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+    <Property Name="NewData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
     <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
@@ -57,6 +57,7 @@
     <Property Name="ClientID" Type="Int32" Nullable="false" />
     <Property Name="ReminderID" Type="Int32" Nullable="false" />
     <Property Name="SaleID" Type="Int32" />
+    <Property Name="AdviseExpiry" Type="DateTime" Precision="3" />
     <NavigationProperty Name="BookingStatu" Relationship="Self.FK_Booking_BookingStatus" FromRole="Booking" ToRole="BookingStatus" />
     <NavigationProperty Name="Client" Relationship="Self.FK_Booking_Client" FromRole="Booking" ToRole="Client" />
     <NavigationProperty Name="Reminder" Relationship="Self.FK_Booking_Reminder" FromRole="Booking" ToRole="Reminder" />
@@ -119,7 +120,8 @@
     </Key>
     <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="ClientID" Type="Int32" Nullable="false" />
-    <Property Name="CriticalData" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="OldData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+    <Property Name="NewData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
     <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
@@ -187,7 +189,8 @@
     </Key>
     <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="EmployeeID" Type="Int32" Nullable="false" />
-    <Property Name="CriticalData" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="OldData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+    <Property Name="NewData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
     <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
@@ -439,7 +442,6 @@
     </Key>
     <Property Name="TypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="Description" Type="String" MaxLength="240" FixedLength="false" Unicode="false" Nullable="false" />
     <NavigationProperty Name="EmployeeServiceTypes" Relationship="Self.FK_EmployeeServiceType_ServiceType" FromRole="ServiceType" ToRole="EmployeeServiceType" />
     <NavigationProperty Name="Services" Relationship="Self.FK_Service_ServiceType" FromRole="ServiceType" ToRole="Service" />
   </EntityType>
@@ -485,6 +487,8 @@
     <Property Name="ItemID" Type="Int32" Nullable="false" />
     <Property Name="OrderID" Type="Int32" Nullable="false" />
     <Property Name="Quantity" Type="Int32" />
+    <Property Name="Received" Type="Boolean" Nullable="false" />
+    <Property Name="QuantityReceived" Type="Int32" Nullable="false" />
     <NavigationProperty Name="StockItem" Relationship="Self.FK_StockItemLine_StockItem" FromRole="StockItemLine" ToRole="StockItem" />
     <NavigationProperty Name="SupplierOrder" Relationship="Self.FK_StockItemLine_SupplierOrder" FromRole="StockItemLine" ToRole="SupplierOrder" />
   </EntityType>
@@ -493,10 +497,8 @@
       <PropertyRef Name="StockTakeID" />
     </Key>
     <Property Name="StockTakeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-    <Property Name="AdminID" Type="Int32" Nullable="false" />
     <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
-    <NavigationProperty Name="Admin" Relationship="Self.FK_StockTake_Admin" FromRole="StockTake" ToRole="Admin" />
     <NavigationProperty Name="StockTakeLines" Relationship="Self.FK_StockTakeLine_StockTake" FromRole="StockTake" ToRole="StockTakeLine" />
   </EntityType>
   <EntityType Name="StockTakeLine">
@@ -515,10 +517,8 @@
       <PropertyRef Name="WriteOffID" />
     </Key>
     <Property Name="WriteOffID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-    <Property Name="AdminID" Type="Int32" Nullable="false" />
     <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Date" Type="DateTime" Nullable="false" Precision="0" />
-    <NavigationProperty Name="Admin" Relationship="Self.FK_StockWriteOff_Admin" FromRole="StockWriteOff" ToRole="Admin" />
     <NavigationProperty Name="WriteOffLines" Relationship="Self.FK_WriteOffLine_StockWriteOff" FromRole="StockWriteOff" ToRole="WriteOffLine" />
   </EntityType>
   <EntityType Name="Supplier">
@@ -565,6 +565,7 @@
     <Property Name="Username" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Password" Type="String" MaxLength="300" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="SessionID" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+    <Property Name="SessionExpiry" Type="DateTime" Precision="3" />
     <NavigationProperty Name="Admins" Relationship="Self.FK_Admin_User" FromRole="User" ToRole="Admin" />
     <NavigationProperty Name="Clients" Relationship="Self.FK_Client_User" FromRole="User" ToRole="Client" />
     <NavigationProperty Name="Employees" Relationship="Self.FK_Employee_User" FromRole="User" ToRole="Employee" />
@@ -610,30 +611,6 @@
         <PropertyRef Name="AdminID" />
       </Principal>
       <Dependent Role="AdminAuditTrail">
-        <PropertyRef Name="AdminID" />
-      </Dependent>
-    </ReferentialConstraint>
-  </Association>
-  <Association Name="FK_StockTake_Admin">
-    <End Role="Admin" Type="Self.Admin" Multiplicity="1" />
-    <End Role="StockTake" Type="Self.StockTake" Multiplicity="*" />
-    <ReferentialConstraint>
-      <Principal Role="Admin">
-        <PropertyRef Name="AdminID" />
-      </Principal>
-      <Dependent Role="StockTake">
-        <PropertyRef Name="AdminID" />
-      </Dependent>
-    </ReferentialConstraint>
-  </Association>
-  <Association Name="FK_StockWriteOff_Admin">
-    <End Role="Admin" Type="Self.Admin" Multiplicity="1" />
-    <End Role="StockWriteOff" Type="Self.StockWriteOff" Multiplicity="*" />
-    <ReferentialConstraint>
-      <Principal Role="Admin">
-        <PropertyRef Name="AdminID" />
-      </Principal>
-      <Dependent Role="StockWriteOff">
         <PropertyRef Name="AdminID" />
       </Dependent>
     </ReferentialConstraint>
@@ -1365,14 +1342,6 @@
     <AssociationSet Name="FK_AdminAuditTrail_Admin" Association="Self.FK_AdminAuditTrail_Admin">
       <End Role="Admin" EntitySet="Admins" />
       <End Role="AdminAuditTrail" EntitySet="AdminAuditTrails" />
-    </AssociationSet>
-    <AssociationSet Name="FK_StockTake_Admin" Association="Self.FK_StockTake_Admin">
-      <End Role="Admin" EntitySet="Admins" />
-      <End Role="StockTake" EntitySet="StockTakes" />
-    </AssociationSet>
-    <AssociationSet Name="FK_StockWriteOff_Admin" Association="Self.FK_StockWriteOff_Admin">
-      <End Role="Admin" EntitySet="Admins" />
-      <End Role="StockWriteOff" EntitySet="StockWriteOffs" />
     </AssociationSet>
     <AssociationSet Name="FK_Basket_Client" Association="Self.FK_Basket_Client">
       <End Role="Client" EntitySet="Clients" />

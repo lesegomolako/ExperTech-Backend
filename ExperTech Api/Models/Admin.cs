@@ -18,8 +18,6 @@ namespace ExperTech_Api.Models
         public Admin()
         {
             this.AdminAuditTrails = new HashSet<AdminAuditTrail>();
-            this.StockTakes = new HashSet<StockTake>();
-            this.StockWriteOffs = new HashSet<StockWriteOff>();
         }
     
         public int AdminID { get; set; }
@@ -28,14 +26,11 @@ namespace ExperTech_Api.Models
         public string ContactNo { get; set; }
         public string Email { get; set; }
         public Nullable<int> UserID { get; set; }
+        public bool Owner { get; set; }
         public bool Deleted { get; set; }
     
         public virtual User User { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<AdminAuditTrail> AdminAuditTrails { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<StockTake> StockTakes { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<StockWriteOff> StockWriteOffs { get; set; }
     }
 }

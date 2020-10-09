@@ -510,7 +510,6 @@ namespace ExperTech_Api.Controllers
                 dynamic dynamicEST = new ExpandoObject();
                 dynamicEST.TypeID = ESTname.TypeID;
                 dynamicEST.Name = ESTname.Name;
-                dynamicEST.Description = ESTname.Description;
                 dymaminEmplType.Add(dynamicEST);
             }
             return dymaminEmplType;
