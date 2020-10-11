@@ -88,7 +88,7 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/StockItem/DeleteStockItem")]
         [HttpDelete]
-        public object DeleteStockItem(string SessionID, int ItemID)
+        public dynamic DeleteStockItem(string SessionID, int ItemID)
         {
 
             var admin = db.Users.Where(zz => zz.SessionID == SessionID).ToList();
@@ -98,6 +98,7 @@ namespace ExperTech_Api.Controllers
                 toReturn.Error = "Session is not valid";
                 return toReturn;
             }
+
             db.Configuration.ProxyCreationEnabled = false;
             StockItem findStockItem = db.StockItems.Find(ItemID);
             List<StockTakeLine> findTakeLine = db.StockTakeLines.Where(zz => zz.ItemID == ItemID).ToList();

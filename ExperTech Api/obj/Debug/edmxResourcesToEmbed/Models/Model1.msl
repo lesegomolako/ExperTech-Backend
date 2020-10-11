@@ -477,9 +477,10 @@
         <MappingFragment StoreEntitySet="SupplierOrder">
           <ScalarProperty Name="OrderID" ColumnName="OrderID" />
           <ScalarProperty Name="SupplierID" ColumnName="SupplierID" />
-          <ScalarProperty Name="Description" ColumnName="Description" />
           <ScalarProperty Name="Price" ColumnName="Price" />
           <ScalarProperty Name="Date" ColumnName="Date" />
+          <ScalarProperty Name="Received" ColumnName="Received" />
+          <ScalarProperty Name="DateReceived" ColumnName="DateReceived" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

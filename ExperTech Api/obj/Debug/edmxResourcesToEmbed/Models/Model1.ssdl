@@ -436,9 +436,10 @@
     </Key>
     <Property Name="OrderID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="SupplierID" Type="int" />
-    <Property Name="Description" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="Price" Type="decimal" Precision="6" Scale="2" Nullable="false" />
-    <Property Name="Date" Type="date" Nullable="false" />
+    <Property Name="Date" Type="datetime" Nullable="false" />
+    <Property Name="Received" Type="bit" Nullable="false" />
+    <Property Name="DateReceived" Type="datetime" />
   </EntityType>
   <EntityType Name="Timeslot">
     <Key>

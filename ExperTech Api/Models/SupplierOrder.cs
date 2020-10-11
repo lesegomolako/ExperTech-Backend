@@ -22,9 +22,10 @@ namespace ExperTech_Api.Models
     
         public int OrderID { get; set; }
         public Nullable<int> SupplierID { get; set; }
-        public string Description { get; set; }
         public decimal Price { get; set; }
         public System.DateTime Date { get; set; }
+        public bool Received { get; set; }
+        public Nullable<System.DateTime> DateReceived { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<StockItemLine> StockItemLines { get; set; }

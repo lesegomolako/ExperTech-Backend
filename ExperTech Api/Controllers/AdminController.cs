@@ -81,6 +81,34 @@ namespace ExperTech_Api.Controllers
         {
             return "";
         }
+
+        [Route("api/Admin/Authorize")]
+        [HttpPost]
+        public dynamic Authorize([FromBody]User Owner, string SessionID)
+        {
+            bool findUser = UserController.CheckUser(SessionID);
+            if(findUser)
+            {
+                string Password = UserController.GenerateHash(UserController.ApplySomeSalt(Owner.Password));
+                User findAdmin = db.Users.Where(zz => zz.Username == Owner.Username && zz.Password == Password).FirstOrDefault();
+                if(findAdmin != null)
+                {
+                    bool findOwner = db.Admins.Where(zz => zz.UserID == findAdmin.UserID).Select(zz => zz.Owner).FirstOrDefault();
+                    if (findOwner)
+                        return "success";
+                    else
+                        return "denied";
+                }
+                else
+                {
+                    return "denied";
+                }
+            }
+            else
+            {
+                return UserController.SessionError();
+            }
+        }
         //*******************************final delete client*****************************
         //[Route("api/Client/clientDelete")]
         //[HttpPut]
@@ -231,6 +259,7 @@ namespace ExperTech_Api.Controllers
                 string surname = db.Clients.Where(zz => zz.ClientID == items.ClientID).Select(zz => zz.Surname).FirstOrDefault();
                 string status = db.BookingStatus.Where(zz => zz.StatusID == items.StatusID).Select(zz => zz.Status).FirstOrDefault();
                 int DateID = db.EmployeeSchedules.Where(zz => zz.BookingID == items.BookingID).Select(zz => zz.DateID).FirstOrDefault();
+                int TimeID = db.EmployeeSchedules.Where(zz => zz.BookingID == items.BookingID).Select(zz => zz.TimeID).FirstOrDefault();
                 int ServiceID = db.BookingLines.Where(zz => zz.BookingID == items.BookingID).Select(zz => zz.ServiceID).FirstOrDefault();
                 int? OptionID = db.BookingLines.Where(zz => zz.BookingID == items.BookingID).Select(zz => zz.OptionID).FirstOrDefault();
 
@@ -239,9 +268,27 @@ namespace ExperTech_Api.Controllers
                 listObject.ClientID = items.ClientID;
                 listObject.Client = name + " " + surname;              
                 listObject.Status = status;              
-                listObject.Date = db.Dates.Where(zz => zz.DateID == DateID).Select(zz => zz.Date1).FirstOrDefault();
+               
                 listObject.ServiceID = ServiceID;
+
+                bool OverDue = false;
+                DateTime Date = db.Dates.Where(zz => zz.DateID == DateID).Select(zz => zz.Date1).FirstOrDefault();
+                TimeSpan Time = db.Timeslots.Where(zz => zz.TimeID == TimeID).Select(zz => zz.StartTime).FirstOrDefault();
+                TimeSpan endTime = db.Timeslots.Where(zz => zz.TimeID == TimeID).Select(zz => zz.EndTime).FirstOrDefault();
+
+                DateTime endBookingTime = Date.Date + endTime;
+                DateTime bookingDate = Date.Date + Time;
+                DateTime today = DateTime.Now;
                 
+
+                if (today>endBookingTime.AddHours(1))
+                {
+                    OverDue = true;
+                }
+
+                listObject.DateTime = bookingDate;
+                listObject.OverDue = OverDue;
+
                 if(OptionID != null)
                 {
                     string ServiceName = db.Services.Where(zz => zz.ServiceID == ServiceID).Select(zz => zz.Name).FirstOrDefault();
@@ -264,7 +311,7 @@ namespace ExperTech_Api.Controllers
                 bool hasPackage = false;
                 foreach (Sale saleitems in findSales)
                 {
-                    DateTime today = DateTime.Now;
+                  
                     ClientPackage findPackage = db.ClientPackages.Include(zz => zz.ServicePackage).Include(zz => zz.PackageInstances).Where(zz => zz.SaleID == saleitems.SaleID &&
                     zz.PackageID == PackageID && zz.ExpiryDate > today.Date).FirstOrDefault();
 

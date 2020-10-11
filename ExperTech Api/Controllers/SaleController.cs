@@ -85,7 +85,7 @@ namespace ExperTech_Api.Controllers
         public dynamic GetProductSales()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            List<Sale> getSales = db.Sales.Include(zz => zz.SaleLines).Where(zz => zz.SaleTypeID == 1).ToList();
+            List<Sale> getSales = db.Sales.Include(zz => zz.SaleLines).Where(zz => zz.SaleTypeID == 1 && zz.Payment == null).ToList();
             return SaleList(getSales);
         }
 
@@ -152,6 +152,38 @@ namespace ExperTech_Api.Controllers
 
             }
             return newlist;
+        }
+
+        [Route("api/Sale/SalePayment")]
+        [HttpPost]
+        public dynamic SalePayment(dynamic SaleDetails)
+        {
+            try
+            {
+                string SessionID = SaleDetails.SessionID;
+                bool findUser = UserController.CheckUser(SessionID);
+                if(findUser)
+                {
+                    int SaleID = (int)SaleDetails.SaleID;
+                    int PaymentTypeID = (int)SaleDetails.PaymentTypeID;
+                    decimal Total = (decimal)SaleDetails.Price;
+
+                    Sale findSale = db.Sales.Find(SaleID);
+                    findSale.PaymentTypeID = PaymentTypeID;
+                    findSale.Payment = Total;
+                    db.SaveChanges();
+
+                    return "success";
+                }
+                else
+                {
+                    return UserController.SessionError();
+                }
+            }
+            catch(Exception err)
+            {
+                return err.Message;
+            }
         }
 
        

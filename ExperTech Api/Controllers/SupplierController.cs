@@ -164,7 +164,7 @@ namespace ExperTech_Api.Controllers
                 OrderObject.SupplierID = Items.SupplierID;
                 string SupplierName = db.Suppliers.Where(zz => zz.SupplierID == Items.SupplierID).Select(zz => zz.Name).FirstOrDefault();
                 OrderObject.Supplier = SupplierName;
-                OrderObject.Description = Items.Description;
+               
                 OrderObject.Price = Items.Price;
                 OrderObject.Date = Items.Date;
 
@@ -173,6 +173,7 @@ namespace ExperTech_Api.Controllers
                 foreach (StockItemLine Line in Items.StockItemLines)
                 {
                     dynamic LineObject = new ExpandoObject();
+                    LineObject.LineID = Line.LineID;
                     LineObject.ItemID = Line.ItemID;
                     LineObject.SupplierID = Line.OrderID;
                     LineObject.Quantity = Line.Quantity;
@@ -204,7 +205,7 @@ namespace ExperTech_Api.Controllers
 
             SupplierOrder newObject = new SupplierOrder();
             newObject.SupplierID = Items.SupplierID;
-            newObject.Description = Items.Description;
+            
             decimal total = 0;
             foreach (StockItemLine details in Items.StockItemLines)
             {

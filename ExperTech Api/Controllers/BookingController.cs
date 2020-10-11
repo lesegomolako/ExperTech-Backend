@@ -52,15 +52,18 @@ namespace ExperTech_Api.Controllers
                 EmployeeSchedule findSlot = db.EmployeeSchedules.Where(zz => zz.EmployeeID == EmployeeID && zz.DateID == DateID && zz.TimeID == TimeID).FirstOrDefault();
                 findSlot.BookingID = BookingID;
                 findSlot.StatusID = 3;
-                db.SaveChanges();
+               
 
                 Booking findBooking = db.Bookings.Where(zz => zz.BookingID == BookingID).FirstOrDefault();
                 findBooking.StatusID = 2;
-                db.SaveChanges();
+                findBooking.AdviseExpiry = DateTime.Now.AddDays(1);
+               
 
                 DateRequested findRequest = db.DateRequesteds.Where(zz => zz.RequestedID == RequestedID).FirstOrDefault();
                 db.DateRequesteds.Remove(findRequest);
                 db.SaveChanges();
+
+                SendAdviseEmail(BookingID);
 
                 return "success";
 
@@ -71,6 +74,62 @@ namespace ExperTech_Api.Controllers
             }
             
         }
+
+        private void SendAdviseEmail(int BookingID)
+        {
+            try
+            {
+                Booking findBooking = db.Bookings.Include(zz => zz.BookingLines).Include(zz => zz.Client)
+                    .Include(zz => zz.EmployeeSchedules).Where(zz => zz.BookingID == BookingID).FirstOrDefault();
+
+                var f = findBooking.BookingLines.ToArray();
+                var e = findBooking.EmployeeSchedules.ToArray();
+
+                int ServiceID = f[0].ServiceID;
+                int? OptionID = f[0].OptionID;
+
+                int EmployeeID = e[0].EmployeeID;
+                int DateID = e[0].DateID;
+                int TimeiD = e[0].TimeID;
+
+                string name = findBooking.Client.Name + " " + findBooking.Client.Surname;
+                string email = findBooking.Client.Email;
+
+                string Service;
+
+                if (OptionID != null)
+                {
+                    string findService = db.Services.Find(ServiceID).Name;
+                    string findOption = db.ServiceOptions.Find(OptionID).Name;
+
+                    Service = findService + " (" + findOption + ")";
+                }
+                else
+                {
+                    Service = db.Services.Find(ServiceID).Name;
+                }
+
+                string Employee = db.Employees.Find(EmployeeID).Name;
+                string Date = (db.Dates.Find(DateID).Date1).ToLongDateString();
+                Timeslot getTimes = db.Timeslots.Find(TimeiD);
+                string Time = getTimes.StartTime.ToString() + "-" + getTimes.EndTime;
+
+
+
+
+                string body = System.IO.File.ReadAllText(HttpContext.Current.Server.MapPath("~/EmailTemplates/AdviseBooking.html"));
+                body = body.Replace("#Service#", Service).Replace("#Name#", name).Replace("#Employee#", Employee)
+                    .Replace("#Date#", Date).Replace("#Time#", Time);
+
+                UserController.Email(body, email, "Booking Request");
+            }
+            catch(Exception err)
+            {
+                Console.WriteLine(err.Message);
+            }
+
+        }
+
 
         [System.Web.Http.Route("api/Booking/getALLemployees")]
         [System.Web.Mvc.HttpGet]
@@ -256,6 +315,26 @@ namespace ExperTech_Api.Controllers
             return db.Timeslots.Where(zz => zz.Available == true).ToList();
         }
 
+        private void BookingExpiry(int BookingID)
+        {
+
+            Booking findBooking = db.Bookings.Find(BookingID);
+            var OldStatus = findBooking.StatusID;
+            findBooking.StatusID = 5;
+
+            EmployeeSchedule findSchedule = db.EmployeeSchedules.Where(zz => zz.BookingID == BookingID).FirstOrDefault();
+            var OldID = findBooking.BookingID;
+            var OldEmpStatus = findBooking.StatusID;
+            findSchedule.BookingID = null;
+            findSchedule.StatusID = 1;
+
+            //send SMS
+
+            //AdminAuditTrail makeAudit = new AdminAuditTrail();
+            //makeAudit.
+
+            db.SaveChanges();
+        }
 
         [System.Web.Http.Route("api/Booking/getClientBooking")]
         [System.Web.Mvc.HttpGet]
@@ -292,7 +371,7 @@ namespace ExperTech_Api.Controllers
 
         [System.Web.Http.Route("api/Bookings/ViewBookings")]
         [HttpGet]
-        public List<dynamic> ViewBookings(string SessionID)
+        public dynamic ViewBookings(string SessionID)
         {
             User findUser = db.Users.Include(zz => zz.Clients).Where(zz => zz.SessionID == SessionID).FirstOrDefault();
             if (findUser != null)
@@ -314,11 +393,17 @@ namespace ExperTech_Api.Controllers
 
 
 
-        private List<dynamic> getClientBooking(List<Booking> forBooking)
+        private dynamic getClientBooking(List<Booking> forBooking)
         {
             List<dynamic> dymanicBookings = new List<dynamic>();
             foreach (Booking bookings in forBooking)
             {
+                DateTime today = DateTime.Now;
+                if (bookings.StatusID == 2 && today > bookings.AdviseExpiry)
+                {
+                    BookingExpiry(bookings.BookingID);
+                }
+
                 dynamic obForBooking = new ExpandoObject();
                 obForBooking.BookingID = bookings.BookingID;
                 obForBooking.Status = bookings.BookingStatu.Status;
@@ -350,7 +435,7 @@ namespace ExperTech_Api.Controllers
 
                     DateTime makeDT = (DateTime)getDate + (TimeSpan)getTimes.StartTime;
                     DateTime DayBefore = makeDT.Subtract(new TimeSpan(24, 0, 0));
-                    DateTime today = DateTime.Now;
+                    
 
                     bool canCancel = false;
                     if(today < DayBefore )
@@ -607,6 +692,34 @@ namespace ExperTech_Api.Controllers
             }
         }
 
+        [Route("api/Bookings/NoShow")]
+        [HttpGet]
+        public dynamic NoShow(string SessionID, int BookingID)
+        {
+            bool findUser = UserController.CheckUser(SessionID);
+            if (findUser)
+            {
+                try
+                {
+                    Booking findBooking = db.Bookings.Where(zz => zz.BookingID == BookingID).FirstOrDefault();
+                    findBooking.StatusID = 7;
+                    db.SaveChanges();
+                    return "success";
+                }
+                catch (Exception err)
+                {
+                    return err.Message;
+                }
+            }
+            else
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return toReturn;
+            }
+        }
+
         [Route("api/Bookings/DeleteBooking")]
         [HttpDelete]
         public dynamic DeleteBooking(int BookingID)
@@ -639,7 +752,7 @@ namespace ExperTech_Api.Controllers
             {
                 try
                 {
-
+                    var Date = Bookings.StartDate;
                     int getDateID = db.Dates.Where(zz => zz.Date1 == Bookings.StartDate.Date).Select(zz => zz.DateID).FirstOrDefault();
                     if (getDateID != 0)
                     {

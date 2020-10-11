@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web;
 using System.Text;
 using System.Dynamic;
 using ExperTech_Api.Models;
@@ -19,6 +20,7 @@ namespace ExperTech_Api.Controllers
     [RoutePrefix("api/User")]
     public class UserController : ApiController
     {
+        
         static void SMS()
         {
             // Find your Account Sid and Token at twilio.com/console
@@ -86,6 +88,28 @@ namespace ExperTech_Api.Controllers
 
         }
 
+        public static bool CheckUser(string SessionID)
+        {
+            ExperTechEntities db = new ExperTechEntities();
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if(findUser != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static dynamic SessionError()
+        {
+            dynamic toReturn = new ExpandoObject();
+            toReturn.Error = "session";
+            toReturn.Message = "Session is no longer valid";
+            return toReturn;
+        }
+
         private dynamic findProfile(User Modell)
         {
             if(Modell.RoleID == 1)
@@ -119,6 +143,7 @@ namespace ExperTech_Api.Controllers
                     myObject.Surname = items.Surname;
                     myObject.Email = items.Email;
                     myObject.ContactNo = items.ContactNo;
+                    myObject.Owner = items.Owner;
                     newList.Add(myObject);
                 }
                 newObject.Admins = newList;
@@ -226,31 +251,53 @@ namespace ExperTech_Api.Controllers
         {
             db.Configuration.ProxyCreationEnabled = false;
             User findUser = db.Users.Where(zz => zz.Username == Username).FirstOrDefault();
+            string SessionID;
+            //string body = "Click the link below to reset your passoword:" + "\n" + "http://localhost:4200/reset?SessionID=";
+            string body = System.IO.File.ReadAllText(HttpContext.Current.Server.MapPath("~/EmailTemplates/ResetPassword.html"));
             
-            if(findUser != null)
+            if (findUser != null)
             {
-                switch(findUser.RoleID)
+                try
                 {
-                    case 1:
-                        Guid g = Guid.NewGuid();
-                        findUser.SessionID = g.ToString();
-                        db.SaveChanges();
-                        string findEmail = db.Clients.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.Email).FirstOrDefault();
-                        return ForgotEmail(findUser.SessionID, findEmail);
-                    case 2:
-                        Guid f = Guid.NewGuid();
-                        findUser.SessionID = f.ToString();
-                        db.SaveChanges();
-                        string findAEmail = db.Admins.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.Email).FirstOrDefault();
-                        return ForgotEmail(findUser.SessionID, findAEmail);
-                    case 3:
-                        Guid h = Guid.NewGuid();
-                        findUser.SessionID = h.ToString();
-                        db.SaveChanges();
-                        string findEmpEmail = db.Employees.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.Email).FirstOrDefault();
-                        return ForgotEmail(findUser.SessionID, findEmpEmail);
-                    default:
-                        return "User not found";
+                    switch (findUser.RoleID)
+                    {
+                        case 1:
+                            Client findClient = db.Clients.Where(zz => zz.UserID == findUser.UserID).FirstOrDefault();
+                            Guid g = Guid.NewGuid();
+                            findUser.SessionID = g.ToString();
+                            db.SaveChanges();
+                            SessionID = findUser.SessionID;
+                            body = body.Replace("#SessionID#", SessionID).Replace("#Name#", findClient.Name + " " + findClient.Surname);
+                            string findEmail = findClient.Email;
+                            Email(body, findEmail, "Reset Password");
+                            return "success";
+                        case 2:
+                            Admin findAdmin = db.Admins.Where(zz => zz.UserID == findUser.UserID).FirstOrDefault();
+                            Guid f = Guid.NewGuid();
+                            findUser.SessionID = f.ToString();
+                            db.SaveChanges();
+                            SessionID = findUser.SessionID;
+                            body = body.Replace("#SessionID#", SessionID).Replace("#Name#", findAdmin.Name + " " + findAdmin.Surname);
+                            string findAEmail = findAdmin.Email;
+                            Email(body, findAEmail, "Reset Password");
+                            return "success";
+                        case 3:
+                            Employee findEmployee = db.Employees.Where(zz => zz.UserID == findUser.UserID).FirstOrDefault();
+                            Guid h = Guid.NewGuid();
+                            findUser.SessionID = h.ToString();
+                            db.SaveChanges();
+                            SessionID = findUser.SessionID;
+                            body = body.Replace("#SessionID#", SessionID).Replace("#Name#", findEmployee.Name + " " + findEmployee.Surname);
+                            string findEmpEmail = findEmployee.Email;
+                            Email(body, findEmpEmail, "Reset Password");
+                            return "success";
+                        default:
+                            return "User not found";
+                    }
+                }
+                catch(Exception err)
+                {
+                    return err.Message;
                 }
             }
             else
@@ -266,39 +313,42 @@ namespace ExperTech_Api.Controllers
         public dynamic Logout(string SessionID)
         {
             db.Configuration.ProxyCreationEnabled = false;
-            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
-            findUser.SessionID = null;
-            db.SaveChanges();
+            if (SessionID != null)
+            {
+                User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+                findUser.SessionID = null;
+                db.SaveChanges();
+            }
             return "success";
         }
 
-        private dynamic ForgotEmail(string SessionID, string Email )
-        {
-            try
-            {
-                MailMessage message = new MailMessage();
-                SmtpClient smtp = new SmtpClient();
-                message.From = new MailAddress("hairexhilartion@gmail.com");
-                message.To.Add(new MailAddress(Email));
-                message.Subject = "Exhiliration Hair & Beauty Registration";
-                message.IsBodyHtml = false;
-                message.Body = "Click the link below to reset your passoword:" + "\n" + "http://localhost:4200/reset?SessionID=" + SessionID;
-                smtp.Port = 587;
-                smtp.Host = "smtp.gmail.com";
-                smtp.EnableSsl = true;
-                smtp.EnableSsl = true;
-                smtp.UseDefaultCredentials = false;
-                smtp.Credentials = new NetworkCredential("hairexhilartion@gmail.com", "@Exhilaration1");
-                smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
-                smtp.Send(message);
+        //private dynamic ForgotEmail(string SessionID, string Email, string Subject )
+        //{
+        //    try
+        //    {
+        //        MailMessage message = new MailMessage();
+        //        SmtpClient smtp = new SmtpClient();
+        //        message.From = new MailAddress("hairexhilartion@gmail.com");
+        //        message.To.Add(new MailAddress(Email));
+        //        message.Subject = "Exhiliration Hair & Beauty " + Subject;
+        //        message.IsBodyHtml = false;
+        //        message.Body = "Click the link below to reset your passoword:" + "\n" + "http://localhost:4200/reset?SessionID=" + SessionID;
+        //        smtp.Port = 587;
+        //        smtp.Host = "smtp.gmail.com";
+        //        smtp.EnableSsl = true;
+        //        smtp.EnableSsl = true;
+        //        smtp.UseDefaultCredentials = false;
+        //        smtp.Credentials = new NetworkCredential("hairexhilartion@gmail.com", "@Exhilaration1");
+        //        smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+        //        smtp.Send(message);
 
-                return "success";
-            }
-            catch (Exception err)
-            {
-                return err.Message;
-            }
-        }
+        //        return "success";
+        //    }
+        //    catch (Exception err)
+        //    {
+        //        return err.Message;
+        //    }
+        //}
 
         [Route("ResetPassword")]
         [HttpPost]
@@ -515,7 +565,7 @@ namespace ExperTech_Api.Controllers
             return dymaminEmplType;
         }
         //*******************************registration stuff******************************************
-        public static void Email(string SessionID, string Email)
+        public static void Email(string body, string Email, string Subject)
         {
             try
             {
@@ -523,9 +573,9 @@ namespace ExperTech_Api.Controllers
                 SmtpClient smtp = new SmtpClient();
                 message.From = new MailAddress("hairexhilartion@gmail.com");
                 message.To.Add(new MailAddress(Email));
-                message.Subject = "Exhiliration Hair & Beauty Registration";
-                message.IsBodyHtml = false;
-                message.Body = "Click the link below to setup account:" + "\n" + "http://localhost:4200/setup?SessionID=" + SessionID;
+                message.Subject = "Exhiliration Hair & Beauty | " + Subject;
+                message.IsBodyHtml = true;
+                message.Body = body;
                 smtp.Port = 587;
                 smtp.Host = "smtp.gmail.com";
                 smtp.EnableSsl = true;
@@ -565,7 +615,12 @@ namespace ExperTech_Api.Controllers
                     AdminData.UserID = UserID;
                     db.Admins.Add(AdminData);
                     db.SaveChanges();
-                    Email(SessionID, AdminData.Email);
+
+                    string name = AdminData.Name + " " + AdminData.Surname;
+                    string body = System.IO.File.ReadAllText(HttpContext.Current.Server.MapPath("~/EmailTemplates/Register.html"));
+                    body = body.Replace("#Name#", name).Replace("#SessionID#", SessionID);
+                    
+                    Email(body, AdminData.Email, "Registration");
                 }
                 
                 return "success";
@@ -599,6 +654,8 @@ namespace ExperTech_Api.Controllers
                 int UserID = UserObject.UserID;
                 string SessionID = UserObject.SessionID;
 
+                
+
                 foreach (Employee EmployeesData in Modell.UserData.Employees)
                 {
                     EmployeesData.UserID = UserID;
@@ -606,7 +663,6 @@ namespace ExperTech_Api.Controllers
                     db.SaveChanges();
 
                     populateTimes(EmployeesData.EmployeeID);
-
 
                     foreach (int types in Modell.ServiceTypes)
                     {
@@ -616,7 +672,11 @@ namespace ExperTech_Api.Controllers
                         db.EmployeeServiceTypes.Add(newEmpType);
                         db.SaveChanges();
                     }
-                    Email(SessionID, EmployeesData.Email);
+                    string name = EmployeesData.Name + " " + EmployeesData.Surname;
+                    string body = System.IO.File.ReadAllText(HttpContext.Current.Server.MapPath("~/EmailTemplates/Register.html"));
+                    body = body.Replace("#Name#", name).Replace("#SessionID#", SessionID);
+
+                    Email(body, EmployeesData.Email, "Reigstration");
                 }
               
                 return "success";
@@ -936,7 +996,7 @@ namespace ExperTech_Api.Controllers
             {
                 int thisDateID = ScheduleList[j].DateID;
                 int thisTimeID = ScheduleList[j].TimeID;
-                EmployeeSchedule newSchedge = db.EmployeeSchedules.Where(zz => zz.DateID == thisDateID && zz.TimeID == thisTimeID).FirstOrDefault();
+                EmployeeSchedule newSchedge = db.EmployeeSchedules.Where(zz => zz.DateID == thisDateID && zz.TimeID == thisTimeID && zz.EmployeeID == EmployeeID).FirstOrDefault();
                 if (newSchedge == null)
                 {
                     EmployeeSchedule items = new EmployeeSchedule();

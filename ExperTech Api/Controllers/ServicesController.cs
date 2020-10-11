@@ -142,7 +142,7 @@ namespace ExperTech_Api.Controllers
                         dynamic toReturn = new ExpandoObject();
                         int countServ = findService.Count;
                         toReturn.Error = "dependencies";
-                        toReturn.Message = "There are services that depend this Service Type \nDelete those services first.";
+                        toReturn.Message = "There are services that depend this on Service Type \nDelete those services first.";
                         return toReturn;
                     }
                     else
@@ -451,9 +451,34 @@ namespace ExperTech_Api.Controllers
             try
             {
                 Service find = db.Services.Where(zz => zz.ServiceID == ServiceID).FirstOrDefault();
-                find.Deleted = true;
-                db.SaveChanges();
-                return "success";
+                List<BookingLine> findLines = db.BookingLines.Where(zz => zz.ServiceID == ServiceID).ToList();
+                List<ServicePrice> findPrices = db.ServicePrices.Where(zz => zz.ServiceID == ServiceID).ToList();
+                List<ServiceTypeOption> findOptions = db.ServiceTypeOptions.Where(zz => zz.ServiceID == ServiceID).ToList();
+                List<ServicePhoto> findPhotos = db.ServicePhotoes.Where(zz => zz.ServiceID == ServiceID).ToList();
+                List<ServicePackage> findPackage = db.ServicePackages.Where(zz => zz.ServiceID == ServiceID).ToList();
+
+                if (findLines.Count != 0 || findPackage.Count != 0)
+                {
+                    dynamic toReturn = new ExpandoObject();
+                    toReturn.Error = "dependencies";
+                    toReturn.Message = "Unable to delete service: There are bookings or packages linked to this service. \n";
+                    return toReturn;
+                }
+                else
+                {
+                    if(findPrices.Count != 0)
+                    db.ServicePrices.RemoveRange(findPrices);
+
+                    if(findOptions.Count != 0)
+                    db.ServiceTypeOptions.RemoveRange(findOptions);
+
+                    if(findPhotos.Count != 0)
+                    db.ServicePhotoes.RemoveRange(findPhotos);
+
+                    db.Services.Remove(find);
+                    db.SaveChanges();
+                    return "success";
+                }
             }
             catch (Exception err)
             {
@@ -860,9 +885,22 @@ namespace ExperTech_Api.Controllers
 
             db.Configuration.ProxyCreationEnabled = false;
             ServiceOption findOption = db.ServiceOptions.Find(OptionID);
-            findOption.Deleted = true;
-            db.SaveChanges();
-            return "success";
+            List<ServiceTypeOption> findTypeOptions = db.ServiceTypeOptions.Where(zz => zz.OptionID == OptionID).ToList();
+
+            if(findTypeOptions.Count != 0)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "dependencies";
+                toReturn.Message = "Unable to delete service option: This option is linked to some services. \n";
+                return toReturn;
+            }
+            else
+            {
+                db.ServiceOptions.Remove(findOption);
+                db.SaveChanges();
+                return "success";
+            }
+           
         }
 
         //******************************Service Package************************************

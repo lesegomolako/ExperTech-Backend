@@ -540,9 +540,10 @@
     </Key>
     <Property Name="OrderID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="SupplierID" Type="Int32" />
-    <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Price" Type="Decimal" Precision="6" Scale="2" Nullable="false" />
-    <Property Name="Date" Type="DateTime" Nullable="false" Precision="0" />
+    <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="Received" Type="Boolean" Nullable="false" />
+    <Property Name="DateReceived" Type="DateTime" Precision="3" />
     <NavigationProperty Name="StockItemLines" Relationship="Self.FK_StockItemLine_SupplierOrder" FromRole="SupplierOrder" ToRole="StockItemLine" />
     <NavigationProperty Name="Supplier" Relationship="Self.FK_SupplierOrder_Supplier" FromRole="SupplierOrder" ToRole="Supplier" />
   </EntityType>
