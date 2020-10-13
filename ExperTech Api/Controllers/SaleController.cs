@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web;
 using System.Net.Mail;
 using System.Data.Entity;
 //using System.Windows.Forms;
@@ -203,10 +204,10 @@ namespace ExperTech_Api.Controllers
 
             try
             {
-                int ClientID = db.Clients.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.ClientID).FirstOrDefault();
+                Client findClient = db.Clients.Where(zz => zz.UserID == findUser.UserID).FirstOrDefault();
 
                 Sale MakeSale = new Sale();
-                MakeSale.ClientID = ClientID;
+                MakeSale.ClientID = findClient.ClientID ;
                 MakeSale.StatusID = 1;
                 MakeSale.ReminderID = 2;
                 MakeSale.Date = DateTime.Now;
@@ -215,7 +216,7 @@ namespace ExperTech_Api.Controllers
                 db.SaveChanges();
 
                 int SaleID = MakeSale.SaleID;
-                int BasketID = db.Baskets.Where(zz => zz.ClientID == ClientID).Select(zz => zz.BasketID).FirstOrDefault();
+                int BasketID = db.Baskets.Where(zz => zz.ClientID == findClient.ClientID).Select(zz => zz.BasketID).FirstOrDefault();
 
                 List<BasketLine> getBasket = db.BasketLines.Include(zz => zz.Product).Where(zz => zz.BasketID == BasketID).ToList();
 
@@ -245,6 +246,15 @@ namespace ExperTech_Api.Controllers
                 }
                 db.BasketLines.RemoveRange(getBasket);
                 db.SaveChanges();
+                string name = findClient.Name + " " + findClient.Surname;
+
+                string table = FormatTable(SaleID);
+
+
+                string body = System.IO.File.ReadAllText(HttpContext.Current.Server.MapPath("~/EmailTemplates/SaleInvoice.html"));
+                body = body.Replace("#Name#", name).Replace("#Table#", table);
+
+                UserController.Email(body, findClient.Email, "Sale Invoice");
                 return "success";
             }
             catch(Exception err)
@@ -253,6 +263,78 @@ namespace ExperTech_Api.Controllers
             }
 
         }
+
+        private string FormatTable(int SaleID)
+        {
+            string messageBody = "";
+            Sale Modell = db.Sales.Include(zz => zz.SaleLines).Include(zz => zz.Client).Where(zz => zz.SaleID == SaleID).FirstOrDefault();
+            if (Modell.SaleLines.Count == 0) return "";
+
+            //< table class="table">    
+            //                <thead>    
+            //                    <tr>    
+            //                        <th width = "25%" > Product Name</th>    
+            //                        <th width = "25%" > Price(R) </ th >
+            //                        < th width="25%">Quantity</th>       
+            //                    </tr>    
+            //                </thead>    
+            //                <tbody>    
+            //                    <tr* ngFor = "let item of clientObject.Products" >
+            //                        < td scope="row">
+            //                        {{item.Name}}</td>    
+            //                        <td>R{{item.Price}}</td>    
+            //                        <td>{{item.Quantity}}</td>    
+            //                    </tr> 
+            //                    <tr>
+            //                        <td></td>
+            //                        <td><strong>Total</strong></td>
+            //                        <td style = "border-bottom-style: double;" > 100 </ td >
+            //                    </ tr >
+            //                </ tbody >
+            //            </ table >
+
+            string htmlTableStart = "<table style='border-collapse:collapse; text-align:center;' >";
+            string htmlTableEnd = "</table>";
+            string htmlHeaderRowStart = "<tr style='background-color:#6FA1D2; color:#ffffff;'>";
+            string htmlHeaderRowEnd = "</tr>";
+            string htmlTrStart = "<tr style='color:#555555;'>";
+            string htmlTrEnd = "</tr>";
+            string htmlTdStart = "<td style='border-color:#5c87b2; border-style:solid; border-width:thin; padding: 5px;'>";
+            string htmlTdEnd = "</td>";
+            string htmlTotalTdStart = "<td style='border-color:#5c87b2; border-bottom-style:double; border-width:thin; padding: 5px;'>";
+
+            messageBody += htmlTableStart;
+            messageBody += htmlHeaderRowStart;
+            messageBody += htmlTdStart + "Product Name" + htmlTdEnd;
+            messageBody += htmlTdStart + "Price" + htmlTdEnd;
+            messageBody += htmlTdStart + "Quantity" + htmlTdEnd;
+            messageBody += htmlHeaderRowEnd;
+
+            decimal Total = 0;
+            //Loop all the rows from grid vew and added to html td  
+            foreach (SaleLine items in Modell.SaleLines)
+            {
+                Product findProduct = db.Products.Where(zz => zz.ProductID == items.ProductID).FirstOrDefault();
+                messageBody = messageBody + htmlTrStart;
+                messageBody = messageBody + htmlTdStart + findProduct.Name + htmlTdEnd; //adding student name  
+                messageBody = messageBody + htmlTdStart + findProduct.Price + htmlTdEnd; //adding DOB  
+                messageBody = messageBody + htmlTdStart + items.Quantity + htmlTdEnd; //adding Email   
+                messageBody = messageBody + htmlTrEnd;
+
+                Total += (findProduct.Price * items.Quantity);
+            }
+            messageBody += htmlTrStart;
+            messageBody += htmlTdStart + "" + htmlTdEnd;
+            messageBody += htmlTdStart + "Total" + htmlTdEnd;
+            messageBody += htmlTotalTdStart + Total + htmlTdEnd;
+            messageBody += htmlTrEnd;
+
+            messageBody = messageBody + htmlTableEnd;
+
+            return messageBody;
+        }
+        
+        
     }
 }
 

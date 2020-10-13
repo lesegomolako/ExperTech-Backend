@@ -108,7 +108,9 @@
     <Property Name="SaleID" Type="int" Nullable="false" />
     <Property Name="PackageID" Type="int" Nullable="false" />
     <Property Name="Date" Type="datetime" Nullable="false" />
+    <Property Name="ClientID" Type="int" Nullable="false" />
     <Property Name="ExpiryDate" Type="date" Nullable="false" />
+    <Property Name="Active" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="CompanyInfo">
     <Key>
@@ -656,6 +658,18 @@
         <PropertyRef Name="ClientID" />
       </Principal>
       <Dependent Role="ClientAuditTrail">
+        <PropertyRef Name="ClientID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_ClientPackage_Client">
+    <End Role="Client" Type="Self.Client" Multiplicity="1" />
+    <End Role="ClientPackage" Type="Self.ClientPackage" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Client">
+        <PropertyRef Name="ClientID" />
+      </Principal>
+      <Dependent Role="ClientPackage">
         <PropertyRef Name="ClientID" />
       </Dependent>
     </ReferentialConstraint>
@@ -1281,6 +1295,10 @@
     <AssociationSet Name="FK_ClientAuditTrail_Client" Association="Self.FK_ClientAuditTrail_Client">
       <End Role="Client" EntitySet="Client" />
       <End Role="ClientAuditTrail" EntitySet="ClientAuditTrail" />
+    </AssociationSet>
+    <AssociationSet Name="FK_ClientPackage_Client" Association="Self.FK_ClientPackage_Client">
+      <End Role="Client" EntitySet="Client" />
+      <End Role="ClientPackage" EntitySet="ClientPackage" />
     </AssociationSet>
     <AssociationSet Name="FK_ClientPackage_Sale" Association="Self.FK_ClientPackage_Sale">
       <End Role="Sale" EntitySet="Sale" />

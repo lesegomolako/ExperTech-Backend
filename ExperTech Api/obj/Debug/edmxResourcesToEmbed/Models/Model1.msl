@@ -117,7 +117,9 @@
           <ScalarProperty Name="SaleID" ColumnName="SaleID" />
           <ScalarProperty Name="PackageID" ColumnName="PackageID" />
           <ScalarProperty Name="Date" ColumnName="Date" />
+          <ScalarProperty Name="ClientID" ColumnName="ClientID" />
           <ScalarProperty Name="ExpiryDate" ColumnName="ExpiryDate" />
+          <ScalarProperty Name="Active" ColumnName="Active" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

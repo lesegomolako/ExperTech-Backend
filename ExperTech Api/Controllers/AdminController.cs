@@ -321,6 +321,7 @@ namespace ExperTech_Api.Controllers
                         hasPackage = true;
                         dynamic PackageDetails = new ExpandoObject();
                         PackageDetails.PackageID = findPackage.PackageID;
+                        PackageDetails.SaleID = findPackage.SaleID;
                         string PName = findPackage.ServicePackage.Description;
                         int InstancesLeft = findPackage.PackageInstances.Where(zz => zz.StatusID == 1).Count();
                         PackageDetails.Name = PName + "(" + InstancesLeft.ToString() + " uses left)";

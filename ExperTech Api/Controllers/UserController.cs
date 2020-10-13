@@ -772,6 +772,8 @@ namespace ExperTech_Api.Controllers
             }
         }
         //***********************************make booking paynent*****************************
+        
+
         [Route("bookingPayment")]
         [HttpPost]
         public dynamic bookingPayment(dynamic bkings)
@@ -783,28 +785,60 @@ namespace ExperTech_Api.Controllers
                 if (findUser != null)
                 {
                     int BookingID = (int)bkings.BookingID;
-                    int PaymentTypeID = (int)bkings.PaymentTypeID;
+                    int? PaymentTypeID = (int?)bkings.PaymentTypeID;
                     decimal Price = (decimal)bkings.Price;
-
+                    int? PackageID = (int?)bkings.PackageID;
+                    int? SaleID = (int?)bkings.SaleID;
                     Booking findBookings = db.Bookings.Where(zz => zz.BookingID == BookingID).FirstOrDefault();
 
-                    Sale makeSale = new Sale();
-                    makeSale.PaymentTypeID = PaymentTypeID;
-                    makeSale.Payment = Price;
-                    makeSale.SaleTypeID = 2;
-                    makeSale.ClientID = findBookings.ClientID;
-                    makeSale.StatusID = 2;
-                    makeSale.Date = DateTime.Now;
-                    db.Sales.Add(makeSale);
-                    db.SaveChanges();
+                    if (SaleID != null && PackageID != null && PaymentTypeID == null)
+                    {
+                        
+                        ClientPackage clientPackage = db.ClientPackages.Include(zz => zz.PackageInstances).Where(zz => zz.SaleID == SaleID && zz.PackageID == PackageID).FirstOrDefault();
+                        List<PackageInstance> getInstance = clientPackage.PackageInstances.ToList();
+                        int LineID = db.BookingLines.Where(zz => zz.BookingID == findBookings.BookingID).Select(zz => zz.LineID).FirstOrDefault();
 
-                    findBookings.StatusID = 6;
-                    findBookings.SaleID = makeSale.SaleID;
+                        for (int j=0; j<getInstance.Count; j++)
+                        {
+                            if(getInstance[j].StatusID == 1)
+                            {
+                                PackageInstance thisInstance = getInstance[j];
+                                thisInstance.StatusID = 2;
+                                thisInstance.LineID = LineID;
+                                db.SaveChanges();
+                                break;
+                            }
+                        }
+
+                        findBookings.StatusID = 6;
+                        findBookings.SaleID = SaleID;
+
+                        
+
+                        db.SaveChanges();
+                        return "success";
+                    }
+                    else
+                    {
+                        
+
+                        Sale makeSale = new Sale();
+                        makeSale.PaymentTypeID = PaymentTypeID;
+                        makeSale.Payment = Price;
+                        makeSale.SaleTypeID = 2;
+                        makeSale.ClientID = findBookings.ClientID;
+                        makeSale.StatusID = 2;
+                        makeSale.Date = DateTime.Now;
+                        db.Sales.Add(makeSale);
+                        db.SaveChanges();
+
+                        findBookings.StatusID = 6;
+                        findBookings.SaleID = makeSale.SaleID;
 
 
-                    db.SaveChanges();
-           
-                    return "success";
+                        db.SaveChanges();
+                        return "success";
+                    }
                 }
                 else
                 {
@@ -881,21 +915,40 @@ namespace ExperTech_Api.Controllers
                 toReturn.Error = "Session is not valid";
                 return toReturn;
             }
-            else
-            {
-               
 
-            // string sp = "Activate Service Package";
+            try
+            {
+                DateTime today = DateTime.Now;
+                var findPackage = Modell.ClientPackages.FirstOrDefault();
+
+                ClientPackage checkDuplicate = db.ClientPackages.Where(zz => zz.PackageID == findPackage.PackageID && zz.ClientID == Modell.ClientID
+                && zz.Active == true).FirstOrDefault();
+
+                if(checkDuplicate != null)
+                {
+                    if(checkDuplicate.ExpiryDate > today)
+                    {
+                        checkDuplicate.Active = false;
+                        db.SaveChanges();
+                    }
+                    else
+                    {
+                        return "duplicate";
+                    }
+                    
+                }
+
+                // string sp = "Activate Service Package";
                 DateTime Now = DateTime.Now;
                 Sale sales = new Sale();
 
-                sales.ClientID = Modell.ClientID;      
+                sales.ClientID = Modell.ClientID;
                 sales.Payment = Modell.Payment;
                 sales.SaleTypeID = 3;
                 sales.PaymentTypeID = Modell.PaymentTypeID;
                 sales.StatusID = 2;
                 sales.Date = Now;
-                
+
                 db.Sales.Add(sales);
                 db.SaveChanges();
 
@@ -908,6 +961,7 @@ namespace ExperTech_Api.Controllers
                     CP.SaleID = SaleID;
                     CP.PackageID = items.PackageID;
                     CP.Date = Now;
+                    CP.ClientID = Modell.ClientID;
                     int Duration = db.ServicePackages.Where(zz => zz.PackageID == items.PackageID).Select(zz => zz.Duration).FirstOrDefault();
                     CP.ExpiryDate = Now.AddMonths(Duration);
                     db.ClientPackages.Add(CP);
@@ -927,8 +981,13 @@ namespace ExperTech_Api.Controllers
                 }
 
                 return "success";
-               
             }
+            catch(Exception err)
+            {
+                return err.Message;
+            }
+
+
         }
         //****************************user details******************************
         [Route("getUser")]

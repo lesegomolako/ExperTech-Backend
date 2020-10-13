@@ -20,6 +20,7 @@ namespace ExperTech_Api.Models
             this.Baskets = new HashSet<Basket>();
             this.Bookings = new HashSet<Booking>();
             this.ClientAuditTrails = new HashSet<ClientAuditTrail>();
+            this.ClientPackages = new HashSet<ClientPackage>();
             this.Sales = new HashSet<Sale>();
         }
     
@@ -38,6 +39,8 @@ namespace ExperTech_Api.Models
         public virtual User User { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ClientAuditTrail> ClientAuditTrails { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClientPackage> ClientPackages { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Sale> Sales { get; set; }
     }
