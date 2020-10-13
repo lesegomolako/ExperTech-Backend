@@ -763,9 +763,8 @@ namespace ExperTech_Api.Controllers
                             }
                         }
                     }
-                    dynamic toReturn = new ExpandoObject();
-                    toReturn.Message = "success";
-                    return toReturn;
+                  
+                    return "success";
                 }
                 catch (Exception err)
                 {

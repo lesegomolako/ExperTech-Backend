@@ -817,7 +817,7 @@ namespace ExperTech_Api.Controllers
                 foreach (DateRequested items in Modell.DateRequesteds)
                 {
                     items.BookingID = BookingID;
-
+                    items.Date = items.Date.AddDays(1);
                     db.DateRequesteds.Add(items);
 
                     //findSchedule.BookingID = BookingID;

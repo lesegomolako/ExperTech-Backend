@@ -87,11 +87,23 @@ namespace ExperTech_Api.Controllers
             foreach (EmployeeSchedule items in Modell)
             {
                 dynamic newObject = new ExpandoObject();
+                DateTime getDate = db.Dates.Where(zz => zz.DateID == items.DateID).Select(zz => zz.Date1).FirstOrDefault();
+                Timeslot getTimes = db.Timeslots.Where(zz => zz.TimeID == items.TimeID).FirstOrDefault();
+
+                newObject.EmployeeID = items.EmployeeID;
+                newObject.ServiceTypes = db.EmployeeServiceTypes.Where(zz => zz.EmployeeID == items.EmployeeID).ToList();
+
                 newObject.DateID = items.DateID;
-                newObject.Dates = db.Dates.Where(zz => zz.DateID == items.DateID).Select(zz => zz.Date1).FirstOrDefault();
+                newObject.Dates = 
                 newObject.TimeID = items.TimeID;
-                newObject.StartTime = db.Timeslots.Where(zz => zz.TimeID == items.TimeID).Select(zz => zz.StartTime).FirstOrDefault();
-                newObject.EndTime = db.Timeslots.Where(zz => zz.TimeID == items.TimeID).Select(zz => zz.EndTime).FirstOrDefault();
+                newObject.StartTime = getTimes.StartTime;
+                newObject.EndTime = getTimes.EndTime;
+
+                DateTime StartDateTime = getDate.Date + getTimes.StartTime;
+                DateTime EndDateTime = getDate.Date + getTimes.EndTime;
+
+                newObject.StartDateTime = StartDateTime;
+                newObject.EndDateTime = EndDateTime;
                 newObject.StatusID = items.StatusID;
 
                 getList.Add(newObject);
@@ -99,6 +111,29 @@ namespace ExperTech_Api.Controllers
 
 
                 return getList;
+        }
+
+        //*************************get all employees schedules ***************************
+        [Route("api/Employees/DisplayEmployeeSchedules")]
+        [HttpGet]
+        public dynamic DisplayEmployeeSchedules(string SessionID)
+        {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser != null)
+            {
+
+                db.Configuration.ProxyCreationEnabled = false;
+                List<EmployeeSchedule> findSchedule = db.EmployeeSchedules.ToList();
+                return GetSchedule(findSchedule);
+
+            }
+            else
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return toReturn;
+            }
         }
 
         //*************************read employee availability details*********************
@@ -171,8 +206,8 @@ namespace ExperTech_Api.Controllers
             {
                 try
                 {
-                    DateTime StartDate = Stuff.StartDate;
-                    DateTime EndDate = Stuff.EndDate;
+                    DateTime StartDate = Stuff.StartDate.AddDays(1);
+                    DateTime EndDate = Stuff.EndDate.AddDays(1);
 
 
                     int Avail = Stuff.Avail;
@@ -186,44 +221,71 @@ namespace ExperTech_Api.Controllers
                     int StartTimeID = Stuff.StartTimeID;
                     int EndTimeID = Stuff.EndTimeID;
 
-                    for (int j = StartDateID; j < EndDateID; j++)
+                    if (StartDateID == EndDateID)
                     {
-                        List<EmployeeSchedule> findSchedule = db.EmployeeSchedules.Where(zz => zz.DateID == j).ToList();
-                        for (int kk = StartTimeID; kk < EndTimeID; kk++)
+                        if(StartTimeID == EndTimeID)
                         {
-                            for (int k = 0; k < findSchedule.Count; k++)
+                            EmployeeSchedule findSchedule = db.EmployeeSchedules.Where(zz => zz.DateID == StartDateID && zz.TimeID == StartTimeID && zz.StatusID != 3).FirstOrDefault();
+                            if(Avail == 1)
                             {
-                                if (Avail == 1)
-                                {
-
+                                findSchedule.StatusID = 1;
+                                db.SaveChanges();
+                            }
+                            else if(Avail == 2)
+                            {
+                                findSchedule.StatusID = 2;
+                                db.SaveChanges();
+                            }
+                        }
+                        else
+                        {
+                            List<EmployeeSchedule> findSchedule = db.EmployeeSchedules.Where(zz => zz.DateID == StartDateID && zz.StatusID != 3).ToList();
+                            for (int kk = StartTimeID; kk < EndTimeID+1; kk++)
+                            {
+                                for (int k = 0; k < findSchedule.Count; k++)
+                                { 
                                     if (findSchedule[k].TimeID == kk)
                                     {
-                                        findSchedule[k].StatusID = 1;
-                                        db.SaveChanges();
-                                    }
-                                    else
-                                    {
-                                        findSchedule[k].StatusID = 2;
-                                        db.SaveChanges();
-                                    }
+                                        if (Avail == 1)
+                                        {
+                                            findSchedule[k].StatusID = 1;
+                                            db.SaveChanges();
+                                        }
+                                        else 
+                                        {
+                                            findSchedule[k].StatusID = 2;
+                                            db.SaveChanges();
+                                        }
 
+                                    }
                                 }
-                                else if(Avail == 2)
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int j = StartDateID; j < EndDateID+1; j++)
+                        {
+                            List<EmployeeSchedule> findSchedule = db.EmployeeSchedules.Where(zz => zz.DateID == j && zz.StatusID != 3).ToList();
+                            for (int kk = StartTimeID; kk < EndTimeID; kk++)
+                            {
+                                for (int k = 0; k < findSchedule.Count; k++)
                                 {
                                     if (findSchedule[k].TimeID == kk)
                                     {
-                                        findSchedule[k].StatusID = 2;
-                                        db.SaveChanges();
-                                    }
-                                    else
-                                    {
-                                        findSchedule[k].StatusID = 1;
-                                        db.SaveChanges();
-                                    }
-                                }
-                                else
-                                {
+                                        if (Avail == 1)
+                                        {
 
+                                            findSchedule[k].StatusID = 1;
+                                            db.SaveChanges();
+                                        }
+                                        else
+                                        {
+                                            findSchedule[k].StatusID = 2;
+                                            db.SaveChanges();
+                                        }
+
+                                    }
                                 }
                             }
                         }

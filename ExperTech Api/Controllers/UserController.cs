@@ -1003,7 +1003,7 @@ namespace ExperTech_Api.Controllers
                     items.EmployeeID = EmployeeID;
                     items.DateID = thisDateID;
                     items.TimeID = thisTimeID;
-                    items.StatusID = 1;
+                    items.StatusID = 2;
                     newList.Add(items);
                 }
 
