@@ -12,17 +12,14 @@ namespace ExperTech_Api.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class AdminAuditTrail
+    public partial class CategoryOption
     {
-        public int AuditID { get; set; }
-        public int AdminID { get; set; }
-        public string OldData { get; set; }
-        public string NewData { get; set; }
-        public string TablesAffected { get; set; }
-        public string TransactionType { get; set; }
-        public System.DateTime Date { get; set; }
-        public Nullable<int> AuthorizedBy { get; set; }
+        public int OptionID { get; set; }
+        public string Name { get; set; }
+        public string Option { get; set; }
+        public int CategoryID { get; set; }
+        public bool Deleted { get; set; }
     
-        public virtual Admin Admin { get; set; }
+        public virtual StockCategory StockCategory { get; set; }
     }
 }

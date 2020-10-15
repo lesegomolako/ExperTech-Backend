@@ -9,6 +9,7 @@ using System.Dynamic;
 using ExperTech_Api.Models;
 using System.Web.Http.Cors;
 using System.Data.Entity;
+using Newtonsoft.Json;
 
 namespace ExperTech_Api.Controllers
 {
@@ -17,16 +18,27 @@ namespace ExperTech_Api.Controllers
         public ExperTechEntities db = new ExperTechEntities();
 
         [EnableCors(origins: "*", headers: "*", methods: "*")]
-        [Route("api/Admin/getAdmin")]
-        [System.Web.Mvc.HttpGet]
 
         //********************************read admin*****************************************
-        public List<dynamic> getAdmin()
+        [Route("api/Admin/getAdmin")]
+        [HttpGet]
+        public dynamic getAdmin(string SessionID)
         {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+
+            if(findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return toReturn; 
+            }
+
+            int AdminID = db.Admins.Where(zz => zz.UserID == zz.UserID).Select(zz => zz.AdminID).FirstOrDefault();
             db.Configuration.ProxyCreationEnabled = false;
-            return getAdminID(db.Admins.ToList());
+            return getAdminID(db.Admins.Where(zz => zz.AdminID !=  AdminID && zz.Deleted == false).ToList());
         }
-        private List<dynamic> getAdminID(List<Admin> forAdmin)
+        private dynamic getAdminID(List<Admin> forAdmin)
         {
             List<dynamic> dynamicAdmins = new List<dynamic>();
             foreach (Admin adminname in forAdmin)
@@ -86,8 +98,8 @@ namespace ExperTech_Api.Controllers
         [HttpPost]
         public dynamic Authorize([FromBody]User Owner, string SessionID)
         {
-            bool findUser = UserController.CheckUser(SessionID);
-            if(findUser)
+            User findUser = UserController.CheckUser(SessionID);
+            if(findUser != null)
             {
                 string Password = UserController.GenerateHash(UserController.ApplySomeSalt(Owner.Password));
                 User findAdmin = db.Users.Where(zz => zz.Username == Owner.Username && zz.Password == Password).FirstOrDefault();
@@ -130,27 +142,49 @@ namespace ExperTech_Api.Controllers
         //        return"failed";
         //    }
         //}
-        //****************************final admin delete******************************
-        //[Route("api/Admin/adminDelete")]
-        //[HttpPut]
-        //public object employeeDelete(int admins)
-        //{
-        //    try
-        //    {
-        //        User usrOBJ = db.Users.Where(rr => rr.UserID == admins).FirstOrDefault();
-        //        db.Users.Remove(usrOBJ);
-        //        db.SaveChanges();
 
-        //        Admin findemployee = db.Admins.Where(zz => zz.AdminID == admins).FirstOrDefault();
-        //        findemployee.Deleted = true;
-        //        db.SaveChanges();
-        //        return "success";
-        //    }
-        //    catch (Exception err)
-        //    {
-        //        return "failed";
-        //    }
-        //}
+        //****************************final admin delete******************************
+        [Route("api/Admin/deleteAdmin")]
+        [HttpDelete]
+        public object deleteAdmin(int AdminID, string SessionID, int? OwnerID)
+        {
+            User findUser = UserController.CheckUser(SessionID);
+            if(findUser == null)
+            {
+               
+                return UserController.SessionError(); ;
+            } 
+            
+            try
+            {
+                int LoggedInAdminID = db.Admins.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.AdminID).FirstOrDefault();
+                Admin findAdmin = db.Admins.Where(zz => zz.AdminID == AdminID).FirstOrDefault();
+
+                var Temp = findAdmin;
+             
+                findAdmin.Deleted = true;
+                db.SaveChanges();
+
+                AdminAuditTrail createTrail = new AdminAuditTrail();
+                createTrail.AdminID = LoggedInAdminID;
+                createTrail.OldData = JsonConvert.SerializeObject(Temp);
+                createTrail.NewData = "Deletion of Admin: " + JsonConvert.SerializeObject(findAdmin);
+                createTrail.TablesAffected = "Admin";
+                createTrail.TransactionType = "Delete";
+                createTrail.Date = DateTime.Now;
+                createTrail.AuthorizedBy = OwnerID;
+                db.AdminAuditTrails.Add(createTrail);
+                db.SaveChanges();
+
+
+                return "success";
+            }
+            catch (Exception err)
+            {
+                return err.Message;
+            }
+        }
+
         //******************************delete service package*****************************
         //[Route("api/ServicePackage/DeleteServicePackage")]
         //[HttpDelete]
@@ -168,7 +202,7 @@ namespace ExperTech_Api.Controllers
         //        return "failed";
         //    }
         //}
-       
+
         //******************************update company info**************************
         [Route("api/Admin/updateCompany")]
         [HttpPut]
@@ -185,11 +219,26 @@ namespace ExperTech_Api.Controllers
             {
                 try
                 {
+                    
                     CompanyInfo information = db.CompanyInfoes.Where(zz => zz.InfoID == forCompany.InfoID).FirstOrDefault();
+
+                    var Temp = information;
 
                     information.Name = forCompany.Name;
                     information.Address = forCompany.Address;
                     information.ContactNo = forCompany.ContactNo;
+                    db.SaveChanges();
+
+                    int LoggedInAdminID = db.Admins.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.AdminID).FirstOrDefault();
+                    string action = "Company information update: ";
+                    AdminAuditTrail createTrail = new AdminAuditTrail();
+                    createTrail.AdminID = LoggedInAdminID;
+                    createTrail.OldData = JsonConvert.SerializeObject(Temp);
+                    createTrail.NewData =  action + JsonConvert.SerializeObject(information);
+                    createTrail.TablesAffected = "CompanyInfo";
+                    createTrail.TransactionType = "Update";
+                    createTrail.Date = DateTime.Now;
+                    db.AdminAuditTrails.Add(createTrail);
                     db.SaveChanges();
                     return "success";
                 }
@@ -382,6 +431,17 @@ namespace ExperTech_Api.Controllers
                 saveSocials.Link = Modell.Link;
                 db.SocialMedias.Add(saveSocials);
                 db.SaveChanges();
+
+                int LoggedInAdminID = db.Admins.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.AdminID).FirstOrDefault();
+                string action = "Addition of social media: ";
+                AdminAuditTrail createTrail = new AdminAuditTrail();
+                createTrail.AdminID = LoggedInAdminID;         
+                createTrail.NewData = action + JsonConvert.SerializeObject(saveSocials);
+                createTrail.TablesAffected = "Social Media";
+                createTrail.TransactionType = "Add";
+                createTrail.Date = DateTime.Now;
+                db.AdminAuditTrails.Add(createTrail);
+                db.SaveChanges();
                 return "success";
             }
             catch(Exception err)
@@ -406,9 +466,25 @@ namespace ExperTech_Api.Controllers
             try
             {
                 SocialMedia saveSocials = db.SocialMedias.Where(zz => zz.SocialID == Modell.SocialID).FirstOrDefault();
+
+                var Temp = saveSocials;
+
                 saveSocials.Name = Modell.Name;
                 saveSocials.Link = Modell.Link;
                 db.SocialMedias.Add(saveSocials);
+                db.SaveChanges();
+
+                int LoggedInAdminID = db.Admins.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.AdminID).FirstOrDefault();
+                string action = "Update Social media: ";
+                AdminAuditTrail createTrail = new AdminAuditTrail();
+                createTrail.AdminID = LoggedInAdminID;
+                createTrail.OldData = JsonConvert.SerializeObject(Temp);
+                createTrail.NewData = action + JsonConvert.SerializeObject(saveSocials);
+                createTrail.TablesAffected = "CompanyInfo";
+                createTrail.TransactionType = "Update";
+                createTrail.Date = DateTime.Now;
+                db.AdminAuditTrails.Add(createTrail);
+              
                 db.SaveChanges();
                 return "success";
             }
@@ -434,7 +510,20 @@ namespace ExperTech_Api.Controllers
             try
             {
                 SocialMedia saveSocials = db.SocialMedias.Where(zz => zz.SocialID == SocialID).FirstOrDefault();
+
+                var Temp = saveSocials;
                 db.SocialMedias.Remove(saveSocials);
+                db.SaveChanges();
+
+                int LoggedInAdminID = db.Admins.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.AdminID).FirstOrDefault();
+                string action = "Delete social media link ";
+                AdminAuditTrail createTrail = new AdminAuditTrail();
+                createTrail.AdminID = LoggedInAdminID;
+                createTrail.OldData = JsonConvert.SerializeObject(Temp);
+                createTrail.TablesAffected = "SocialMedia";
+                createTrail.TransactionType = "Delete";
+                createTrail.Date = DateTime.Now;
+                db.AdminAuditTrails.Add(createTrail);
                 db.SaveChanges();
                 return "success";
             }

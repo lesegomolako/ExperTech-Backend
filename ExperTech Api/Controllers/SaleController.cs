@@ -162,8 +162,8 @@ namespace ExperTech_Api.Controllers
             try
             {
                 string SessionID = SaleDetails.SessionID;
-                bool findUser = UserController.CheckUser(SessionID);
-                if(findUser)
+                User findUser = UserController.CheckUser(SessionID);
+                if(findUser != null)
                 {
                     int SaleID = (int)SaleDetails.SaleID;
                     int PaymentTypeID = (int)SaleDetails.PaymentTypeID;

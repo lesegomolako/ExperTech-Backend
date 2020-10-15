@@ -12,30 +12,22 @@ namespace ExperTech_Api.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class StockItem
+    public partial class StockCategory
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public StockItem()
+        public StockCategory()
         {
-            this.StockItemLines = new HashSet<StockItemLine>();
-            this.StockTakeLines = new HashSet<StockTakeLine>();
-            this.WriteOffLines = new HashSet<WriteOffLine>();
+            this.CategoryOptions = new HashSet<CategoryOption>();
+            this.StockItems = new HashSet<StockItem>();
         }
     
-        public int ItemID { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
         public int CategoryID { get; set; }
-        public decimal Price { get; set; }
-        public int QuantityInStock { get; set; }
+        public string Name { get; set; }
         public bool Deleted { get; set; }
     
-        public virtual StockCategory StockCategory { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<StockItemLine> StockItemLines { get; set; }
+        public virtual ICollection<CategoryOption> CategoryOptions { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<StockTakeLine> StockTakeLines { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<WriteOffLine> WriteOffLines { get; set; }
+        public virtual ICollection<StockItem> StockItems { get; set; }
     }
 }

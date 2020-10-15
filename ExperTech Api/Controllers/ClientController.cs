@@ -15,6 +15,7 @@ using System.Web;
 using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
+using Newtonsoft.Json;
 
 
 
@@ -27,8 +28,13 @@ namespace ExperTech_Api.Controllers
         //***********************************add client (make booking)***************************
         [Route("AddClient")]
         [HttpPost]
-        public dynamic AddClient([FromBody]Client Modell)
+        public dynamic AddClient([FromBody]Client Modell, string SessionID)
         {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if(findUser == null)
+            {
+                return UserController.SessionError();
+            }
             db.Configuration.ProxyCreationEnabled = false;
             dynamic toReturn = new ExpandoObject();
             try
@@ -38,6 +44,18 @@ namespace ExperTech_Api.Controllers
                 {
                     db.Clients.Add(Modell);
                     db.SaveChanges();
+
+                    int LoggedInAdminID = db.Admins.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.AdminID).FirstOrDefault();
+                    string action = "Add Client: ";
+                    AdminAuditTrail createTrail = new AdminAuditTrail();
+                    createTrail.AdminID = LoggedInAdminID;           
+                    createTrail.NewData = action + JsonConvert.SerializeObject(Modell);
+                    createTrail.TablesAffected = "Client";
+                    createTrail.TransactionType = "Create";
+                    createTrail.Date = DateTime.Now;
+                    db.AdminAuditTrails.Add(createTrail);
+                    db.SaveChanges();
+
                     toReturn.Message = "success";
                     toReturn.Client = Modell;
                     return toReturn;
@@ -113,8 +131,10 @@ namespace ExperTech_Api.Controllers
                 return null;
             }
         }
-        [System.Web.Mvc.HttpPost]
-        [System.Web.Http.Route("registerUser")]
+
+        
+        [Route("registerUser")]
+        [HttpPost]
         public object registerUser([FromBody] User client)
         {
 
@@ -140,7 +160,9 @@ namespace ExperTech_Api.Controllers
                     int findUser = db.Users.Where(zz => zz.Username == client.Username).Select(zz => zz.UserID).FirstOrDefault();
 
 
-
+                    int ClientID = 0;
+                    dynamic ClientData = new ExpandoObject();
+                    dynamic BasketData = new ExpandoObject();
                     foreach (Client items in client.Clients)
                     {
                         Client Verfiy = db.Clients.Where(zz => zz.Name == items.Name && zz.Surname == items.Surname && zz.Email == items.Email).FirstOrDefault();
@@ -155,16 +177,37 @@ namespace ExperTech_Api.Controllers
                             db.Clients.Add(cli);
                             db.SaveChanges();
 
-                            int find = db.Clients.Where(zz => zz.Name == items.Name && zz.Surname == items.Surname && zz.Email == items.Email).Select(zz => zz.ClientID).FirstOrDefault();
+                            ClientData = cli;
+                            ClientID = cli.ClientID;
 
                             Basket CreateBasket = new Basket();
-                            CreateBasket.ClientID = find;
+                            CreateBasket.ClientID = ClientID;
                             db.Baskets.Add(CreateBasket);
                             db.SaveChanges();
+
+                            BasketData = CreateBasket;
+                        }
+                        else
+                        {
+                            toReturn.Message = "duplicate";
+                            toReturn.Error = "Client details already exist. Either re-enter your details or login";
+                            return toReturn;
                         }
 
 
                     }
+
+                    int LoggedInClientID = ClientID;
+                    string action = "Client Register: ";
+                    ClientAuditTrail createTrail = new ClientAuditTrail();
+                    createTrail.ClientID = LoggedInClientID;
+                    createTrail.NewData = action + "Username: " + clu.Username + "," + "Client Name: " + ClientData.Name + "Client Surname: " + ClientData.Surname + "," + ClientData.Email + ", " + ClientData.ContactNo;
+                    createTrail.TablesAffected = "User, Client, Basket";
+                    createTrail.TransactionType = "Create";
+                    createTrail.Date = DateTime.Now;
+                    db.ClientAuditTrails.Add(createTrail);
+                    db.SaveChanges();
+
                     toReturn.Message = "success";
                     toReturn.SessionID = clu.SessionID;
                     toReturn.RoleID = clu.RoleID;
@@ -172,7 +215,10 @@ namespace ExperTech_Api.Controllers
                 }
                 else
                 {
-                    return toReturn.Error = "Client details already exist";
+                    
+                    toReturn.Message = "duplicate";
+                    toReturn.Error = "Client details already exist. Either re-enter your details or login";
+                    return toReturn;
                 }
             }
             catch (Exception err)

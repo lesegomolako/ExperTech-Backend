@@ -391,7 +391,7 @@ namespace ExperTech_Api.Controllers
 
         }
 
-
+       
 
         private dynamic getClientBooking(List<Booking> forBooking)
         {
@@ -696,8 +696,8 @@ namespace ExperTech_Api.Controllers
         [HttpGet]
         public dynamic NoShow(string SessionID, int BookingID)
         {
-            bool findUser = UserController.CheckUser(SessionID);
-            if (findUser)
+            User findUser = UserController.CheckUser(SessionID);
+            if (findUser != null)
             {
                 try
                 {
@@ -713,10 +713,8 @@ namespace ExperTech_Api.Controllers
             }
             else
             {
-                dynamic toReturn = new ExpandoObject();
-                toReturn.Error = "session";
-                toReturn.Message = "Session is not valid";
-                return toReturn;
+
+                return UserController.SessionError();
             }
         }
 
@@ -859,7 +857,84 @@ namespace ExperTech_Api.Controllers
             }
         }
 
+        [Route("api/Bookings/getEmployeeSchedule")]
+        [HttpGet]
+        public dynamic getEmployeeSchedule(string SessionID)
+        {
+            User findUser = UserController.CheckUser(SessionID);
+            if(findUser == null)
+            {
+                return UserController.SessionError();
+            }
 
+            List<EmployeeServiceType> findEmp = db.EmployeeServiceTypes.Include(zz => zz.Employee).Include(zz => zz.ServiceType).ToList();
+            return FormatSchedule(db.EmployeeServiceTypes.ToList());
+        }
+
+        private dynamic FormatSchedule(List<EmployeeServiceType> list)
+        {
+            List<dynamic> Modell = new List<dynamic>();
+            foreach(EmployeeServiceType items in list)
+            {
+                dynamic empObject = new ExpandoObject();
+                empObject.TypeID = items.TypeID;
+                empObject.EmployeeID = items.EmployeeID;
+                empObject.Name = items.ServiceType.Name;
+                empObject.Employee = items.Employee.Name + " " + items.Employee.Surname;
+
+                List<Service> services = db.Services.Where(zz => zz.TypeID == items.TypeID && zz.Deleted == false).ToList();
+                List<dynamic> servList = new List<dynamic>();
+                foreach(Service service in services)
+                {
+                    dynamic serviceObj = new ExpandoObject();
+                    serviceObj.ServiceID = service.ServiceID;
+                    serviceObj.TypeID = service.TypeID;
+                    serviceObj.Name = service.Name;
+                    servList.Add(serviceObj);
+                }
+                if (servList.Count != 0)
+                    empObject.Services = servList;
+
+                List<ServiceTypeOption> options = db.ServiceTypeOptions.ToList();
+                List<dynamic> optList = new List<dynamic>();
+
+                foreach(ServiceTypeOption option in options)
+                {
+                    dynamic optionsObj = new ExpandoObject();
+                    optionsObj.OptionID = option.OptionID;
+                    optionsObj.ServiceID = option.ServiceID;
+                    ServiceOption findOption = db.ServiceOptions.Where(zz => zz.OptionID == option.OptionID).FirstOrDefault();
+                    optionsObj.Name = findOption.Name;
+                    optList.Add(optionsObj);
+                }
+                if (optList.Count != 0)
+                    empObject.ServiceOptions = optList;
+
+                List<EmployeeSchedule> getSchedule = db.EmployeeSchedules.Where(zz => zz.EmployeeID == items.EmployeeID && zz.StatusID == 1).ToList();
+                List<dynamic> getSchedge = new List<dynamic>();
+                foreach(EmployeeSchedule schedule in getSchedule)
+                {
+                    dynamic schedgeList = new ExpandoObject();
+                    schedgeList.EmployeeID = schedule.EmployeeID;
+                    schedgeList.TimeID = schedule.TimeID;
+                    schedgeList.DateID = schedule.DateID;
+
+                    DateTime findDate = db.Dates.Where(zz => zz.DateID == schedule.DateID).Select(zz => zz.Date1).FirstOrDefault();
+                    schedgeList.Date = findDate;
+
+                    TimeSpan findTime = db.Timeslots.Where(zz => zz.TimeID == schedule.TimeID).Select(zz => zz.StartTime).FirstOrDefault();
+                    schedgeList.Time = findTime;
+
+                    getSchedge.Add(schedgeList);
+                }
+                if (getSchedge.Count != 0)
+                    empObject.EmployeeSchedule = getSchedge;
+
+                Modell.Add(empObject);
+            }
+
+            return Modell;
+        }
         //[System.Web.Http.Route("api/Booking/getReminder")]
         //[System.Web.Mvc.HttpGet]
         //public dynamic getReminder(int id)

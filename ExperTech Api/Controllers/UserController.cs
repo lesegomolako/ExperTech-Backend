@@ -47,12 +47,54 @@ namespace ExperTech_Api.Controllers
             SMS();
         }
 
-        
+        public class Passwords
+        {
+            public string newPassword { get; set; }
+
+            public string oldPassword { get; set; }
+        }
+
+        [Route("ChangePassword")]
+        [HttpPost]
+        public dynamic ChangePassword([FromBody]Passwords change, string SessionID)
+        {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if(findUser != null)
+            {
+                return SessionError();
+            }
+
+            try
+            {
+                var OldPass = GenerateHash(ApplySomeSalt(change.oldPassword));
+                var newPass = GenerateHash(ApplySomeSalt(change.newPassword));
+
+                if (OldPass == findUser.Password)
+                {
+                    findUser.Password = newPass;
+                    db.SaveChanges();
+                    return "success";
+                }
+                else
+                {
+                    dynamic toReturn = new ExpandoObject();
+                    toReturn.Error = "password";
+                    toReturn.Message = "The old password entered is incorrect";
+                    return toReturn;
+                }
+            }
+            catch(Exception err)
+            {
+                return err.Message;
+            }
+        }
+
+
 
         public ExperTechEntities db = new ExperTechEntities();
 
-        [System.Web.Http.Route("getProfile")]
-        [System.Web.Mvc.HttpGet]
+        [Route("getProfile")]
+        [HttpGet]
         public dynamic getProfile(string SessionID)
         {
 
@@ -88,17 +130,19 @@ namespace ExperTech_Api.Controllers
 
         }
 
-        public static bool CheckUser(string SessionID)
+        
+
+        public static User CheckUser(string SessionID)
         {
             ExperTechEntities db = new ExperTechEntities();
             User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
             if(findUser != null)
             {
-                return true;
+                return findUser;
             }
             else
             {
-                return false;
+                return null;
             }
         }
 
@@ -962,6 +1006,7 @@ namespace ExperTech_Api.Controllers
                     CP.PackageID = items.PackageID;
                     CP.Date = Now;
                     CP.ClientID = Modell.ClientID;
+                    CP.Active = true;
                     int Duration = db.ServicePackages.Where(zz => zz.PackageID == items.PackageID).Select(zz => zz.Duration).FirstOrDefault();
                     CP.ExpiryDate = Now.AddMonths(Duration);
                     db.ClientPackages.Add(CP);
@@ -969,7 +1014,7 @@ namespace ExperTech_Api.Controllers
 
                     //**********instance for the service package*****************
                     int loop = db.ServicePackages.Where(zz => zz.PackageID == items.PackageID).Select(zz => zz.Quantity).FirstOrDefault(); ;
-                    for (int j = 0; j <= loop; j++)
+                    for (int j = 0; j < loop; j++)
                     {
                         PackageInstance addInstance = new PackageInstance();
                         addInstance.PackageID = items.PackageID;

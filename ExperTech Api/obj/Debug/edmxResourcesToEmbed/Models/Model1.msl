@@ -25,6 +25,7 @@
           <ScalarProperty Name="TablesAffected" ColumnName="TablesAffected" />
           <ScalarProperty Name="TransactionType" ColumnName="TransactionType" />
           <ScalarProperty Name="Date" ColumnName="Date" />
+          <ScalarProperty Name="AuthorizedBy" ColumnName="AuthorizedBy" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -82,6 +83,17 @@
         <MappingFragment StoreEntitySet="BookingStatus">
           <ScalarProperty Name="StatusID" ColumnName="StatusID" />
           <ScalarProperty Name="Status" ColumnName="Status" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="CategoryOptions">
+      <EntityTypeMapping TypeName="ExperTechModel.CategoryOption">
+        <MappingFragment StoreEntitySet="CategoryOptions">
+          <ScalarProperty Name="OptionID" ColumnName="OptionID" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Option" ColumnName="Option" />
+          <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -410,12 +422,22 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <EntitySetMapping Name="StockCategories">
+      <EntityTypeMapping TypeName="ExperTechModel.StockCategory">
+        <MappingFragment StoreEntitySet="StockCategory">
+          <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
     <EntitySetMapping Name="StockItems">
       <EntityTypeMapping TypeName="ExperTechModel.StockItem">
         <MappingFragment StoreEntitySet="StockItem">
           <ScalarProperty Name="ItemID" ColumnName="ItemID" />
           <ScalarProperty Name="Name" ColumnName="Name" />
           <ScalarProperty Name="Description" ColumnName="Description" />
+          <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
           <ScalarProperty Name="Price" ColumnName="Price" />
           <ScalarProperty Name="QuantityInStock" ColumnName="QuantityInStock" />
           <ScalarProperty Name="Deleted" ColumnName="Deleted" />

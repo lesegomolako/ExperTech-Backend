@@ -22,13 +22,23 @@ namespace ExperTech_Api.Controllers
         [HttpGet]
 
         //*****************************read employee*************************************
-        public List<dynamic> getEmployee()
+        public dynamic getEmployee(string SessionID)
         {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if(findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is not valid";
+                return toReturn;
+            }
+
+            
             db.Configuration.ProxyCreationEnabled = false;
-            return getEmployeeID(db.Employees.ToList());
+            return getEmployeeID(db.Employees.Where(zz => zz.Deleted == false).ToList());
         }
 
-        private List<dynamic> getEmployeeID(List<Employee> forEmployee)
+        private dynamic getEmployeeID(List<Employee> forEmployee)
         {
             List<dynamic> dynamicEmployees = new List<dynamic>();
             foreach (Employee employeename in forEmployee)
@@ -266,25 +276,45 @@ namespace ExperTech_Api.Controllers
                     {
                         for (int j = StartDateID; j < EndDateID+1; j++)
                         {
-                            List<EmployeeSchedule> findSchedule = db.EmployeeSchedules.Where(zz => zz.DateID == j && zz.StatusID != 3).ToList();
-                            for (int kk = StartTimeID; kk < EndTimeID; kk++)
+                            if(StartTimeID == EndTimeID)
                             {
-                                for (int k = 0; k < findSchedule.Count; k++)
+                                EmployeeSchedule findSchedule = db.EmployeeSchedules.Where(zz => zz.DateID == j && zz.TimeID == StartTimeID && zz.StatusID != 3).FirstOrDefault();
+
+                                if (Avail == 1)
                                 {
-                                    if (findSchedule[k].TimeID == kk)
+
+                                    findSchedule.StatusID = 1;
+                                    db.SaveChanges();
+                                }
+                                else
+                                {
+                                    findSchedule.StatusID = 2;
+                                    db.SaveChanges();
+                                }
+
+                            }
+                            else
+                            {
+                                List<EmployeeSchedule> findSchedule = db.EmployeeSchedules.Where(zz => zz.DateID == j && zz.StatusID != 3).ToList();
+                                for (int kk = StartTimeID; kk < EndTimeID; kk++)
+                                {
+                                    for (int k = 0; k < findSchedule.Count; k++)
                                     {
-                                        if (Avail == 1)
+                                        if (findSchedule[k].TimeID == kk)
                                         {
+                                            if (Avail == 1)
+                                            {
 
-                                            findSchedule[k].StatusID = 1;
-                                            db.SaveChanges();
-                                        }
-                                        else
-                                        {
-                                            findSchedule[k].StatusID = 2;
-                                            db.SaveChanges();
-                                        }
+                                                findSchedule[k].StatusID = 1;
+                                                db.SaveChanges();
+                                            }
+                                            else
+                                            {
+                                                findSchedule[k].StatusID = 2;
+                                                db.SaveChanges();
+                                            }
 
+                                        }
                                     }
                                 }
                             }
@@ -422,72 +452,13 @@ namespace ExperTech_Api.Controllers
                 return toReturn;
             }
 
-            Employee findEmployee = db.Employees.Include(zz => zz.EmployeeSchedules).Include(zz => zz.EmployeeServiceTypes)
-                .Include(zz => zz.EmployeeAuditTrails).Where(zz => zz.EmployeeID == EmployeeID).FirstOrDefault();
-
-            List<EmployeeServiceType> findServiceTypes = db.EmployeeServiceTypes.Where(zz => zz.EmployeeID == EmployeeID).ToList();
-            List<EmployeeSchedule> findSchedule = db.EmployeeSchedules.Where(zz => zz.EmployeeID == EmployeeID).ToList();
-            List<EmployeeAuditTrail> findAudit = db.EmployeeAuditTrails.Where(zz => zz.EmployeeID == EmployeeID).ToList();
-            User findEmpUser = db.Users.Where(zz => zz.UserID == findEmployee.UserID).FirstOrDefault();
-
-            bool UserDeleted = false;
-            bool ScheduleDeleted = false;
-            bool ServiceTypesDeleted = false;
-            bool AuditDeleted = false;
-
-
-            if(findEmployee != null)
+            Employee findEmp = db.Employees.Where(zz => zz.UserID == findUser.UserID).FirstOrDefault();
+            if (findEmp != null)
             {
-                foreach(EmployeeSchedule items in findSchedule)
-                {
-                    if(items.BookingID != null)
-                    {
-                        Booking findBooking = db.Bookings.Where(zz => zz.BookingID == items.BookingID).FirstOrDefault();
-                        findBooking.StatusID = 5;
-                        db.SaveChanges();
-                    }
-                }
-
-                if(findServiceTypes != null)
-                {
-                    db.EmployeeServiceTypes.RemoveRange(findServiceTypes);
-                    ServiceTypesDeleted = true;
-                   
-                }
-
-                if(findSchedule != null)
-                {
-                    db.EmployeeSchedules.RemoveRange(findSchedule);
-                    ScheduleDeleted = true;
-                }
-
-                if(findAudit != null)
-                {
-                    db.EmployeeAuditTrails.RemoveRange(findAudit);
-                    AuditDeleted = true;
-                }
-
-                if (findEmpUser != null)
-                {
-                    db.Users.Remove(findEmpUser);
-                    UserDeleted = true;
-                }
-
-                if(UserDeleted && AuditDeleted && ServiceTypesDeleted && ScheduleDeleted)
-                {
-                    db.Employees.Remove(findEmployee);
-                    db.SaveChanges();
-
-                    return "success";
-                }
-                else
-                {
-                    dynamic toReturn = new ExpandoObject();
-                    toReturn.Error = "deletion";
-                    toReturn.Message = "Error deleting Employee";
-                    return toReturn;
-                }
-
+                
+                findEmp.Deleted = true;
+                db.SaveChanges();
+                return "success";
                 
             }
             else

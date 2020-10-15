@@ -700,7 +700,7 @@ namespace ExperTech_Api.Controllers
                         {
                             //saves the OptionID and ServiceID into bride entity
                             int OptionID = (int)Items.OptionID;
-                            ServiceTypeOption newObject = db.ServiceTypeOptions.Where(zz => zz.ServiceID == ServiceID && zz.OptionID == OptionID).FirstOrDefault();
+                            ServiceTypeOption newObject = new ServiceTypeOption();
                             newObject.ServiceID = ServiceID;
                             newObject.OptionID = OptionID;
                             db.ServiceTypeOptions.Add(newObject);
