@@ -81,6 +81,40 @@ namespace ExperTech_Api.Controllers
 
             return dynamicBasketline;
         }
+
+        [Route("api/Sale/CancelSale")]
+        [HttpDelete]
+        public dynamic CancelSale(int SaleID, string SessionID, int? AuthorizeID)
+        {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if(findUser == null)
+            {
+                return UserController.SessionError();
+            }
+
+            try
+            {
+                Sale findSale = db.Sales.Where(zz => zz.SaleID == SaleID).FirstOrDefault();
+
+                List<SaleLine> lines2delete = new List<SaleLine>();
+                foreach(SaleLine items in findSale.SaleLines)
+                {
+                    Product findProduct = db.Products.Where(zz => zz.ProductID == items.ProductID).FirstOrDefault();
+                    findProduct.QuantityOnHand += items.Quantity;
+                    db.SaveChanges();
+
+                    lines2delete.Add(items);
+                }
+                db.SaleLines.RemoveRange(lines2delete);
+                db.SaveChanges();
+                return "success";
+            }
+            catch(Exception err)
+            {
+                return err.Message;
+            }
+        }
+
         [Route("api/Sale/GetProductSales")]
         [HttpGet]
         public dynamic GetProductSales()

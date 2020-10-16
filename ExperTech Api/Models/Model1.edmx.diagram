@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="46678f287554411e8b4841621b3445e3" Name="Diagram1">
+      <Diagram DiagramId="c905eba429c340738324f3b96547a972" Name="Diagram1">
         <EntityTypeShape EntityType="ExperTechModel.Admin" Width="1.5" PointX="5.25" PointY="15.875" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.AdminAuditTrail" Width="1.5" PointX="7.5" PointY="16" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.Basket" Width="1.5" PointX="7.5" PointY="19.625" IsExpanded="true" />
@@ -13,7 +13,7 @@
         <EntityTypeShape EntityType="ExperTechModel.BookingLine" Width="1.5" PointX="12.75" PointY="22.875" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.BookingNote" Width="1.5" PointX="9.75" PointY="27.125" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.BookingStatu" Width="1.5" PointX="5.25" PointY="25.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.CategoryOption" Width="1.5" PointX="17" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.CategoryOption" Width="1.5" PointX="17" PointY="5.5" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.Client" Width="1.5" PointX="5.25" PointY="20.375" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.ClientAuditTrail" Width="1.5" PointX="7.5" PointY="27.375" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.ClientPackage" Width="1.5" PointX="10.5" PointY="22.625" IsExpanded="true" />
@@ -46,8 +46,8 @@
         <EntityTypeShape EntityType="ExperTechModel.ServiceType" Width="1.5" PointX="8.25" PointY="38.75" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.ServiceTypeOption" Width="1.5" PointX="10.5" PointY="42.125" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.SocialMedia" Width="1.5" PointX="2.75" PointY="2.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.StockCategory" Width="1.5" PointX="14.75" PointY="7.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ExperTechModel.StockItem" Width="1.5" PointX="17" PointY="8.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.StockCategory" Width="1.5" PointX="14.75" PointY="7.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExperTechModel.StockItem" Width="1.5" PointX="17" PointY="8.5" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.StockItemLine" Width="1.5" PointX="19.25" PointY="8.875" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.StockTake" Width="1.5" PointX="20" PointY="12.375" IsExpanded="true" />
         <EntityTypeShape EntityType="ExperTechModel.StockTakeLine" Width="1.5" PointX="22.25" PointY="9.125" IsExpanded="true" />

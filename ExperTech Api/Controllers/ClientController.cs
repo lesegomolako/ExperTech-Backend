@@ -83,7 +83,7 @@ namespace ExperTech_Api.Controllers
             //User findUser = db.Users.Where(zz => zz.SessionID == sessionID).FirstOrDefault();
 
      
-            return getClientID(db.Clients.ToList());
+            return getClientID(db.Clients.Where(zz => zz.Deleted == false).ToList());
             
          
         }
@@ -105,30 +105,35 @@ namespace ExperTech_Api.Controllers
 
         }
 
-        
-       
+
+
+
 
         //***************delete client from system, i really didn't have to say from system but i did it anyways, lmao************************
         [Route("deleteClient")]
         [HttpDelete]
-        public List<dynamic> deleteClient([FromBody] Client forClient)
+        public dynamic deleteClient(int ClientID, string SessionID)
         {
-            if (forClient != null)
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if(findUser == null)
             {
-                db.Configuration.ProxyCreationEnabled = false;
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is no longer valid";
+                return toReturn;
+            }
 
-                // Client clientThings = db.Clients.Where(rr => rr.ClientID == forClient.ClientID).FirstOrDefault();
-                User userThings = db.Users.Where(rr => rr.UserID == forClient.UserID).FirstOrDefault();
-
-                // db.Clients.Remove(clientThings);
-                db.Users.Remove(userThings);
+            try
+            {
+                Client findClient = db.Clients.Where(zz => zz.ClientID == ClientID).FirstOrDefault();
+                findClient.Deleted = true;
                 db.SaveChanges();
 
-                return getClient();
+                return "success";
             }
-            else
+            catch (Exception err)
             {
-                return null;
+                return err.Message;
             }
         }
 

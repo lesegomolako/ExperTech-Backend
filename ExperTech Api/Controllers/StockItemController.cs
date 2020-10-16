@@ -33,7 +33,7 @@ namespace ExperTech_Api.Controllers
             //    }
 
                 db.Configuration.ProxyCreationEnabled = false;
-                return StockItemList(db.StockItems.ToList());
+                return StockItemList(db.StockItems.Include(zz => zz.StockCategory).ToList());
             }
         
 
@@ -48,6 +48,10 @@ namespace ExperTech_Api.Controllers
                 dynobject.Description = loop.Description;
                 dynobject.Price = loop.Price;
                 dynobject.QuantityInStock = loop.QuantityInStock;
+                dynobject.CategoryID = loop.CategoryID;
+                dynobject.Category = loop.StockCategory.Name;
+                dynobject.Color = loop.Color;
+                dynobject.Size = loop.Size;
                 newlist.Add(dynobject);
 
 
@@ -84,7 +88,119 @@ namespace ExperTech_Api.Controllers
             }
         }
 
-        
+        [Route("api/StockItem/GetCategories")]
+        [HttpGet]
+        public dynamic GetCategories()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            return db.StockCategories.ToList();
+        }
+
+        [Route("api/StockItem/AddCategory")]
+        [HttpPost]
+        public dynamic AddCategory([FromBody] StockCategory Modell, string SessionID )
+        {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if(findUser != null)
+            {
+                return UserController.SessionError();
+            }
+
+            try
+            {
+                StockCategory findStock = db.StockCategories.Where(zz => zz.Name == Modell.Name).FirstOrDefault();
+                if(findStock == null)
+                {
+                    findStock = new StockCategory();
+                    findStock.Name = Modell.Name;
+                    db.StockCategories.Add(findStock);
+                    db.SaveChanges();
+                    return "success";
+                }
+                else
+                {
+                    return "duplicate";
+                }
+
+            }
+            catch(Exception err)
+            {
+                return err.Message;
+            }
+        }
+
+        [Route("api/StockItem/EditCategory")]
+        [HttpPost]
+        public dynamic EditCategory([FromBody] StockCategory Modell, string SessionID)
+        {
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser != null)
+            {
+                return UserController.SessionError();
+            }
+
+            try
+            {
+                StockCategory findStock = db.StockCategories.Where(zz => zz.CategoryID == Modell.CategoryID).FirstOrDefault();
+                if (findStock == null)
+                {
+                    findStock.Name = Modell.Name;
+                    db.StockCategories.Add(findStock);
+                    db.SaveChanges();
+                    return "success";
+                }
+                else
+                {
+                    return "invalid";
+                }
+
+            }
+            catch (Exception err)
+            {
+                return err.Message;
+            }
+        }
+
+        [Route("api/StockItem/DeleteCategory")]
+        [HttpDelete]
+        public dynamic DeleteCategory(int CategoryID, string SessionID)
+        {
+            User findUser = UserController.CheckUser(SessionID);
+            if(findUser == null)
+            {
+                return UserController.SessionError();
+            }
+
+            try
+            {
+                StockCategory findCat = db.StockCategories.Where(zz => zz.CategoryID == CategoryID).FirstOrDefault();
+                if(findCat != null)
+                {
+                    List<StockItem> findItems = db.StockItems.Where(zz => zz.CategoryID == CategoryID).ToList();
+                    if(findItems.Count > 0)
+                    {
+                        dynamic toReturn = new ExpandoObject();
+                        toReturn.Error = "dependencies";
+                        toReturn.Message = "Delete Failed. There are stock items that related to this category, delete those first";
+                        return toReturn;
+                    }
+
+                    db.StockCategories.Remove(findCat);
+                    db.SaveChanges();
+                    return "success";
+                }
+                else
+                {
+                    return "Category not found";
+                }
+            }
+            catch(Exception err)
+            {
+                return err.Message;
+            }
+        }
+
+
 
         [Route("api/StockItem/DeleteStockItem")]
         [HttpDelete]

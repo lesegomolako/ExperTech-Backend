@@ -427,7 +427,6 @@
         <MappingFragment StoreEntitySet="StockCategory">
           <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
           <ScalarProperty Name="Name" ColumnName="Name" />
-          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -437,6 +436,8 @@
           <ScalarProperty Name="ItemID" ColumnName="ItemID" />
           <ScalarProperty Name="Name" ColumnName="Name" />
           <ScalarProperty Name="Description" ColumnName="Description" />
+          <ScalarProperty Name="Size" ColumnName="Size" />
+          <ScalarProperty Name="Color" ColumnName="Color" />
           <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
           <ScalarProperty Name="Price" ColumnName="Price" />
           <ScalarProperty Name="QuantityInStock" ColumnName="QuantityInStock" />

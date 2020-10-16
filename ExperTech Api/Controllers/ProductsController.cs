@@ -116,7 +116,7 @@ namespace ExperTech_Api.Controllers
         public IHttpActionResult GetProduct()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            return GetProductz(db.Products.Include(zz => zz.ProductPhotoes).Include(zz => zz.ProductCategory).ToList());
+            return GetProductz(db.Products.Include(zz => zz.ProductPhotoes).Include(zz => zz.ProductCategory).Where(zz => zz.Deleted == false).ToList());
         }
 
         private IHttpActionResult GetProductz(List<Product> Modell)
@@ -191,11 +191,14 @@ namespace ExperTech_Api.Controllers
         public dynamic DeleteProduct(int ProductID)
         {
             Product findProduct = db.Products.Where(zz => zz.ProductID == ProductID).FirstOrDefault();
-            foreach (ProductPhoto photo in findProduct.ProductPhotoes)
+            List<SaleLine> findLines = db.SaleLines.Where(zz => zz.ProductID == findProduct.ProductID).ToList();
+            if(findLines.Count != 0)
             {
-                db.ProductPhotoes.Remove(photo);
+                findProduct.Deleted = true;
                 db.SaveChanges();
+                return "success";
             }
+            db.ProductPhotoes.RemoveRange(findProduct.ProductPhotoes);
             db.Products.Remove(findProduct);
             db.SaveChanges();
             return "success";

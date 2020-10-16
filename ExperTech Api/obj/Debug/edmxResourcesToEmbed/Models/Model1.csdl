@@ -21,8 +21,8 @@
     </Key>
     <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="AdminID" Type="Int32" Nullable="false" />
-    <Property Name="OldData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
-    <Property Name="NewData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+    <Property Name="OldData" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+    <Property Name="NewData" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
     <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
@@ -133,8 +133,8 @@
     </Key>
     <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="ClientID" Type="Int32" Nullable="false" />
-    <Property Name="OldData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
-    <Property Name="NewData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+    <Property Name="OldData" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+    <Property Name="NewData" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
     <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
@@ -205,8 +205,8 @@
     </Key>
     <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="EmployeeID" Type="Int32" Nullable="false" />
-    <Property Name="OldData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
-    <Property Name="NewData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+    <Property Name="OldData" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+    <Property Name="NewData" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
     <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
@@ -487,7 +487,6 @@
     </Key>
     <Property Name="CategoryID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="Deleted" Type="Boolean" Nullable="false" />
     <NavigationProperty Name="CategoryOptions" Relationship="Self.FK_CategoryOptions_StockCategory" FromRole="StockCategory" ToRole="CategoryOptions" />
     <NavigationProperty Name="StockItems" Relationship="Self.FK_StockItem_StockCategory" FromRole="StockCategory" ToRole="StockItem" />
   </EntityType>
@@ -497,7 +496,9 @@
     </Key>
     <Property Name="ItemID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="Description" Type="String" MaxLength="150" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Description" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
+    <Property Name="Size" Type="Int32" Nullable="false" />
+    <Property Name="Color" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
     <Property Name="CategoryID" Type="Int32" Nullable="false" />
     <Property Name="Price" Type="Decimal" Precision="6" Scale="2" Nullable="false" />
     <Property Name="QuantityInStock" Type="Int32" Nullable="false" />

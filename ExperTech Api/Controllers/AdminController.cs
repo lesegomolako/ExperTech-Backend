@@ -105,9 +105,14 @@ namespace ExperTech_Api.Controllers
                 User findAdmin = db.Users.Where(zz => zz.Username == Owner.Username && zz.Password == Password).FirstOrDefault();
                 if(findAdmin != null)
                 {
-                    bool findOwner = db.Admins.Where(zz => zz.UserID == findAdmin.UserID).Select(zz => zz.Owner).FirstOrDefault();
-                    if (findOwner)
-                        return "success";
+                    Admin findOwner = db.Admins.Where(zz => zz.UserID == findAdmin.UserID).FirstOrDefault();
+                    if (findOwner.Owner)
+                    {
+                        dynamic toReturn = new ExpandoObject();
+                        toReturn.Message = "success";
+                        toReturn.AdminID = findOwner.AdminID;
+                        return toReturn;
+                    }               
                     else
                         return "denied";
                 }
@@ -231,15 +236,7 @@ namespace ExperTech_Api.Controllers
 
                     int LoggedInAdminID = db.Admins.Where(zz => zz.UserID == findUser.UserID).Select(zz => zz.AdminID).FirstOrDefault();
                     string action = "Company information update: ";
-                    AdminAuditTrail createTrail = new AdminAuditTrail();
-                    createTrail.AdminID = LoggedInAdminID;
-                    createTrail.OldData = JsonConvert.SerializeObject(Temp);
-                    createTrail.NewData =  action + JsonConvert.SerializeObject(information);
-                    createTrail.TablesAffected = "CompanyInfo";
-                    createTrail.TransactionType = "Update";
-                    createTrail.Date = DateTime.Now;
-                    db.AdminAuditTrails.Add(createTrail);
-                    db.SaveChanges();
+                   
                     return "success";
                 }
                 catch

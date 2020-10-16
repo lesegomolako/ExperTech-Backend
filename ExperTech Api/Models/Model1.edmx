@@ -24,8 +24,8 @@
           </Key>
           <Property Name="AuditID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="AdminID" Type="int" Nullable="false" />
-          <Property Name="OldData" Type="varchar" MaxLength="250" />
-          <Property Name="NewData" Type="varchar" MaxLength="250" />
+          <Property Name="OldData" Type="varchar(max)" />
+          <Property Name="NewData" Type="varchar(max)" />
           <Property Name="TablesAffected" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="TransactionType" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Date" Type="datetime" Nullable="false" />
@@ -110,8 +110,8 @@
           </Key>
           <Property Name="AuditID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="ClientID" Type="int" Nullable="false" />
-          <Property Name="OldData" Type="varchar" MaxLength="250" />
-          <Property Name="NewData" Type="varchar" MaxLength="250" />
+          <Property Name="OldData" Type="varchar(max)" />
+          <Property Name="NewData" Type="varchar(max)" />
           <Property Name="TablesAffected" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="TransactionType" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Date" Type="datetime" Nullable="false" />
@@ -171,8 +171,8 @@
           </Key>
           <Property Name="AuditID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="EmployeeID" Type="int" Nullable="false" />
-          <Property Name="OldData" Type="varchar" MaxLength="250" />
-          <Property Name="NewData" Type="varchar" MaxLength="250" />
+          <Property Name="OldData" Type="varchar(max)" />
+          <Property Name="NewData" Type="varchar(max)" />
           <Property Name="TablesAffected" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="TransactionType" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Date" Type="datetime" Nullable="false" />
@@ -396,7 +396,6 @@
           </Key>
           <Property Name="CategoryID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="Deleted" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="StockItem">
           <Key>
@@ -404,7 +403,9 @@
           </Key>
           <Property Name="ItemID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="Description" Type="varchar" MaxLength="150" Nullable="false" />
+          <Property Name="Description" Type="varchar" MaxLength="150" />
+          <Property Name="Size" Type="int" Nullable="false" />
+          <Property Name="Color" Type="varchar" MaxLength="50" />
           <Property Name="CategoryID" Type="int" Nullable="false" />
           <Property Name="Price" Type="decimal" Precision="6" Scale="2" Nullable="false" />
           <Property Name="QuantityInStock" Type="int" Nullable="false" />
@@ -1554,8 +1555,8 @@
           </Key>
           <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="AdminID" Type="Int32" Nullable="false" />
-          <Property Name="OldData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
-          <Property Name="NewData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="OldData" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="NewData" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
@@ -1666,8 +1667,8 @@
           </Key>
           <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="ClientID" Type="Int32" Nullable="false" />
-          <Property Name="OldData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
-          <Property Name="NewData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="OldData" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="NewData" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
@@ -1738,8 +1739,8 @@
           </Key>
           <Property Name="AuditID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="EmployeeID" Type="Int32" Nullable="false" />
-          <Property Name="OldData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
-          <Property Name="NewData" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="OldData" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="NewData" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="TablesAffected" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="TransactionType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
@@ -2020,7 +2021,6 @@
           </Key>
           <Property Name="CategoryID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Deleted" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="CategoryOptions" Relationship="Self.FK_CategoryOptions_StockCategory" FromRole="StockCategory" ToRole="CategoryOptions" />
           <NavigationProperty Name="StockItems" Relationship="Self.FK_StockItem_StockCategory" FromRole="StockCategory" ToRole="StockItem" />
         </EntityType>
@@ -2030,7 +2030,9 @@
           </Key>
           <Property Name="ItemID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Description" Type="String" MaxLength="150" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
+          <Property Name="Size" Type="Int32" Nullable="false" />
+          <Property Name="Color" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="CategoryID" Type="Int32" Nullable="false" />
           <Property Name="Price" Type="Decimal" Precision="6" Scale="2" Nullable="false" />
           <Property Name="QuantityInStock" Type="Int32" Nullable="false" />
@@ -3608,7 +3610,6 @@
               <MappingFragment StoreEntitySet="StockCategory">
                 <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="Deleted" ColumnName="Deleted" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -3618,6 +3619,8 @@
                 <ScalarProperty Name="ItemID" ColumnName="ItemID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Size" ColumnName="Size" />
+                <ScalarProperty Name="Color" ColumnName="Color" />
                 <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
                 <ScalarProperty Name="Price" ColumnName="Price" />
                 <ScalarProperty Name="QuantityInStock" ColumnName="QuantityInStock" />

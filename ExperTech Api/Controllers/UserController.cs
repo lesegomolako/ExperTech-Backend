@@ -59,7 +59,7 @@ namespace ExperTech_Api.Controllers
         public dynamic ChangePassword([FromBody]Passwords change, string SessionID)
         {
             User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
-            if(findUser != null)
+            if(findUser == null)
             {
                 return SessionError();
             }
@@ -970,7 +970,7 @@ namespace ExperTech_Api.Controllers
 
                 if(checkDuplicate != null)
                 {
-                    if(checkDuplicate.ExpiryDate > today)
+                    if(checkDuplicate.ExpiryDate < today)
                     {
                         checkDuplicate.Active = false;
                         db.SaveChanges();
@@ -1118,5 +1118,63 @@ namespace ExperTech_Api.Controllers
             return "success";
         }
 
+        public class AuditTrailParams
+        {
+            public int LoggedInID { get; set; }
+            public string OldData { get; set; }
+            public string NewData { get; set; }
+            public string TablesAffected { get; set; }
+            public string TransactionType { get; set; }
+            public int AuthorizedID { get; set; }
+
+
+        }
+
+        public static void AdminAuditTrail(AuditTrailParams data)
+        {
+            ExperTechEntities db = new ExperTechEntities();
+            AdminAuditTrail createTrail = new AdminAuditTrail();
+            createTrail.AdminID = data.LoggedInID;
+            createTrail.OldData = data.OldData;
+            createTrail.NewData = data.NewData;
+            createTrail.TablesAffected = data.TablesAffected;
+            createTrail.TransactionType = data.TransactionType;
+            createTrail.Date = DateTime.Now;
+            createTrail.AuthorizedBy = data.AuthorizedID;
+            db.AdminAuditTrails.Add(createTrail);
+            db.SaveChanges();
+        }
+
+        public static void ClientAuditTrail(AuditTrailParams data)
+        {
+            ExperTechEntities db = new ExperTechEntities();
+            ClientAuditTrail createTrail = new ClientAuditTrail();
+            createTrail.ClientID = data.LoggedInID;
+            createTrail.OldData = data.OldData;
+            createTrail.NewData = data.NewData;
+            createTrail.TablesAffected = data.TablesAffected;
+            createTrail.TransactionType = data.TransactionType;
+            createTrail.Date = DateTime.Now;
+            db.ClientAuditTrails.Add(createTrail);
+            db.SaveChanges();
+        }
+
+        public static void EmployeeAuditTrail(AuditTrailParams data)
+        {
+            ExperTechEntities db = new ExperTechEntities();
+            EmployeeAuditTrail createTrail = new EmployeeAuditTrail();
+            createTrail.EmployeeID = data.LoggedInID;
+            createTrail.OldData = data.OldData;
+            createTrail.NewData = data.NewData;
+            createTrail.TablesAffected = data.TablesAffected;
+            createTrail.TransactionType = data.TransactionType;
+            createTrail.Date = DateTime.Now;
+            db.EmployeeAuditTrails.Add(createTrail);
+            db.SaveChanges();
+        }
+
+
     }
+
+
 }

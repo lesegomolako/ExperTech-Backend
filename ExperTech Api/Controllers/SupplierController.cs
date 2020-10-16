@@ -164,7 +164,7 @@ namespace ExperTech_Api.Controllers
                 OrderObject.SupplierID = Items.SupplierID;
                 string SupplierName = db.Suppliers.Where(zz => zz.SupplierID == Items.SupplierID).Select(zz => zz.Name).FirstOrDefault();
                 OrderObject.Supplier = SupplierName;
-               
+                OrderObject.Received = Items.Received;
                 OrderObject.Price = Items.Price;
                 OrderObject.Date = Items.Date;
 
@@ -177,8 +177,14 @@ namespace ExperTech_Api.Controllers
                     LineObject.ItemID = Line.ItemID;
                     LineObject.SupplierID = Line.OrderID;
                     LineObject.Quantity = Line.Quantity;
-                    string findItem = db.StockItems.Where(zz => zz.ItemID == Line.ItemID).Select(zz => zz.Name).FirstOrDefault();
-                    LineObject.Items = findItem;
+                    StockItem findItem = db.StockItems.Where(zz => zz.ItemID == Line.ItemID).FirstOrDefault();
+
+                    if (findItem.Color != null)
+                        LineObject.Items = findItem.Name + "(" + findItem.Color + ")";
+                    else
+                        LineObject.Items = findItem.Name;
+
+                    LineObject.Size = findItem.Size;
                     stockItem.Add(LineObject);
                 }
                 OrderObject.StockItemLines = stockItem;
@@ -187,6 +193,54 @@ namespace ExperTech_Api.Controllers
             }
 
             return newObject;
+        }
+
+        [Route("api/Supplier/ReceiveStock")]
+        [HttpPost]
+        public dynamic ReceiveStock(SupplierOrder Modell, string SessionID)
+        {
+            User findUser = UserController.CheckUser(SessionID);
+            if(findUser == null)
+            {
+                return UserController.SessionError();
+            }    
+
+            try
+            {
+                SupplierOrder findOrder = db.SupplierOrders.Include(zz => zz.StockItemLines).Where(zz => zz.OrderID == Modell.OrderID).FirstOrDefault();
+                if(findOrder != null)
+                {
+                    int count = Modell.StockItemLines.Count;
+                    for(int j=0; j<count; j++)
+                    {
+                        var thisList = Modell.StockItemLines.ToList();
+                        int LineID = thisList[j].LineID;
+                        StockItemLine findLine = db.StockItemLines.Where(zz => zz.LineID == LineID).FirstOrDefault();
+                        findLine.QuantityReceived = thisList[j].QuantityReceived;
+                        findLine.Received = thisList[j].Received;
+                        db.SaveChanges();
+
+                        int ItemID = findLine.ItemID;
+                        StockItem findItem = db.StockItems.Where(zz => zz.ItemID == ItemID).FirstOrDefault();
+                        findItem.QuantityInStock = thisList[j].QuantityReceived;
+                        db.SaveChanges();
+                    }
+                    findOrder.DateReceived = DateTime.Now;
+                    findOrder.Received = true;
+                    db.SaveChanges();
+                    return "success";
+                }
+                else
+                {
+                    return "invalid";
+                }
+
+            }
+            catch(Exception err)
+            {
+                return err.Message;
+            }
+              
         }
 
 

@@ -19,8 +19,8 @@
     </Key>
     <Property Name="AuditID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="AdminID" Type="int" Nullable="false" />
-    <Property Name="OldData" Type="varchar" MaxLength="250" />
-    <Property Name="NewData" Type="varchar" MaxLength="250" />
+    <Property Name="OldData" Type="varchar(max)" />
+    <Property Name="NewData" Type="varchar(max)" />
     <Property Name="TablesAffected" Type="varchar" MaxLength="100" Nullable="false" />
     <Property Name="TransactionType" Type="varchar" MaxLength="10" Nullable="false" />
     <Property Name="Date" Type="datetime" Nullable="false" />
@@ -105,8 +105,8 @@
     </Key>
     <Property Name="AuditID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="ClientID" Type="int" Nullable="false" />
-    <Property Name="OldData" Type="varchar" MaxLength="250" />
-    <Property Name="NewData" Type="varchar" MaxLength="250" />
+    <Property Name="OldData" Type="varchar(max)" />
+    <Property Name="NewData" Type="varchar(max)" />
     <Property Name="TablesAffected" Type="varchar" MaxLength="100" Nullable="false" />
     <Property Name="TransactionType" Type="varchar" MaxLength="10" Nullable="false" />
     <Property Name="Date" Type="datetime" Nullable="false" />
@@ -166,8 +166,8 @@
     </Key>
     <Property Name="AuditID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="EmployeeID" Type="int" Nullable="false" />
-    <Property Name="OldData" Type="varchar" MaxLength="250" />
-    <Property Name="NewData" Type="varchar" MaxLength="250" />
+    <Property Name="OldData" Type="varchar(max)" />
+    <Property Name="NewData" Type="varchar(max)" />
     <Property Name="TablesAffected" Type="varchar" MaxLength="100" Nullable="false" />
     <Property Name="TransactionType" Type="varchar" MaxLength="10" Nullable="false" />
     <Property Name="Date" Type="datetime" Nullable="false" />
@@ -391,7 +391,6 @@
     </Key>
     <Property Name="CategoryID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
-    <Property Name="Deleted" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="StockItem">
     <Key>
@@ -399,7 +398,9 @@
     </Key>
     <Property Name="ItemID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
-    <Property Name="Description" Type="varchar" MaxLength="150" Nullable="false" />
+    <Property Name="Description" Type="varchar" MaxLength="150" />
+    <Property Name="Size" Type="int" Nullable="false" />
+    <Property Name="Color" Type="varchar" MaxLength="50" />
     <Property Name="CategoryID" Type="int" Nullable="false" />
     <Property Name="Price" Type="decimal" Precision="6" Scale="2" Nullable="false" />
     <Property Name="QuantityInStock" Type="int" Nullable="false" />
