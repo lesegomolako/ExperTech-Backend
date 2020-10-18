@@ -28,11 +28,11 @@ namespace ExperTech_Api.Controllers
         {
             var httpRequest = HttpContext.Current.Request;
             string imageName = "";
-            string SessionID = httpRequest["SessionID"];
-            int findUser = db.Users.Where(zz => zz.SessionID == SessionID).Select(zz => zz.UserID).FirstOrDefault();
+            //string SessionID = httpRequest["SessionID"];
+            //int findUser = db.Users.Where(zz => zz.SessionID == SessionID).Select(zz => zz.UserID).FirstOrDefault();
 
-            if (findUser != 0)
-            {
+            //if (findUser != 0)
+            //{
                 try
                 {
                     var postedFile = httpRequest.Files["Image"];
@@ -100,14 +100,14 @@ namespace ExperTech_Api.Controllers
                     return "Product details are invalid";
                 }
 
-            }
-            else
-            {
-                dynamic toReturn = new ExpandoObject();
-                toReturn.Error = "session";
-                toReturn.Message = "Session is not valid";
-                return "Session is not valid";
-            }
+            //}
+            //else
+            //{
+            //    dynamic toReturn = new ExpandoObject();
+            //    toReturn.Error = "session";
+            //    toReturn.Message = "Session is not valid";
+            //    return "Session is not valid";
+            //}
 
         }
 

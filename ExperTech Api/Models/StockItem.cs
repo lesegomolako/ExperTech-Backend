@@ -27,12 +27,10 @@ namespace ExperTech_Api.Models
         public string Description { get; set; }
         public int Size { get; set; }
         public string Color { get; set; }
-        public int CategoryID { get; set; }
         public decimal Price { get; set; }
         public int QuantityInStock { get; set; }
         public bool Deleted { get; set; }
     
-        public virtual StockCategory StockCategory { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<StockItemLine> StockItemLines { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

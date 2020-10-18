@@ -105,7 +105,10 @@ namespace ExperTech_Api.Controllers
 
                     lines2delete.Add(items);
                 }
-                db.SaleLines.RemoveRange(lines2delete);
+                if(lines2delete.Count >0)
+                    db.SaleLines.RemoveRange(lines2delete);
+
+                db.Sales.Remove(findSale);
                 db.SaveChanges();
                 return "success";
             }
@@ -289,6 +292,12 @@ namespace ExperTech_Api.Controllers
                 body = body.Replace("#Name#", name).Replace("#Table#", table);
 
                 UserController.Email(body, findClient.Email, "Sale Invoice");
+
+                string smsBody = "Exhilaration Beauty & Hair Salon: Your booking has been advised. Log in to website to Accept or Reject Booking.";
+                string cellNo = db.Clients.Where(zz => zz.ClientID == findClient.ClientID).Select(zz => zz.ContactNo).FirstOrDefault(); ;
+                if (cellNo != "")
+                    UserController.SMS(smsBody, cellNo);
+
                 return "success";
             }
             catch(Exception err)

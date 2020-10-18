@@ -20,14 +20,14 @@ namespace ExperTech_Api.Controllers
 
         //[Route("api/Reports/GetProductReportData")]
         //[HttpPost]
-        //public dynamic GetProductReportData([FromBody]Criteria Criteria)
+        //public dynamic GetProductReportData([FromBody] Criteria Criteria)
         //{
-          
+
         //    db.Configuration.ProxyCreationEnabled = false;
         //    try
         //    {
-        //        DateTime StartDate = Convert.ToDateTime(Criteria.StartDate);
-        //        DateTime EndDate = Convert.ToDateTime(Criteria.EndDate);
+        //        DateTime StartDate = Criteria.StartDate.AddDays(1);
+        //        DateTime EndDate = Criteria.EndDate.AddDays(1);
         //        List<SaleLine> getSales = db.SaleLines.Include(zz => zz.Product).Where(zz => zz.Sale.Date >= StartDate && zz.Sale.Date <= EndDate).ToList();
 
 
@@ -38,8 +38,8 @@ namespace ExperTech_Api.Controllers
         //    {
         //        return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Sale report details are invalid");
         //    }
-
         //}
+
 
         private dynamic getReport(List<SaleLine> ReportList, dynamic Criteria)
         {
@@ -64,6 +64,7 @@ namespace ExperTech_Api.Controllers
             {
                 dynamic object1 = new ExpandoObject();
                 object1.Name = db.ProductCategories.Where(zz => zz.CategoryID == count.Key).Select(zz => zz.Category).FirstOrDefault();
+                var Total = 0;
                 List<dynamic> stockCount = new List<dynamic>();
                 foreach (var item in count)
                 {
@@ -83,14 +84,21 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Reports/GetFinancialReportData")]
         [HttpPost]
-        public dynamic GetFinancialReportData([FromBody] Criteria Criteria)
+        public dynamic GetFinancialReportData([FromBody] Criteria Criteria, string SessionID)
         {
 
             db.Configuration.ProxyCreationEnabled = false;
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is no longer valid";
+            }
             try
             {
-                DateTime StartDate = Convert.ToDateTime(Criteria.StartDate);
-                DateTime EndDate = Convert.ToDateTime(Criteria.EndDate);
+                DateTime StartDate = Criteria.StartDate.AddDays(1);
+                DateTime EndDate = Criteria.EndDate.AddDays(1);
                 List<Sale> getSales = db.Sales.Where(zz => zz.Date >= StartDate && zz.Date <= EndDate).ToList();
                 List<StockItemLine> getStocks = db.StockItemLines.Include(zz => zz.SupplierOrder).Include(zz => zz.StockItem)
                     .Where(zz => zz.SupplierOrder.Date >= StartDate && zz.SupplierOrder.Date <= EndDate).ToList();
@@ -150,15 +158,22 @@ namespace ExperTech_Api.Controllers
 
         [Route("api/Reports/GetBookingReportData")]
         [HttpPost]
-        public dynamic GetBookingReportData([FromBody] Criteria Criteria)
+        public dynamic GetBookingReportData([FromBody] Criteria Criteria, string SessionID)
         {
 
             db.Configuration.ProxyCreationEnabled = false;
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is no longer valid";
+            }
             try
             {
-                DateTime StartDate = Convert.ToDateTime(Criteria.StartDate);
-                DateTime EndDate = Convert.ToDateTime(Criteria.EndDate);
-               
+                DateTime StartDate = Criteria.StartDate.AddDays(1);
+                DateTime EndDate = Criteria.EndDate.AddDays(1);
+
                 List<EmployeeSchedule> getBookings = db.EmployeeSchedules.Include(zz => zz.Booking).Include(zz => zz.Employee)
                     .Where(zz => zz.Schedule.Date.Date1 >= StartDate && zz.Schedule.Date.Date1 <= EndDate && zz.Booking.StatusID == 6).ToList();
 
@@ -214,8 +229,8 @@ namespace ExperTech_Api.Controllers
 
             try
             {
-                DateTime StartDate = Convert.ToDateTime(Criteria.StartDate);
-                DateTime EndDate = Convert.ToDateTime(Criteria.EndDate);
+                DateTime StartDate = Criteria.StartDate.AddDays(1);
+                DateTime EndDate = Criteria.EndDate.AddDays(1);
                 List<Sale> getSales = db.Sales.Include(zz => zz.SaleLines).Where(zz => zz.Date >= StartDate && zz.Date <= EndDate).ToList();
 
                 int Option = Criteria.Option;
@@ -226,7 +241,7 @@ namespace ExperTech_Api.Controllers
                         List<SaleLine> getSaleLines = db.SaleLines.Include(zz => zz.Product).Where(zz => zz.Sale.Date >= StartDate && zz.Sale.Date <= EndDate).ToList();
                         return getReport(getSaleLines, Option);
                     case 2:
-                        List<Booking> getBookingSale = db.Bookings.Where(zz => zz.SaleID != null).Where(zz => zz.Sale.Date >= StartDate && zz.Sale.Date <= EndDate).ToList();
+                        List<Booking> getBookingSale = db.Bookings.Include(zz => zz.BookingLines).Include(zz => zz.Sale).Where(zz => zz.SaleID != null).Where(zz => zz.Sale.Date >= StartDate && zz.Sale.Date <= EndDate).ToList();
                         return getBookingSaleReport(getBookingSale);
                     case 3:
                         List<ClientPackage> getPackageSales = db.ClientPackages.Where(zz => zz.Sale.Date >= StartDate && zz.Sale.Date <= EndDate).ToList();
@@ -249,31 +264,44 @@ namespace ExperTech_Api.Controllers
         private dynamic getPackageSalesReport(List<ClientPackage> ReportList)
         {
             dynamic Output = new ExpandoObject();
-            //var categoryList = ReportList.GroupBy(zz => zz.SaleTypeID);
-            //List<dynamic> catList = new List<dynamic>();
-            //foreach (var count in categoryList)
-            //{
-            //    string findCat = db.SaleTypes.Where(zz => zz.SaleTypeID == count.Key).Select(zz => zz.Type).FirstOrDefault();
-            //    dynamic object1 = new ExpandoObject();
-            //    object1.Name = findCat;
-            //    object1.Total = count.Sum(zz => zz.Payment);
-            //    catList.Add(object1);
-            //}
-            //Output.Category = catList;
+            var categoryList = ReportList.GroupBy(zz => zz.PackageID);
+            List<dynamic> catList = new List<dynamic>();
+            foreach (var count in categoryList)
+            {
+                dynamic object1 = new ExpandoObject();
+
+                int ServiceID = db.ServicePackages.Where(zz => zz.PackageID == count.Key).Select(zz => zz.ServiceID).FirstOrDefault();
+                object1.Name = db.Services.Where(zz => zz.ServiceID == ServiceID).Select(zz => zz.Name).FirstOrDefault();
+                object1.NumActivated = count.Count();
+                object1.Total = count.Sum(zz => zz.Sale.Payment);
+                catList.Add(object1);
+            }
+            Output.Category = catList;
             return Output;
         }
 
         private dynamic getBookingSaleReport(List<Booking> ReportList) 
         {
             dynamic Output = new ExpandoObject();
-            var groupList = ReportList.GroupBy(zz => zz.BookingLines.GroupBy(ff => ff.ServiceID).Select(tt => tt.Key));
+            
             List<dynamic> bookList = new List<dynamic>();
-            foreach(var items in groupList)
+            foreach(var items in ReportList)
             {
-                var j = items.Key;
-                //string ServiceName = db.Services.Where(zz => zz.ServiceID == items.Key).
+                var group = items.BookingLines.GroupBy(zz => zz.ServiceID);
+                foreach (var count in group)
+                {
+                    int j = Convert.ToInt32(count.Key);
+                    string ServiceName = db.Services.Where(zz => zz.ServiceID == j).Select(zz => zz.Name).FirstOrDefault();
+                    dynamic object1 = new ExpandoObject();
+                    object1.Service = ServiceName;
+                    object1.NumBookings = count.Count();
+                    object1.Total = count.Sum(zz => zz.Booking.Sale.Payment);
+                    bookList.Add(object1);
+                }
+
             }
-            return "";
+            Output.Category = bookList;
+            return Output;
         }
 
         private dynamic getAllSalesReport(List<Sale> ReportList, int Criteria)
@@ -287,26 +315,32 @@ namespace ExperTech_Api.Controllers
                 string findCat = db.SaleTypes.Where(zz => zz.SaleTypeID == count.Key).Select(zz => zz.Type).FirstOrDefault();
                 dynamic object1 = new ExpandoObject();
                 object1.Name = findCat;
+                object1.NumSold = count.Count();
                 object1.Total = count.Sum(zz => zz.Payment);
                 catList.Add(object1);
             }
             Output.Category = catList;
             return Output;
-
-
         }
 
         [Route("api/Reports/GetSupplierData")]
         [HttpPost]
-        public dynamic GetSupplierData([FromBody] Criteria Criteria)
+        public dynamic GetSupplierData([FromBody] Criteria Criteria, string SessionID)
         {
 
             db.Configuration.ProxyCreationEnabled = false;
+            User findUser = db.Users.Where(zz => zz.SessionID == SessionID).FirstOrDefault();
+            if (findUser == null)
+            {
+                dynamic toReturn = new ExpandoObject();
+                toReturn.Error = "session";
+                toReturn.Message = "Session is no longer valid";
+            }
             try
             {
-                DateTime StartDate = Convert.ToDateTime(Criteria.StartDate);
-                DateTime EndDate = Convert.ToDateTime(Criteria.EndDate);
-                List<StockItemLine> getSuppliers = db.StockItemLines.Where(zz => zz.SupplierOrder.Date >= StartDate && zz.SupplierOrder.Date <= EndDate)
+                DateTime StartDate = Criteria.StartDate.AddDays(1);
+                DateTime EndDate = Criteria.EndDate.AddDays(1);
+                List<StockItemLine> getSuppliers = db.StockItemLines.Where(zz => zz.SupplierOrder.Date >= StartDate && zz.SupplierOrder.Date <= EndDate && zz.Received == true)
                     .Include(zz => zz.StockItem).Include(zz => zz.SupplierOrder).ToList();
                 return getSuppReport(getSuppliers);
             }
@@ -350,7 +384,81 @@ namespace ExperTech_Api.Controllers
             return Output;
         }
 
+        [Route("api/Reports/GetAllReports")]
+        [HttpPost]
+        public dynamic GetAllReports([FromBody] Criteria Criteria, string SessionID)
+        {
+            User findUser = UserController.CheckUser(SessionID);
+            if (findUser == null)
+            {
+                return UserController.SessionError();
+            }
+
+            DateTime StartDate = Criteria.StartDate.AddDays(1).Date;
+            DateTime EndDate = Criteria.EndDate.AddDays(2).Date;
+            List<Booking> getBookings = db.Bookings.Include(zz => zz.EmployeeSchedules).Include(zz => zz.DateRequesteds)
+                .Include(zz => zz.BookingLines).Include(zz => zz.Sale).Where(zz => zz.DateCreated >= StartDate && zz.DateCreated <= EndDate).ToList();
+
+            return formatBookingReport(getBookings, Criteria);
+        }
+
+        private dynamic formatBookingReport(List<Booking> Modell, Criteria dates)
+        {
+            dynamic Output = new ExpandoObject();
+
+            var bookings = Modell.GroupBy(zz => zz.StatusID);
+            List<dynamic> statuses = new List<dynamic>();
+            foreach(var count in bookings)
+            {
+                dynamic object1 = new ExpandoObject();
+                BookingStatu findStatus = db.BookingStatus.Find(count.Key);
+                object1.Name = findStatus.Status;
+                object1.Count = count.Count();
+                statuses.Add(object1);
+            }
+            Output.Statuses = statuses;
+
+
+            List<dynamic> services = new List<dynamic>();
+            foreach (var items in Modell)
+            {
+                var group = items.BookingLines.GroupBy(zz => zz.ServiceID);
+                foreach (var count in group)
+                {
+                    int j = Convert.ToInt32(count.Key);
+                    string ServiceName = db.Services.Where(zz => zz.ServiceID == j).Select(zz => zz.Name).FirstOrDefault();
+                    dynamic object1 = new ExpandoObject();
+                    object1.Service = ServiceName;
+                    object1.NumBookings = count.Count();
+                    services.Add(object1);
+                }
+
+            }
+            Output.ServicesBooked = services;
+
+
+            List<dynamic> packages = new List<dynamic>();
+            List<PackageInstance> findIntance = db.PackageInstances.Where(zz => zz.Date >= dates.StartDate && zz.Date <= dates.EndDate && zz.LineID != null && zz.StatusID == 2).ToList();
+            var groupList = findIntance.GroupBy(zz => zz.PackageID);
+
+            foreach(var liss in groupList)
+            {
+                ServicePackage findPackae = db.ServicePackages.Where(zz => zz.PackageID == liss.Key).FirstOrDefault();
+                dynamic object1 = new ExpandoObject();
+                object1.Name = findPackae.Service.Name;
+                object1.Total = liss.Count();
+
+                packages.Add(object1);
+            }
+            Output.ServicePackages = packages;
+
+            return Output;
+
+        }
+
     }
+
+   
 
     public class Criteria
     {

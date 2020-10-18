@@ -195,6 +195,40 @@ namespace ExperTech_Api.Controllers
             return newObject;
         }
 
+        [Route("api/Supplier/CancelOrder")]
+        [HttpDelete]
+        public dynamic CancelOrder(int OrderID, string SessionID)
+        {
+            User findUser = UserController.CheckUser(SessionID);
+            if (findUser == null)
+            {
+                return UserController.SessionError();
+            }
+
+            try
+            {
+                SupplierOrder findOrder = db.SupplierOrders.Where(zz => zz.OrderID == OrderID).FirstOrDefault();
+                if (findOrder != null)
+                {
+                    List<StockItemLine> findLines = db.StockItemLines.Where(zz => zz.OrderID == OrderID).ToList();
+                    db.StockItemLines.RemoveRange(findLines);
+                    db.SaveChanges();
+
+                    db.SupplierOrders.Remove(findOrder);
+                    db.SaveChanges();
+                    return "success";
+                }
+                else
+                {
+                    return "invalid";
+                }
+            }
+            catch(Exception err)
+            {
+                return err.Message;
+            }
+        }
+
         [Route("api/Supplier/ReceiveStock")]
         [HttpPost]
         public dynamic ReceiveStock(SupplierOrder Modell, string SessionID)
@@ -308,14 +342,15 @@ namespace ExperTech_Api.Controllers
             SupplierOrder findOrder = db.SupplierOrders.Where(zz => zz.OrderID == OrderID).FirstOrDefault();
 
             //check the to list stuff
-            foreach (StockItemLine lines in findOrder.StockItemLines.ToList())
+            var list = findOrder.StockItemLines.ToList();
+            foreach (var lines in list)
             {
                 db.StockItemLines.Remove(lines);
                 db.SaveChanges();
             }
             db.SupplierOrders.Remove(findOrder);
             db.SaveChanges();
-            return "sucess";
+            return "success";
 
 
         }

@@ -64,6 +64,10 @@ namespace ExperTech_Api.Controllers
                 db.SaveChanges();
 
                 SendAdviseEmail(BookingID);
+                string body = "Exhilaration Beauty & Hair Salon: Your booking has been advised. Log in to website to Accept or Reject Booking.";
+                string cellNo = db.Clients.Where(zz => zz.ClientID == findBooking.ClientID).Select(zz => zz.ContactNo).FirstOrDefault(); ;
+                if (cellNo != "")
+                    UserController.SMS(body, cellNo);
 
                 return "success";
 
@@ -667,6 +671,7 @@ namespace ExperTech_Api.Controllers
                         newBooking.ClientID = ClientID;
                         newBooking.StatusID = 1;
                         newBooking.ReminderID = 1;
+                        newBooking.DateCreated = DateTime.Now;
                         db.Bookings.Add(newBooking);
                         db.SaveChanges();
 
@@ -750,7 +755,7 @@ namespace ExperTech_Api.Controllers
             {
                 try
                 {
-                    var Date = Bookings.StartDate;
+                    var Date = Bookings.StartDate.AddDays(1);
                     int getDateID = db.Dates.Where(zz => zz.Date1 == Bookings.StartDate.Date).Select(zz => zz.DateID).FirstOrDefault();
                     if (getDateID != 0)
                     {
@@ -758,6 +763,7 @@ namespace ExperTech_Api.Controllers
                         saveBooking.ClientID = Bookings.ClientID;
                         saveBooking.StatusID = 4;
                         saveBooking.ReminderID = 1;
+                        saveBooking.DateCreated = DateTime.Now;
                         db.Bookings.Add(saveBooking);
                         db.SaveChanges();
                         int BookingID = saveBooking.BookingID;

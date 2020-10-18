@@ -21,31 +21,33 @@ namespace ExperTech_Api.Controllers
     public class UserController : ApiController
     {
         
-        static void SMS()
+        public static void SMS(string body, string cell)
         {
             // Find your Account Sid and Token at twilio.com/console
             // DANGER! This is insecure. See http://twil.io/secure
             const string accountSid = "ACa877daffacbbb1f20121558340d54b46";
-            const string authToken = "82580ac0a7147ae502301b95361ba785";
+            const string authToken = "254deeb3c88430c6e6735ee970cacf96";
 
             TwilioClient.Init(accountSid, authToken);
 
-            var message = MessageResource.Create(
-                body: "This is the ship that made the Kessel Run in fourteen parsecs?",
-                from: new Twilio.Types.PhoneNumber("+12057841821"),
-                to: new Twilio.Types.PhoneNumber("+27614446976")
-            );
+            try
+            {
+                var message = MessageResource.Create(
+                    body: body,
+                    from: new Twilio.Types.PhoneNumber("+12057841821"),
+                    to: new Twilio.Types.PhoneNumber(cell)
+                );
+                Console.WriteLine(message.Sid);
+            }
+            catch
+            {
+                
+            }
 
-            Console.WriteLine(message.Sid);
+            
         }
 
-        [Route("SendSMS")]
-        [HttpGet]
-        public void SendSMS()
-        {
-           
-            SMS();
-        }
+        
 
         public class Passwords
         {
@@ -849,6 +851,7 @@ namespace ExperTech_Api.Controllers
                                 PackageInstance thisInstance = getInstance[j];
                                 thisInstance.StatusID = 2;
                                 thisInstance.LineID = LineID;
+                                thisInstance.Date = DateTime.Now;
                                 db.SaveChanges();
                                 break;
                             }
@@ -1126,6 +1129,7 @@ namespace ExperTech_Api.Controllers
             public string TablesAffected { get; set; }
             public string TransactionType { get; set; }
             public int AuthorizedID { get; set; }
+            public DateTime Date { get; set; }
 
 
         }

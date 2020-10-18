@@ -55,6 +55,7 @@
           <ScalarProperty Name="ClientID" ColumnName="ClientID" />
           <ScalarProperty Name="ReminderID" ColumnName="ReminderID" />
           <ScalarProperty Name="SaleID" ColumnName="SaleID" />
+          <ScalarProperty Name="DateCreated" ColumnName="DateCreated" />
           <ScalarProperty Name="AdviseExpiry" ColumnName="AdviseExpiry" />
         </MappingFragment>
       </EntityTypeMapping>
@@ -83,17 +84,6 @@
         <MappingFragment StoreEntitySet="BookingStatus">
           <ScalarProperty Name="StatusID" ColumnName="StatusID" />
           <ScalarProperty Name="Status" ColumnName="Status" />
-        </MappingFragment>
-      </EntityTypeMapping>
-    </EntitySetMapping>
-    <EntitySetMapping Name="CategoryOptions">
-      <EntityTypeMapping TypeName="ExperTechModel.CategoryOption">
-        <MappingFragment StoreEntitySet="CategoryOptions">
-          <ScalarProperty Name="OptionID" ColumnName="OptionID" />
-          <ScalarProperty Name="Name" ColumnName="Name" />
-          <ScalarProperty Name="Option" ColumnName="Option" />
-          <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
-          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -422,14 +412,6 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
-    <EntitySetMapping Name="StockCategories">
-      <EntityTypeMapping TypeName="ExperTechModel.StockCategory">
-        <MappingFragment StoreEntitySet="StockCategory">
-          <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
-          <ScalarProperty Name="Name" ColumnName="Name" />
-        </MappingFragment>
-      </EntityTypeMapping>
-    </EntitySetMapping>
     <EntitySetMapping Name="StockItems">
       <EntityTypeMapping TypeName="ExperTechModel.StockItem">
         <MappingFragment StoreEntitySet="StockItem">
@@ -438,7 +420,6 @@
           <ScalarProperty Name="Description" ColumnName="Description" />
           <ScalarProperty Name="Size" ColumnName="Size" />
           <ScalarProperty Name="Color" ColumnName="Color" />
-          <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
           <ScalarProperty Name="Price" ColumnName="Price" />
           <ScalarProperty Name="QuantityInStock" ColumnName="QuantityInStock" />
           <ScalarProperty Name="Deleted" ColumnName="Deleted" />

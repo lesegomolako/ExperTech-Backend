@@ -33,7 +33,6 @@ namespace ExperTech_Api.Models
         public virtual DbSet<BookingLine> BookingLines { get; set; }
         public virtual DbSet<BookingNote> BookingNotes { get; set; }
         public virtual DbSet<BookingStatu> BookingStatus { get; set; }
-        public virtual DbSet<CategoryOption> CategoryOptions { get; set; }
         public virtual DbSet<Client> Clients { get; set; }
         public virtual DbSet<ClientAuditTrail> ClientAuditTrails { get; set; }
         public virtual DbSet<ClientPackage> ClientPackages { get; set; }
@@ -66,7 +65,6 @@ namespace ExperTech_Api.Models
         public virtual DbSet<ServiceType> ServiceTypes { get; set; }
         public virtual DbSet<ServiceTypeOption> ServiceTypeOptions { get; set; }
         public virtual DbSet<SocialMedia> SocialMedias { get; set; }
-        public virtual DbSet<StockCategory> StockCategories { get; set; }
         public virtual DbSet<StockItem> StockItems { get; set; }
         public virtual DbSet<StockItemLine> StockItemLines { get; set; }
         public virtual DbSet<StockTake> StockTakes { get; set; }

@@ -7,7 +7,7 @@
     <Property Name="AdminID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="Surname" Type="varchar" MaxLength="100" Nullable="false" />
-    <Property Name="ContactNo" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ContactNo" Type="varchar" MaxLength="12" Nullable="false" />
     <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="UserID" Type="int" />
     <Property Name="Owner" Type="bit" Nullable="false" />
@@ -51,6 +51,7 @@
     <Property Name="ClientID" Type="int" Nullable="false" />
     <Property Name="ReminderID" Type="int" Nullable="false" />
     <Property Name="SaleID" Type="int" />
+    <Property Name="DateCreated" Type="datetime" Nullable="false" />
     <Property Name="AdviseExpiry" Type="datetime" />
   </EntityType>
   <EntityType Name="BookingLine">
@@ -77,16 +78,6 @@
     <Property Name="StatusID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Status" Type="varchar" MaxLength="20" Nullable="false" />
   </EntityType>
-  <EntityType Name="CategoryOptions">
-    <Key>
-      <PropertyRef Name="OptionID" />
-    </Key>
-    <Property Name="OptionID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
-    <Property Name="Option" Type="varchar" MaxLength="50" Nullable="false" />
-    <Property Name="CategoryID" Type="int" Nullable="false" />
-    <Property Name="Deleted" Type="bit" Nullable="false" />
-  </EntityType>
   <EntityType Name="Client">
     <Key>
       <PropertyRef Name="ClientID" />
@@ -94,7 +85,7 @@
     <Property Name="ClientID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="Surname" Type="varchar" MaxLength="100" Nullable="false" />
-    <Property Name="ContactNo" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ContactNo" Type="varchar" MaxLength="12" Nullable="false" />
     <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="UserID" Type="int" />
     <Property Name="Deleted" Type="bit" Nullable="false" />
@@ -155,7 +146,7 @@
     <Property Name="EmployeeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="Surname" Type="varchar" MaxLength="100" Nullable="false" />
-    <Property Name="ContactNo" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ContactNo" Type="varchar" MaxLength="12" Nullable="false" />
     <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="UserID" Type="int" />
     <Property Name="Deleted" Type="bit" Nullable="false" />
@@ -385,13 +376,6 @@
     <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="Link" Type="varchar" MaxLength="150" Nullable="false" />
   </EntityType>
-  <EntityType Name="StockCategory">
-    <Key>
-      <PropertyRef Name="CategoryID" />
-    </Key>
-    <Property Name="CategoryID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
-  </EntityType>
   <EntityType Name="StockItem">
     <Key>
       <PropertyRef Name="ItemID" />
@@ -401,7 +385,6 @@
     <Property Name="Description" Type="varchar" MaxLength="150" />
     <Property Name="Size" Type="int" Nullable="false" />
     <Property Name="Color" Type="varchar" MaxLength="50" />
-    <Property Name="CategoryID" Type="int" Nullable="false" />
     <Property Name="Price" Type="decimal" Precision="6" Scale="2" Nullable="false" />
     <Property Name="QuantityInStock" Type="int" Nullable="false" />
     <Property Name="Deleted" Type="bit" Nullable="false" />
@@ -656,18 +639,6 @@
       </Principal>
       <Dependent Role="BookingNotes">
         <PropertyRef Name="BookingID" />
-      </Dependent>
-    </ReferentialConstraint>
-  </Association>
-  <Association Name="FK_CategoryOptions_StockCategory">
-    <End Role="StockCategory" Type="Self.StockCategory" Multiplicity="1" />
-    <End Role="CategoryOptions" Type="Self.CategoryOptions" Multiplicity="*" />
-    <ReferentialConstraint>
-      <Principal Role="StockCategory">
-        <PropertyRef Name="CategoryID" />
-      </Principal>
-      <Dependent Role="CategoryOptions">
-        <PropertyRef Name="CategoryID" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -1121,18 +1092,6 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
-  <Association Name="FK_StockItem_StockCategory">
-    <End Role="StockCategory" Type="Self.StockCategory" Multiplicity="1" />
-    <End Role="StockItem" Type="Self.StockItem" Multiplicity="*" />
-    <ReferentialConstraint>
-      <Principal Role="StockCategory">
-        <PropertyRef Name="CategoryID" />
-      </Principal>
-      <Dependent Role="StockItem">
-        <PropertyRef Name="CategoryID" />
-      </Dependent>
-    </ReferentialConstraint>
-  </Association>
   <Association Name="FK_StockItemLine_StockItem">
     <End Role="StockItem" Type="Self.StockItem" Multiplicity="1" />
     <End Role="StockItemLine" Type="Self.StockItemLine" Multiplicity="*" />
@@ -1238,7 +1197,6 @@
     <EntitySet Name="BookingLine" EntityType="Self.BookingLine" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="BookingNotes" EntityType="Self.BookingNotes" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="BookingStatus" EntityType="Self.BookingStatus" Schema="dbo" store:Type="Tables" />
-    <EntitySet Name="CategoryOptions" EntityType="Self.CategoryOptions" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="Client" EntityType="Self.Client" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ClientAuditTrail" EntityType="Self.ClientAuditTrail" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ClientPackage" EntityType="Self.ClientPackage" Schema="dbo" store:Type="Tables" />
@@ -1271,7 +1229,6 @@
     <EntitySet Name="ServiceType" EntityType="Self.ServiceType" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ServiceTypeOption" EntityType="Self.ServiceTypeOption" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="SocialMedia" EntityType="Self.SocialMedia" Schema="dbo" store:Type="Tables" />
-    <EntitySet Name="StockCategory" EntityType="Self.StockCategory" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="StockItem" EntityType="Self.StockItem" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="StockItemLine" EntityType="Self.StockItemLine" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="StockTake" EntityType="Self.StockTake" Schema="dbo" store:Type="Tables" />
@@ -1334,10 +1291,6 @@
     <AssociationSet Name="FK_BookingNotes_Booking" Association="Self.FK_BookingNotes_Booking">
       <End Role="Booking" EntitySet="Booking" />
       <End Role="BookingNotes" EntitySet="BookingNotes" />
-    </AssociationSet>
-    <AssociationSet Name="FK_CategoryOptions_StockCategory" Association="Self.FK_CategoryOptions_StockCategory">
-      <End Role="StockCategory" EntitySet="StockCategory" />
-      <End Role="CategoryOptions" EntitySet="CategoryOptions" />
     </AssociationSet>
     <AssociationSet Name="FK_Client_User" Association="Self.FK_Client_User">
       <End Role="User" EntitySet="User" />
@@ -1486,10 +1439,6 @@
     <AssociationSet Name="FK_ServiceTypeOption_ServiceOption" Association="Self.FK_ServiceTypeOption_ServiceOption">
       <End Role="ServiceOption" EntitySet="ServiceOption" />
       <End Role="ServiceTypeOption" EntitySet="ServiceTypeOption" />
-    </AssociationSet>
-    <AssociationSet Name="FK_StockItem_StockCategory" Association="Self.FK_StockItem_StockCategory">
-      <End Role="StockCategory" EntitySet="StockCategory" />
-      <End Role="StockItem" EntitySet="StockItem" />
     </AssociationSet>
     <AssociationSet Name="FK_StockItemLine_StockItem" Association="Self.FK_StockItemLine_StockItem">
       <End Role="StockItem" EntitySet="StockItem" />

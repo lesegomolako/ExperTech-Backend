@@ -168,6 +168,8 @@ namespace ExperTech_Api.Controllers
                     int ClientID = 0;
                     dynamic ClientData = new ExpandoObject();
                     dynamic BasketData = new ExpandoObject();
+
+                    var cell = "";
                     foreach (Client items in client.Clients)
                     {
                         Client Verfiy = db.Clients.Where(zz => zz.Name == items.Name && zz.Surname == items.Surname && zz.Email == items.Email).FirstOrDefault();
@@ -176,7 +178,16 @@ namespace ExperTech_Api.Controllers
                             Client cli = new Client();
                             cli.Name = items.Name;
                             cli.Surname = items.Surname;
-                            cli.ContactNo = items.ContactNo;
+                            string contact = items.ContactNo;
+                            // trim any leading zeros
+                            contact = contact.TrimStart(new char[] { '0' });
+
+                            if (!contact.StartsWith("+27"))
+                            {
+                                contact = "+27" + contact;
+                            }
+                            cell = contact;
+                            cli.ContactNo = contact;
                             cli.Email = items.Email;
                             cli.UserID = findUser;
                             db.Clients.Add(cli);
@@ -202,16 +213,21 @@ namespace ExperTech_Api.Controllers
 
                     }
 
-                    int LoggedInClientID = ClientID;
                     string action = "Client Register: ";
-                    ClientAuditTrail createTrail = new ClientAuditTrail();
-                    createTrail.ClientID = LoggedInClientID;
-                    createTrail.NewData = action + "Username: " + clu.Username + "," + "Client Name: " + ClientData.Name + "Client Surname: " + ClientData.Surname + "," + ClientData.Email + ", " + ClientData.ContactNo;
-                    createTrail.TablesAffected = "User, Client, Basket";
-                    createTrail.TransactionType = "Create";
-                    createTrail.Date = DateTime.Now;
-                    db.ClientAuditTrails.Add(createTrail);
-                    db.SaveChanges();
+                    UserController.AuditTrailParams newParams = new UserController.AuditTrailParams();
+                    newParams.LoggedInID = ClientID;                                 
+                    newParams.NewData = action + "Username: " + clu.Username + "," + "Client Name: " + ClientData.Name + "Client Surname: " + ClientData.Surname + "," + ClientData.Email + ", " + ClientData.ContactNo;
+                    newParams.TablesAffected = "User, Client, Basket";
+                    newParams.TransactionType = "Create";
+                    newParams.Date = DateTime.Now;
+
+
+                    UserController.ClientAuditTrail(newParams);
+
+                    string body = "Your registration to exhilarationhairandbeauty.me was successful";
+                    string cellNo = cell;
+                    if(cell != "")
+                    UserController.SMS(body, cell);
 
                     toReturn.Message = "success";
                     toReturn.SessionID = clu.SessionID;

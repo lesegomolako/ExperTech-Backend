@@ -28,6 +28,7 @@ namespace ExperTech_Api.Models
         public int ClientID { get; set; }
         public int ReminderID { get; set; }
         public Nullable<int> SaleID { get; set; }
+        public System.DateTime DateCreated { get; set; }
         public Nullable<System.DateTime> AdviseExpiry { get; set; }
     
         public virtual BookingStatu BookingStatu { get; set; }
